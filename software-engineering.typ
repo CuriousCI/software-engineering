@@ -1,79 +1,95 @@
-#set text(font: "New Computer Modern", lang: "en", weight: "light")
+#set text(font: "New Computer Modern", lang: "en", weight: "light", size: 11pt)
 #set page(margin: 1.75in)
-#set par(leading: 0.55em, spacing: 0.55em, first-line-indent: 1.8em, justify: true)
-// #set raw.text(size: 0.8em)
+#set par(leading: 0.55em, spacing: 0.85em, first-line-indent: 1.8em, justify: true)
+#set heading(numbering: "1.1")
+#set math.equation(numbering: "(1)")
 
 #show heading: set block(above: 1.4em, below: 1em)
 #show sym.emptyset : sym.diameter 
+#show raw.where(block: true): block.with(inset: 1em, stroke: (y: (thickness: .1pt, dash: "dashed")))
+
+// #set list(spacing: 0.85em)
+// #set par(leading: 0.55em, spacing: 0.55em, first-line-indent: 1.8em, justify: true)
+// #show par: set block(spacing: 5pt)
 
 #show outline.entry.where(level: 1): it => {
   show repeat : none
   v(1.1em, weak: true)
-  text(size: 1.1em, weight: "bold", it)
+  text(size: 1em, strong(it))
 }
 
-#let tag(tag) = box(
-  height: 1em, clip: true, baseline: 0.2em,
-  circle(
-    fill: black, inset: 0.1em,
-    align(center + horizon, text(white, size: 0.7em)[*#tag*])
-  )
-)
-
-#show raw.where(block: true): it => block(fill: luma(254), inset: 1em, width: 100%, stroke: (thickness: .1pt, paint: luma(100), dash: "dashed"), it)
-// #show raw.where(block: true): it => block(fill: luma(250), inset: 2em, width: 100%, stroke: (thickness: .1pt, paint: luma(175), dash: "dashed"), it)
 #show raw: r => {
-  let re = regex("x(\d)")
-  show re: it => { 
-    let tag = it.text.match(re).captures.at(0)
-    box(
-      baseline: 0.2em, 
-      circle(
-        fill: black, inset: 0.1em, 
-        align(center + horizon, text(white, size: 0.8em)[*#tag*])
-      )
-    )
+  show regex("t(\d)"): it => {
+    box(baseline: .2em, circle(stroke: .5pt, inset: .1em, align(center + horizon, 
+          text(size: .8em, weight: "bold", repr(it).slice(2, -1))
+    )))
   }
 
-  set text(size: .9em)
   r
 }
 
+#let tag(tag) = box(height: 1em, clip: true, baseline: 0.2em, circle(stroke: .5pt, inset: 0.1em, 
+  align(center + horizon, text(white, size: 0.7em, weight: "bold", tag))
+))
+
 #page(align(center + horizon)[
-    #heading(outlined: false, text(size: 1.5em)[Software Engineering]) 
-    #text(size: 1.3em)[
-      Cicio Ionuț
-      #align(bottom, datetime.today().display("[day]/[month]/[year]"))
-    ]
+    #heading(outlined: false, numbering: none, text(size: 1.5em)[Software Engineering]) 
+    #text(size: 1.3em)[Cicio Ionuț]
+    #align(bottom, datetime.today().display("[day]/[month]/[year]"))
   ]
 )
 
-#page(outline(indent: auto, depth: 4))
+#page(outline(indent: auto))
 
-#set heading(numbering: "1.1")
+= Software models
 
-= Systems modeling 
+When designing *complex software* we have to make major *design choices* at the beginning of the project. Often those choices can't be driven by experience or reasoning alone, that's why a *model* of the project is needed to compare different solutions. Our formal tool of choice is the *Discrete Time Markov Chain* (@dtmc).
 
-_"Software engineering is an engineering discipline that is concerned with all aspects of software production"_ @sommerville2016software. 
+== The "Amazon Prime Video" article 
 
-\
+If you were tasked with designing the software architecture for *Amazon Prime Video* _(a live streaming service for Amazon)_, how would you go about it? What if you had the *non-functional requirement* to keep the costs as low as possible?
 
-In the following pages I'll focus on the most *important concepts* of the course. Those fundamental concepts will be treated in *great detail* to give a deep enough understanding of the material.
+In a recent article, Marcin Kolny, a Senior SDE at Prime Video, describes how they _"*reduced the cost* of the audio/video monitoring infrastructure by 90%"_ @primevideo2024 by using a monolith application instead of distributed microservices (an outcome one wouldn't usually expect). 
 
-\
-
-When designing *complex software* we have to make major *design choices* at the beginning of the project. Often those choices can't be driven by experience or reasoning alone, that's why a *model* of the project is needed to *simulate* and *compare* different solutions. Our formal tool of choice is the *Markov Chain* (treated in @dtmc).
-
-\
+While there isn't always definitive answer, one way to go about this kind choice is building a model of the system to compare the solutions. In the case of Prime Video, _"the audio/video monitoring service consists of three major components:"_ @primevideo2024
+- the *media converter* converts input audio/video streams 
+//to frames or decrypted audio buffers that are sent to detectors
+- the *defect detectors* execute algorithms that analyze frames and audio buffers in real-time looking for defects and send notifications
+- the *orchestrator* controls the flow in the service
 
 #align(center)[
   #figure({
     set text(font: "CaskaydiaCove NF", weight: "light", lang: "en")
-    image("weather-driving-markov-chains.svg", width: 70%)
-  }, caption: "the 'traffic' system modeled with 2 subsystems") <traffic> 
+    image("public/audio-video-monitor.svg", width: 92%)
+  }, caption: "Model of the audio/video monitoring system") <prime-video>
 ]
 
-== The concept of time
+We want to model the components as some kind of stateful machine (with inputs and outputs, @prime-video), interconnect them and *simulate* the behaviour of the system as a whole.
+
+ // real-time notifications whenever a defect is found
+// #lorem(100)
+
+// \
+
+// #block(fill: red, width: 100%, height: auto)[#lorem(1000)]
+
+// Our service consists of three major components. .  
+// (such as video freeze, block corruption, or audio/video synchronization problems) and 
+
+// @primevideo2024 
+
+// #align(center)[
+//   #figure({
+//     set text(font: "CaskaydiaCove NF", weight: "light", lang: "en")
+//     // image("public/weather-driving-markov-chains.svg", width: 80%)
+//   }, caption: "the 'traffic' system modeled with 2 subsystems") <traffic> 
+// ]
+
+== Formal notation <traffic>
+
+=== The concept of time
+
+TODO: rewrite
 
 The models treated in the course evolve through *time*. Time can be modeled in many ways (I guess?), but, for the sake of simplicity, we will consider discrete time. Let $W$ be the _'weather system'_ and $D$ the _'driving ability' system _ in @traffic, we can define the evolution of $D$ as 
 
@@ -87,8 +103,6 @@ $
 \
 
 Given a time instant $t$ (let's suppose 12:32) and a time interval $d$ (1 minute), the driving ability of $D$ at 12:33 depends on the driving ability of $D$ at the time 12:32 and the weather at 12:32.
-
-== Formal notation 
 
 === Markov Chain
 
@@ -129,7 +143,7 @@ It's interesting to notice that the transition function depends on the input val
 
 #pagebreak()
 
-=== An example of DTMC
+==== An example of DTMC
 
 Let's consider the development process of a team. We can define a DTMC $M = (U, X, Y, p, g)$ s.t.
 - $U = {()}$, as it doesn't have any input
@@ -139,7 +153,7 @@ Let's consider the development process of a team. We can define a DTMC $M = (U, 
 #align(center)[
   #figure({
     set text(font: "CaskaydiaCove NF", weight: "light", lang: "en")
-    image("development-process-markov-chain.svg")
+    image("public/development-process-markov-chain.svg")
   }, caption: "the model of a team's development process") <development-process> 
 ]
 
@@ -154,9 +168,29 @@ $
   )
 $
 
-== Network of Markov Chains
+=== Network of Markov Chains
 
 TODO...
+
+==  Tips and tricks
+
+=== Mean
+
+TODO: 'mean' trick, ggwp
+
+$
+  epsilon_n = (sum_(i = 0)^n v_i) / n \
+  epsilon_(n + 1) = (sum_(i = 0)^(n + 1) v_i) / (n + 1) = 
+  = ((sum_(i = 0)^(n) v_i) + v_(n + 1)) / (n + 1) = 
+  (sum_(i = 0)^(n) v_i) / (n + 1) + v_(n + 1) / (n + 1) = \
+  ((sum_(i = 0)^(n) v_i) n) / ((n + 1) n) + v_(n + 1) / (n + 1) = 
+  (sum_(i = 0)^(n) v_i) / n dot.c n / (n + 1) + v_(n + 1) / (n + 1) = 
+  (epsilon_n dot n + v_(n + 1)) / (n + 1)
+$
+
+=== Eulero's method for differential equations
+
+Useful later...
 
 #pagebreak()
 
@@ -198,31 +232,25 @@ TODO...
 
 #pagebreak()
 
-= Models
+= Exercises 
 
-== First examples
+Each exercise has 4 digits `xxxx` that are the same as the ones in the `software` folder in the course material.
+
+== First examples `(1000)`
 
 Now we have to put together our *formal definitions* and our `C++` knowledge to build some simple DTMCs and networks.
 
-=== A simple Markov Chain
+=== A simple Markov Chain `(1100)`
 
-Let's begin our modeling journey by implementing a DTMC $M$ s.t. 
-- $U = {()}$
-- $X = [0,1] times [0,1]$
+
+Let's begin our modeling journey by implementing a DTMC $M$ s.t.
+- $U = {()}$ it takes no input
+- $X = [0,1] times [0,1]$ it has infinite states (all the pairs of real numbers between 0 and 1)
 - $Y = [0,1] times [0,1]$
 - $p : X times X times U -> X = cal(U)(0, 1) times cal(U)(0, 1)$ 
-- $g : X -> Y : (r_0, r_1) |-> (r_0, r_1)$
-
-// as the uniform continuous distribution (TODO) $cal(U)(0, 1)$, maybe better if something around $cal(U)(0, 1) times cal(U)(0, 1)$, not like that, but around there
-
-// and we define 
-
-
-// And we connect the DTMC to itself with
+- $g : X -> Y : (r_0, r_1) |-> (r_0, r_1)$ it outputs the current state
 
 - $X(0) = (0, 0)$
-// - $U = "Time" times RR$ 
-// - $U(t + 1) = (t, r_1 + 1) "s.t." Y(t) = (r_0, r_1)$
 
 \
 
@@ -230,86 +258,64 @@ Let's begin our modeling journey by implementing a DTMC $M$ s.t.
 #include <fstream>
 #include <random>
 
-typedef long double real_t;
+using real_t = double;
 
 int main() {
-    std::random_device random_device; x1
-    std::default_random_engine random_engine(random_device()); x2
-    std::uniform_real_distribution<real_t> uniform(0, 1); x3
+    std::random_device random_device;
+    std::default_random_engine random_engine(random_device());
+    std::uniform_real_distribution<real_t> uniform(0, 1); t1
 
-    const size_t HORIZON = 10; x4
-    std::vector<real_t> state(2, 0); x5
+    const size_t HORIZON = 10; t2
+    std::vector<real_t> state(2, 0); t3
 
     for (size_t time = 0; time <= HORIZON; time++)
         for (auto &r : state)
-            r = uniform(random_engine);
+            r = uniform(random_engine); t4
 
     return 0;
 }
 ```, caption: `software/1100/main.cpp`)
 
-// ```cpp
-// #include <fstream>
-// #include <random>
-//
-// typedef long double real_t;
-//
-// int main() {
-//     std::random_device random_device;
-//     std::default_random_engine random_engine(random_device());
-//     std::uniform_real_distribution<real_t> random_state;
-//
-//     const size_t STATES_SIZE = 2, HORIZON = 10;
-//     std::vector<real_t> states(STATES_SIZE, 0);
-//
-//     std::ofstream output("output.csv");
-//
-//     for (size_t time = 0; time <= HORIZON; time++) {
-//         for (auto &state : states)
-//             state = random_state(random_engine);
-//
-//         output << time << ' ';
-//         for (auto state : states)
-//             output << state << ' ';
-//         output << std::endl;
-//     }
-//
-//     output.close();
-//
-//     return 0;
-// }
-// ```
 
-=== Connected Markov Chains
+=== Connect Markov Chains pt.1 `(1200)`
+
+In this exercise we build 2 markov chains, and connect them...
 
 Now let's model a system with two DTMCs $M_0, M_1$, and lets define the functions
 
 $U(M_0, t + 1) = dots.c$
 $U(M_1, t + 1) = dots.c$
 
-=== Different types of connections
+=== Connect Markov Chains pt.2 `(1300)`
 
-== Traffic light
+The same as above, but with a different connection
 
-== Network controlled traffic light 
+=== Connect Markov Chains pt.3 `(1400)`
 
-== Statistics
+The same as above, but with a different connection
 
-=== Expected value
+== Traffic light `(2100, 2200, 2300)`
 
-TODO: 'mean' trick, ggwp
+This is 
 
-$
-  epsilon_n = (sum_(i = 0)^n v_i) / n \
-  epsilon_(n + 1) = (sum_(i = 0)^(n + 1) v_i) / (n + 1) = 
-  = ((sum_(i = 0)^(n) v_i) + v_(n + 1)) / (n + 1) = 
-  (sum_(i = 0)^(n) v_i) / (n + 1) + v_(n + 1) / (n + 1) = \
-  ((sum_(i = 0)^(n) v_i) n) / ((n + 1) n) + v_(n + 1) / (n + 1) = 
-  (sum_(i = 0)^(n) v_i) / n dot.c n / (n + 1) + v_(n + 1) / (n + 1) = 
-  (epsilon_n dot n + v_(n + 1)) / (n + 1)
-$
+== Control center `(3000)`
 
-=== Probability
+=== No network `(3100)`
+
+=== Network monitor (no faults) `(3200)`
+
+=== Network monitor (faults, no repair) `(3300)`
+
+=== Network monitor (faults, repair) `(3400)`
+
+=== Network monitor (faults, repair, correct protocol) `(3500)`
+
+== Statistics `(4000)`
+
+=== Expected value `(4100)`
+
+
+=== Probability `(4200)`
 
 == Transition matrix
 
@@ -329,7 +335,6 @@ $
 
 == Heater simulation
 
-=== Eulero's method for differential equations
 
 #page(bibliography("bibliography.bib"))
 
@@ -391,3 +396,74 @@ $
   // - 1: requirements engineering
   // - 2: development
   // - 3: testing
+
+// #show raw.where(block: true): block.with(fill: luma(254), inset: 1em, width: 100%, stroke: (thickness: .1pt, paint: luma(100), dash: "dashed"))
+// #show outline.entry.where(level: 1): set text(weight: "bold")
+// #show outline.entry.where(level: 1): set repeat() 
+// #show outline.entry.where(level: 1): it => {
+//   show repeat : none
+//   v(1.1em, weak: true)
+//   text(size: 1.1em, weight: "bold", it)
+// }
+    // fill: black, inset: 0.1em,
+
+
+// #set raw.text(size: 0.8em)
+// #set list(indent: 1em, tight: false)
+// #show list.where(): it => { block(inset: (left: .8em), it) }
+// #show raw.where(block: true): it => block(fill: luma(250), inset: 2em, width: 100%, stroke: (thickness: .1pt, paint: luma(175), dash: "dashed"), it)
+// fill: black, 
+// align(center + horizon, text(white, size: 0.8em)[*#tag*])
+// set text(size: .9em)
+
+
+// \
+
+// _"Software engineering is an engineering discipline that is concerned with all aspects of software production"_ @sommerville2016software. 
+
+// \
+
+
+// Systems // modeling 
+// In the following pages I'll focus on the most *important concepts* of the course. Those fundamental concepts will be treated in *great detail* to give a deep enough understanding of the material.
+// \
+
+// as the uniform continuous distribution (TODO) $cal(U)(0, 1)$, maybe better if something around $cal(U)(0, 1) times cal(U)(0, 1)$, not like that, but around there
+// and we define 
+// And we connect the DTMC to itself with
+
+// - $U = "Time" times RR$ 
+// - $U(t + 1) = (t, r_1 + 1) "s.t." Y(t) = (r_0, r_1)$
+
+
+// ```cpp
+// #include <fstream>
+// #include <random>
+//
+// typedef long double real_t;
+//
+// int main() {
+//     std::random_device random_device;
+//     std::default_random_engine random_engine(random_device());
+//     std::uniform_real_distribution<real_t> random_state;
+//
+//     const size_t STATES_SIZE = 2, HORIZON = 10;
+//     std::vector<real_t> states(STATES_SIZE, 0);
+//
+//     std::ofstream output("output.csv");
+//
+//     for (size_t time = 0; time <= HORIZON; time++) {
+//         for (auto &state : states)
+//             state = random_state(random_engine);
+//
+//         output << time << ' ';
+//         for (auto state : states)
+//             output << state << ' ';
+//         output << std::endl;
+//     }
+//
+//     output.close();
+//
+//     return 0;
+// }
+// ```
