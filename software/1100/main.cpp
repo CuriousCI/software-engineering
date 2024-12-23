@@ -17,13 +17,13 @@ int main() {
         for (auto &r : state)
             r = uniform(random_engine);
 
-        output << time << ' ';
-        for (auto r : state)
-            output << r << ' ';
-        output << std::endl;
+        // output << time << ' ';
+        // for (auto r : state)
+        //     output << r << ' ';
+        // output << std::endl;
     }
 
-    output.close();
+    // output.close();
 
     return 0;
 }
