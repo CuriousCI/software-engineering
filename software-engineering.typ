@@ -4,15 +4,12 @@
 #set heading(numbering: "1.1")
 #set math.equation(numbering: "(1)")
 
+#show figure: set block(breakable: true)
 #show heading: set block(above: 1.4em, below: 1em, sticky: false)
 #show sym.emptyset : sym.diameter 
 #show raw.where(block: true): block.with(inset: 1em, stroke: (y: (thickness: .1pt, dash: "dashed")))
 
 #let note(body) = block(inset: 1em, stroke: (thickness: .1pt, dash: "dashed"), [*Note*: \ #body])
-
-// #set list(spacing: 0.85em)
-// #set par(leading: 0.55em, spacing: 0.55em, first-line-indent: 1.8em, justify: true)
-// #show par: set block(spacing: 5pt)
 
 #show outline.entry.where(level: 1): it => {
   show repeat : none
@@ -30,9 +27,11 @@
   r
 }
 
-#let reft(reft) = box(height: 1em, clip: true, baseline: 0.2em, circle(stroke: .5pt, inset: 0.1em, 
-  align(center + horizon, text(font: "CaskaydiaCove NF", size: 0.7em, strong(str(reft))))
-))
+#let reft(reft) = box(width: 9pt, height: 9pt, clip: true, radius: 100%, stroke: .5pt, baseline: 1pt,
+  align(center + horizon,
+    text(font: "CaskaydiaCove NF", size: 6pt, strong(str(reft)))
+  )
+)
 
 #page(align(center + horizon)[
     #heading(outlined: false, numbering: none, text(size: 1.5em)[Software Engineering]) 
@@ -106,7 +105,7 @@ $
 
 Given a time instant $t$ (let's suppose 12:32) and a time interval $d$ (1 minute), the driving ability of $D$ at 12:33 depends on the driving ability of $D$ at the time 12:32 and the weather at 12:32.
 
-=== Markov Chain
+=== Markov Chain <markov-chain>
 
 A Markov Chain is...
 
@@ -381,7 +380,175 @@ This is
 
 === `[4200]` Probability 
 
+#pagebreak()
+
 == `[5000]` Transition matrix
+
+One of the ways to implement a Markov Chain (like in @markov-chain) is by using a *transition matrix*. The simplest implemenation can be done by using a ```cpp std::discrete_distribution``` by using the trick in @transition-matrix.
+
+=== `[5100]` Random transition matrix
+
+In this example we build a *random transition matrix*. 
+
+#figure(caption: `software/5100/main.cpp`)[
+```cpp
+#include <fstream>
+#include <random>
+#include <vector>
+
+using real_t = double;
+const size_t HORIZON = 20, STATES_SIZE = 10;
+
+int main() {
+    std::random_device random_device;
+    std::default_random_engine random_engine(random_device());
+    auto random_state = t1
+        std::uniform_int_distribution<>(0, STATES_SIZE - 1);
+    std::uniform_real_distribution<> random_real_0_1(0, 1);
+
+    std::vector<std::discrete_distribution<>>
+        transition_matrix(STATES_SIZE); t2
+    std::ofstream log("log.csv");
+
+    for (size_t state = 0; state < STATES_SIZE; state++) {
+        std::vector<real_t> weights(STATES_SIZE); t3
+        for (auto &weight : weights)
+            weight = random_real_0_1(random_engine);
+
+        transition_matrix[state] = t4
+            std::discrete_distribution<>(weights.begin(),
+                                         weights.end());
+    }
+
+    size_t state = random_state(random_engine);
+    for (size_t time = 0; time <= HORIZON; time++) {
+        log << time << " " << state << std::endl;
+        state = transition_matrix[state t5 ](random_engine); t6
+    }
+
+    log.close();
+    return 0;
+}
+```
+]
+
+A *transition matrix* is a ```cpp vector<discrete_distribution<>>``` #reft(2) just like in @transition-matrix. Why can we do this? First of all, the states are numbered from ```cpp 0``` to ```cpp STATES_SIZE - 1```, that's why we can generate a random state #reft(1) just by generating a number from ```cpp 0``` to ```cpp STATES_SIZE - 1```. 
+
+The problem with using a simple ```cpp uniform_int_distribution``` is that we don't want to choose the next state uniformly, we want to do something like in @simple-markov-chain.
+
+#figure(
+  image("public/markov-chain.svg"),
+  caption: "A simple Markov Chain"
+) <simple-markov-chain>
+
+Luckly for us ```cpp std::discrete_distribution<>``` does exactly what we want. It takes a list of weights $w_0, w_1, w_2, ..., w_n$ and assigns each index $i$ the probability $p(i) = (sum_(i = 0)^n w_i) / w_i$ (the probability is proportional to the weight, so we have that $sum_(i = 0)^n p(i) = 1$ like we would expect in a Markov Chain).
+
+To instantiate the ```cpp discrete_distribution``` #reft(4), unlike in @transition-matrix, we need to first calculate the weights #reft(3), as we don't know them in advance.
+
+To randomly generate the next state #reft(6) we just have to use the ```cpp discrete_distribution``` assigned to the current state #reft(5). 
+
+=== `[5200]` Software development & error detection
+
+Our next goal is to model the software development process of a team. Each phase takes the team 4 days to complete, and, at the end of each phase the testing team tests the software, and there can be 3 outcomes:
+- *no error* is introduced during the phase (we can't actually know it, let's suppose there is an all-knowing "oracle" that can tell us there aren't any errors)
+- *no error detected* means that the "oracle" detected an error, but the testing team wasn't able to find it
+- *error detected* means that the "oracle" detected an error, and the testing team was able to find it
+
+If we have *no error*, we proceed to the next phase... the same happens if *no error was detected* (because the testing team sucks and didn't find any errors). If we *detect an error* we either reiterate the current phase (with a certain probability, let's suppose $0.8$), or we go back to one of the previous phases with equal probability (we do this because, if we find an error, there's a high chance it was introduced in the current phase, and we want to keep the model simple).
+
+In this exercise we take the parameters for each phase (the probability to introduce an error and the probability to not detect an error) from a file.
+
+#figure(caption: `software/5300/main.cpp`)[ 
+```cpp
+#include <...>
+
+using real_t = double;
+const size_t HORIZON = 800, PHASES_SIZE = 3;
+
+enum Outcome t1 {
+    NO_ERROR = 0,
+    NO_ERROR_DETECTED = 1,
+    ERROR_DETECTED = 2
+};
+
+int main() {
+    std::random_device random_device;
+    std::default_random_engine urng(random_device());
+    std::uniform_real_distribution<> uniform_0_1(0, 1);
+    std::vector<std::discrete_distribution<>>
+        phases_error_distribution;
+
+    {
+        std::ifstream probabilities("probabilities.csv");
+        real_t probability_error_introduced,
+            probability_error_not_detected;
+
+        while (probabilities >> probability_error_introduced >>
+               probability_error_not_detected)
+            phases_error_distribution.push_back(
+                t2 std::discrete_distribution<>({
+                    1 - probability_error_introduced,
+                    probability_error_introduced *
+                        probability_error_not_detected,
+                    probability_error_introduced *
+                        (1 - probability_error_not_detected),
+                }));
+
+        probabilities.close();
+        assert(phases_error_distribution.size() ==
+               PHASES_SIZE);
+    }
+
+    real_t probability_repeat_phase = 0.8;
+
+    size_t phase = 0;
+    std::vector<size_t> progress(PHASES_SIZE, 0);
+    std::vector<Outcome> outcomes(PHASES_SIZE, NO_ERROR);
+
+    for (size_t time = 0; time < HORIZON; time++) {
+        progress[phase]++;
+
+        if (progress[phase] == 4) {
+            outcomes[phase] = static_cast<Outcome>(
+                phases_error_distribution[phase](urng));
+            switch (outcomes[phase]) {
+            case NO_ERROR:
+            case NO_ERROR_DETECTED:
+                phase++;
+                break;
+            case ERROR_DETECTED:
+                if (phase > 0 && uniform_0_1(urng) >
+                                     probability_repeat_phase)
+                    phase = std::uniform_int_distribution<>(
+                        0, phase - 1)(urng);
+                break;
+            }
+
+            if (phase == PHASES_SIZE)
+                break;
+
+            progress[phase] = 0;
+        }
+    }
+
+    return 0;
+}
+```
+] <error-detection>
+
+TODO: ```cpp class enum``` vs ```cpp enum```. We can model the outcomes as an ```cpp enum``` #reft(1)... we can use the ```cpp discrete_distribution``` trick to choose randomly one of the outcomes #reft(2). The other thing we notice is that we take the probabilities to generate an error and to detect it from a file.
+
+=== `[5300]` Optimizing costs for the development team
+
+If we want we can manipulate the "parameters" in real life: a better experienced team has a lower probability to introduce an error, but a higher cost. What we can do is:
+1. randomly generate the parameters (probability to introduce an error and to not detect it)
+2. simulate the development process with the random parameters
+By repeating this a bunch of times, we can find out which parameters have the best results, a.k.a generate the lowest development times (there are better techinques like simulated annealing, but this one is simple enough for us).
+
+=== `[5400]` Key performance index 
+
+We can repeat the process in exercise `[5300]`, but this time we can assign a parameter a certain cost, and see which parameters optimize cost and time (or something like that? Idk, I should look up the code again).
+
 
 == `[6000]` Complex systems
 
@@ -535,3 +702,24 @@ TODO...
 //     return 0;
 // }
 // ```
+
+// #set list(spacing: 0.85em)
+// #set par(leading: 0.55em, spacing: 0.55em, first-line-indent: 1.8em, justify: true)
+// #show par: set block(spacing: 5pt)
+// #let reft(reft) = box(height: 11pt, clip: true,
+//   circle(stroke: .2pt, inset: 1pt,
+//     align(center + horizon, text(font: "CaskaydiaCove NF", size: 6pt, strong(str(reft)))
+//     )
+//   )
+// )
+// #let reft(reft) = box(circle(text(font: "CaskaydiaCove NF", size: 9pt, strong([(#reft)]))))
+
+// #let reft(reft) = text(font: "CaskaydiaCove NF", size: 9pt, strong([(#reft)]))
+
+//   box(height: 0.8em, clip: true, 
+//   align(center + horizon, text(font: "CaskaydiaCove NF", size: 0.6em, strong(str(reft)))
+// ))
+
+// #let reft(reft) = box(height: 0.8em, clip: true, circle(stroke: .5pt, inset: 0.1em, 
+//   align(center + horizon, text(font: "CaskaydiaCove NF", size: 0.6em, strong(str(reft))))
+// ))

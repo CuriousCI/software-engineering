@@ -1,14 +1,18 @@
-BasedOnStyle: Google
+BasedOnStyle: LLVM
 IndentWidth: 4
-TabWidth: 4
-BreakBeforeBinaryOperators: All
-BreakConstructorInitializers: AfterColon
-BreakInheritanceList: AfterColon
-BreakBeforeBraces: Custom
-BraceWrapping:
-    AfterClass: true
-PackConstructorInitializers: Never
-ColumnLimit: 0
-AlignAfterOpenBracket: BlockIndent
-BinPackArguments: false
-BinPackParameters: false
+ColumnLimit: 63
+
+# TabWidth: 4
+# BreakBeforeBinaryOperators: All
+# BreakConstructorInitializers: AfterColon
+# BreakInheritanceList: AfterColon
+# BreakBeforeBraces: Custom
+# BraceWrapping:
+#     AfterClass: true
+# PackConstructorInitializers: Never
+# ColumnLimit: 60
+# AlignAfterOpenBracket: BlockIndent
+# BinPackArguments: false
+# BinPackParameters: false
+# BinPackArguments: false
+# BinPackParameters: false
