@@ -44,103 +44,107 @@
 
 = Software models
 
-When designing *complex software* we have to make major *design choices* at the beginning of the project. Often those choices can't be driven by experience or reasoning alone, that's why a *model* of the project is needed to compare different solutions. Our formal tool of choice is the *Discrete Time Markov Chain* (@dtmc).
+*Software projects* require *design choices* that often can't be driven by experience or reasoning alone. That's why a *model* of the project is needed to compare different solutions. In this course, to describe software systems, we use *discrete time Markov chains*.
 
 == The "Amazon Prime Video" article 
 
-If you were tasked with designing the software architecture for *Amazon Prime Video* _(a live streaming service for Amazon)_, how would you go about it? What if you had the *non-functional requirement* to keep the costs as low as possible?
+If you were tasked with designing the software architecture for *Amazon Prime Video* _(a live streaming service for Amazon)_, how would you go about it? What if you had the *non-functional requirement* to keep the costs minimal? Would you use distributed services?
 
-In a recent article, Marcin Kolny, a Senior SDE at Prime Video, describes how they _"*reduced the cost* of the audio/video monitoring infrastructure by 90%"_ @primevideo2024 by using a monolith application instead of distributed microservices (an outcome one wouldn't usually expect). 
+More often than not, monolith applications are considered *more costly* than the counterpart due to an inefficient usage of resources. But, in a recent article, a Senior SDE at Prime Video describes how they _"*reduced the cost* of the audio/video monitoring infrastructure by *90%*"_ @primevideo2024 by using a monolith application instead of distributed microservices.  
 
 While there isn't always definitive answer, one way to go about this kind choice is building a model of the system to compare the solutions. In the case of Prime Video, _"the audio/video monitoring service consists of three major components:"_ @primevideo2024
 - the *media converter* converts input audio/video streams 
-//to frames or decrypted audio buffers that are sent to detectors
-- the *defect detectors* execute algorithms that analyze frames and audio buffers in real-time looking for defects and send notifications
+- the *defect detectors* analyze frames and audio buffers in real-time
 - the *orchestrator* controls the flow in the service
 
 #align(center)[
   #figure({
     set text(font: "CaskaydiaCove NF", weight: "light", lang: "en")
-    image("public/audio-video-monitor.svg", width: 92%)
+    image("public/audio-video-monitor.svg", width: 99%)
   }, caption: "Model of the audio/video monitoring system") <prime-video>
 ]
 
-We want to model the components as some kind of stateful machine (with inputs and outputs, @prime-video), interconnect them and *simulate* the behaviour of the system as a whole.
-
- // real-time notifications whenever a defect is found
-// #lorem(100)
-
-// \
-
-// #block(fill: red, width: 100%, height: auto)[#lorem(1000)]
-
-// Our service consists of three major components. .  
-// (such as video freeze, block corruption, or audio/video synchronization problems) and 
-
-// @primevideo2024 
-
-// #align(center)[
-//   #figure({
-//     set text(font: "CaskaydiaCove NF", weight: "light", lang: "en")
-//     // image("public/weather-driving-markov-chains.svg", width: 80%)
-//   }, caption: "the 'traffic' system modeled with 2 subsystems") <traffic> 
-// ]
+The system can be *simulated* by modeling its components as *connected probabilistic stateful automatons*.
 
 == Formal notation <traffic>
 
-=== The concept of time
+=== Markov chains <markov-chain>
 
-TODO: rewrite
+A Markov Chain is defined by a set of *states* $S$ and the *transition probability* $p : S times S -> [0, 1]$ s.t. 
 
-The models treated in the course evolve through *time*. Time can be modeled in many ways (I guess?), but, for the sake of simplicity, we will consider discrete time. Let $W$ be the _'weather system'_ and $D$ the _'driving ability' system _ in @traffic, we can define the evolution of $D$ as 
+$ forall s in S space.en sum_(s' in S) p(s'|s) = 1 $ <markov-chain-constrain>
 
-\
+A simple model of the weather could be $S = { "sunny", "rainy" }$
 
-$ 
-  & D(0) = "'good'" \
-  & D(t + d) = f(D(t), W(t)) 
-$
+#grid(
+  columns: (auto, auto),
+  align: center + horizon,
+  gutter: 1em,
+  math.equation[
+    p = 
+    #table(
+      columns: (auto, auto, auto),
+      stroke: .1pt,
+      align: center + horizon,
+      table.header([], [sunny], [rainy]),
+      [sunny],
+      [0.8],
+      [0.2],
+      [rainy],
+      [0.5],
+      [0.5]
+    )
+  ],
+  {
+    set text(font: "CaskaydiaCove NF", weight: "light", lang: "en")
+    image("public/weather-system.svg")
+  }
+)
 
-\
+Unfortunately for us, Markov chains aren't enough: to describe complex systems (e.g. a server) we need the concepts of *input*, *output* and *time*.
 
-Given a time instant $t$ (let's suppose 12:32) and a time interval $d$ (1 minute), the driving ability of $D$ at 12:33 depends on the driving ability of $D$ at the time 12:32 and the weather at 12:32.
-
-=== Markov Chain <markov-chain>
-
-A Markov Chain is...
-
-=== DTMC (Discrete Time Markov Chain) <dtmc>
+=== DTMC (Discrete Time Markov Chains) <dtmc>
 
 A DTMC $M$ is a tuple $(U, X, Y, p, g)$ s.t.
-- $U != emptyset and X != emptyset and Y != emptyset$ _(otherwise stuff doesn't work)_
-- $U$ can be either 
-  - ${ u_1, ..., u_n }$ where $u_i$ is an input value 
-  - ${()}$ if $M$ doesn't take any input
-- $X = { x_1, ..., x_n }$ where $x_i$ is a state
-- $Y = { y_1, ..., y_n }$ where $y_i$ is an output value
-- $p : X times X times U -> [0, 1]$ is the transition function
-- $g : X -> Y$ is the output function
+- $U, X "and" Y$ aren't empty _(otherwise stuff doesn't work)_
+- $U$ is the set of *input values*
+- $X$ is the set of *states* 
+- $Y$ is the set of *output values* 
+- $p : X times X times U -> [0, 1]$ is the *transition probability*
+- $g : X -> Y$ is the *output function*
 
-\
+The same constrain in @markov-chain-constrain holds for the DTMC, with an important difference: the *probability depends on the input value*. This means that *for each input value*, the sum of the probabilities to transition for *that input value* must be 1.
 
-$
-  forall x in X space.en forall u in U space.en sum_(x' in X) p(x'|x, u) = 1
-$
+$ forall x in X space.en forall u in U space.en sum_(x' in X) p(x'|x, u) = 1 $
 
-\
+Let $M$ be a DTMC, let $t$ be a time *instant* and $d$ a time *interval*
 
 $
-  & M(0) = x_1 \
-  & M(t + d) = cases(
-    x_1 quad & "with probability " p(x_1|M(t), U(t)) \
-    x_2 quad & "with probability " p(x_2|M(t), U(t)) \
+  & X(0) = x_0 \
+  & X(t + d) = cases(
+    x_0 quad "with probability " p(x_0 | X(t), U(t)) \
+    x_1 quad "with probability " p(x_1 | X(t), U(t)) \
     ...
   )
 $
 
-\
+(TODO: I don't like it...) We denote with $U(t)$ the *input value* of $M$ at time $t$ (the same goes for $X(t)$ and $Y(t)$), yada yada...
 
-It's interesting to notice that the transition function depends on the input values. If you consider the _'driving ability'_ system in @traffic, you can see that the probability to go from `good` to `bad` is higher if the weather is rainy and lower if it's sunny. 
+// TODO: rewrite
+//
+// The models treated in the course evolve through *time*. Time can be modeled in many ways (I guess?), but, for the sake of simplicity, we will consider discrete time. Let $W$ be the _'weather system'_ and $D$ the _'driving ability' system _ in @traffic, we can define the evolution of $D$ as 
+//
+// \
+//
+// $ 
+//   & D(0) = "'good'" \
+//   & D(t + d) = f(D(t), W(t)) 
+// $
+//
+// \
+//
+// Given a time instant $t$ (let's suppose 12:32) and a time interval $d$ (1 minute), the driving ability of $D$ at 12:33 depends on the driving ability of $D$ at the time 12:32 and the weather at 12:32.
+
 
 #pagebreak()
 
@@ -157,7 +161,7 @@ Let's consider the development process of a team. We can define a DTMC $M = (U, 
     image("public/development-process-markov-chain.svg")
   }, caption: "the model of a team's development process") <development-process> 
 ]
-
+ 
 \
 
 $
@@ -175,23 +179,30 @@ TODO...
 
 ==  Tips and tricks
 
-=== Mean
+=== Calculate average incrementally
 
-TODO: 'mean' trick, ggwp
+Given a set of values $V = {v_1, ..., v_n}$ s.t. $|V| = n$ the average $epsilon_n$ is s.t. 
+
+$ epsilon_n = (sum_(i = 0)^n v_i) / n $
+
+The problem with this method is that, by adding up all the values before the division, the *numerator* could easily *overflow*, as the biggest integer we can represent precisely with singe-precision floating-point number is 16777216 @wikipediaSinglePrecisionFloatingPointFormat. 
+
+#pagebreak()
+
+There is a way to calculate $epsilon_(n + 1)$ given $epsilon_n$
 
 $
-  epsilon_n = (sum_(i = 0)^n v_i) / n \
   epsilon_(n + 1) = (sum_(i = 0)^(n + 1) v_i) / (n + 1) = 
-  = ((sum_(i = 0)^(n) v_i) + v_(n + 1)) / (n + 1) = 
+  ((sum_(i = 0)^(n) v_i) + v_(n + 1)) / (n + 1) = 
   (sum_(i = 0)^(n) v_i) / (n + 1) + v_(n + 1) / (n + 1) = \
-  ((sum_(i = 0)^(n) v_i) n) / ((n + 1) n) + v_(n + 1) / (n + 1) = 
+  = ((sum_(i = 0)^(n) v_i) n) / ((n + 1) n) + v_(n + 1) / (n + 1) = 
   (sum_(i = 0)^(n) v_i) / n dot.c n / (n + 1) + v_(n + 1) / (n + 1) = 
   (epsilon_n dot n + v_(n + 1)) / (n + 1)
 $
 
-=== Eulero's method for differential equations
+=== Euler's method for differential equations
 
-Useful later...
+Got it from here baby @EulerMethod
 
 #pagebreak()
 
@@ -199,9 +210,9 @@ Useful later...
 
 This section will cover the basics needed for the exam.
 
-== Useful ```cpp #include <random>``` features not in `C` <random>
+== How to use ```cpp #include <random>``` <random>
 
-The ```cpp <random>``` library offers useful tools to build our models. It makes Markov Chains and probabilistic models really easy to implement.
+The ```cpp <random>``` library offers useful tools to build our models. It makes Markov chains and probabilistic models really easy to implement.
 
 // Randomness is fundamental in our models. There are key differences that make ```cpp <random>``` more ergonomic to use in `C++`
 // Even if you decide to not use any of the `C++` fancy features, t
@@ -303,64 +314,139 @@ Each exercise has 4 digits `xxxx` that are the same as the ones in the `software
 
 Now we have to put together our *formal definitions* and our `C++` knowledge to build some simple DTMCs and networks.
 
-=== `[1100]` A simple Markov Chain 
-
+=== `[1100]` A simple Markov chain <a-simple-markov-chain>
 
 Let's begin our modeling journey by implementing a DTMC $M$ s.t.
-- $U = {()}$ it takes no input
-- $X = [0,1] times [0,1]$ it has infinite states (all the pairs of real numbers between 0 and 1)
+- $U = {()}$ s.t. '$()$' is the *empty tuple*
+- $X = [0,1] times [0,1]$, each state is a pair #reft(3) of *real* #reft(1) numbers in $[0, 1]$ 
 - $Y = [0,1] times [0,1]$
-- $p : X times X times U -> X = cal(U)(0, 1) times cal(U)(0, 1)$ 
-- $g : X -> Y : (r_0, r_1) |-> (r_0, r_1)$ it outputs the current state
+- $p : X times X times U -> X = cal(U)(0, 1) times cal(U)(0, 1)$, the transition probability is a *uniform* distribution #reft(2)
+- $g : X -> Y : (r_0, r_1) |-> (r_0, r_1)$ outputs the current state #reft(4)
+- $X(0) = (0, 0)$ #reft(3)
 
-- $X(0) = (0, 0)$
+#figure(caption: `software/1100/main.cpp`)[
+```cpp
+/* ... */ 
 
-\
-
-#figure(```cpp
-#include <fstream>
-#include <random>
-
-using real_t = double;
+using real_t t1 = double; 
+const size_t HORIZON = 10;
 
 int main() {
     std::random_device random_device;
     std::default_random_engine random_engine(random_device());
-    std::uniform_real_distribution<real_t> uniform(0, 1); t1
+    std::uniform_real_distribution<real_t> uniform(0, 1); t2
 
-    const size_t HORIZON = 10; t2
     std::vector<real_t> state(2, 0); t3
+    std::ofstream log("log");
 
-    for (size_t time = 0; time <= HORIZON; time++)
-        for (auto &r : state)
-            r = uniform(random_engine); t4
+    for (size_t time = 0; time <= HORIZON; time++) {
+        for (auto &r : state) r = uniform(random_engine); t2
+        log << time << ' ';
+        for (auto r : state) log << r << ' '; t t4
+        log << std::endl;
+    }
 
+    log.close();
     return 0;
 }
-```, caption: `software/1100/main.cpp`)
+```
+]
 
 \
 
-=== `[1200]` Connect Markov Chains pt.1 
+=== `[1200]` Connect Markov chains pt.1 
 
-In this exercise we build 2 markov chains, and connect them...
+In this exercise we build 2 DTMCs $M_0, M_1$ like the one in the first example @a-simple-markov-chain, with the difference that, and $U_i = [0, 1] times [0, 1]$:
+- $U_0(t + d) = Y_1(t)$
+- $U_1(t + d) = Y_0(t)$
+TODO: formula to get input from other stuff and calculate the state..., maybe define 
+$ 
+  p : X times X times U &-> [0, 1] \
+  (x_0, x_1), (x'_0, x'_1), (u_0, u_1) &|-> ...
+$
 
-Now let's model a system with two DTMCs $M_0, M_1$, and lets define the functions
+#lorem(20)
 
-$U(M_0, t + 1) = dots.c$
-$U(M_1, t + 1) = dots.c$
+#figure(caption: `software/1200/main.cpp`)[
+```cpp
+const size_t HORIZON = 100;
+struct DTMC { real_t state[2]; };
+
+int main() {
+    std::vector<DTMC> dtmcs(2, {0, 0});
+
+    for (size_t time = 0; time <= HORIZON; time++) {
+        for (size_t r = 0; r < 2; r++) {
+            dtmcs[0].state[r] =
+                dtmcs[1].state[r] * uniform(random_engine);
+            dtmcs[1].state[r] =
+                dtmcs[0].state[r] + uniform(random_engine);
+        }
+    } 
+}
+```
+]
 
 === `[1300]` Connect Markov Chains pt.2 
 
 The same as above, but with a different connection
 
+#figure(caption: `software/1300/main.cpp`)[
+```cpp
+int main() {
+    std::vector<DTMC> dtmcs({{1, 1}, {2, 2}});
+
+    for (size_t time = 0; time <= HORIZON; time++) {
+        dtmcs[0].state[0] =
+            .7 * dtmcs[0].state[0] + .7 * dtmcs[0].state[1];
+        dtmcs[0].state[1] =
+            -.7 * dtmcs[0].state[0] + .7 * dtmcs[0].state[1];
+
+        dtmcs[1].state[0] =
+            dtmcs[1].state[0] + dtmcs[1].state[1];
+        dtmcs[1].state[1] =
+            -dtmcs[1].state[0] + dtmcs[1].state[1];
+    }
+}
+```
+]
+
 === `[1400]` Connect Markov Chains pt.3 
 
 The same as above, but with a different connection
 
-== `[2100, 2200, 2300]` Traffic light 
+== `[2000]` Traffic light 
 
-This is 
+In this example we want to model a *traffic light*. The three versions of the system on the drive (`2100`, `2200` and `2300`) do the same thing with a different code structure.
+
+#figure(caption: `software/2000/main.cpp`)[
+```cpp
+const size_t HORIZON = 1000;
+enum Light { GREEN = 0, YELLOW = 1, RED = 2 };
+
+int main() {
+    auto random_timer_duration =
+        std::uniform_int_distribution<>(60, 120);
+
+    Light traffic_light = Light::RED;
+    size_t timer = random_timer_duration(random_engine);
+
+    for (size_t time = 0; time <= HORIZON; time++) {
+        if (timer > 0) {
+            timer--;
+            continue;
+        }
+
+        traffic_light =
+            (traffic_light == RED
+                 ? GREEN
+                 : (traffic_light == GREEN ? YELLOW : RED));
+        timer = random_timer_duration(random_engine);
+    }
+}
+```
+]
+
 
 == `[3000]` Control center 
 
@@ -537,6 +623,8 @@ int main() {
 ] <error-detection>
 
 TODO: ```cpp class enum``` vs ```cpp enum```. We can model the outcomes as an ```cpp enum``` #reft(1)... we can use the ```cpp discrete_distribution``` trick to choose randomly one of the outcomes #reft(2). The other thing we notice is that we take the probabilities to generate an error and to detect it from a file.
+
+#pagebreak()
 
 === `[5300]` Optimizing costs for the development team
 
@@ -723,3 +811,49 @@ TODO...
 // #let reft(reft) = box(height: 0.8em, clip: true, circle(stroke: .5pt, inset: 0.1em, 
 //   align(center + horizon, text(font: "CaskaydiaCove NF", size: 0.6em, strong(str(reft))))
 // ))
+
+// with a set of *input values* and *output values*
+
+// We want to model the components as stateful machines 
+
+// (with inputs and outputs, @prime-video), interconnect them and *simulate* the behaviour of the system as a whole.
+
+ // real-time notifications whenever a defect is found
+// #lorem(100)
+
+// \
+
+// #block(fill: red, width: 100%, height: auto)[#lorem(1000)]
+
+// Our service consists of three major components. .  
+// (such as video freeze, block corruption, or audio/video synchronization problems) and 
+
+// @primevideo2024 
+
+// #align(center)[
+//   #figure({
+//     set text(font: "CaskaydiaCove NF", weight: "light", lang: "en")
+//     // image("public/weather-driving-markov-chains.svg", width: 80%)
+//   }, caption: "the 'traffic' system modeled with 2 subsystems") <traffic> 
+// ]
+
+
+// \
+// \
+
+// - $U != emptyset and X != emptyset and Y != emptyset$ _(otherwise stuff doesn't work)_
+  // - ${ u_1, ..., u_n }$ where $u_i$ is an input value 
+  // - ${()}$ if $M$ doesn't take any input
+
+// $
+//   & M(0) = x_1 \
+//   & M(t + d) = cases(
+//     x_1 quad & "with probability " p(x_1|M(t), U(t)) \
+//     x_2 quad & "with probability " p(x_2|M(t), U(t)) \
+//     ...
+//   )
+// $
+//
+// \
+//
+// It's interesting to notice that the transition function depends on the input values. If you consider the _'driving ability'_ system in @traffic, you can see that the probability to go from `good` to `bad` is higher if the weather is rainy and lower if it's sunny. 
