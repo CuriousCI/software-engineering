@@ -9,7 +9,8 @@
 #show sym.emptyset : sym.diameter 
 #show raw.where(block: true): block.with(inset: 1em, stroke: (y: (thickness: .1pt, dash: "dashed")))
 
-#let note(body) = block(inset: 1em, stroke: (thickness: .1pt, dash: "dashed"), [*Note*: \ #body])
+// #let note(body) = block(inset: 1em, stroke: (thickness: .1pt, dash: "dashed"), [*Note*: \ #body])
+#let note(body) = block(inset: 1em, stroke: (thickness: .1pt, dash: "dashed"), body)
 
 #show outline.entry.where(level: 1): it => {
   show repeat : none
@@ -244,22 +245,23 @@ I'll explain: ```cpp random()``` #reft(1) doesn't work very well (TODO: link to 
   If you see #reft(3) and #reft(5), random_device and r_engine aren't functions, they are instances, but you can call the ```cpp ()``` operator on them because C++ has operator overloading, and it allows you to call custom operators on instances... the same goes for ```cpp std::cout``` and ```cpp <<```
 ]
 
+#pagebreak()
+
 === Distributions <distributions>
 
-Just the capability of generating random numbers isn't enough, we often need to manipulate those numbers to fit our needs. Luckly, `C++` covers basically all of them... for example, this is how easy it is to simulate a transition matrix in @development-process:
+Just the capability to generate random numbers isn't enough, we often need to manipulate those numbers to fit our needs. Luckly, `C++` covers *basically all of them*. For example, we can easily simulate the DTMC in @development-process like this:
+// this is how easy it is to simulate the transition matrix in @development-process:
 
 #figure(caption: `examples/transition_matrix.cpp`)[
 ```cpp
 #include <iostream>
 #include <random>
 
-const size_t HORIZON = 15;
-
 int main() {
     std::random_device random_device;
     std::default_random_engine random_engine(random_device());
 
-    std::discrete_distribution<size_t> transition_matrix[] = {
+    std::discrete_distribution<> transition_matrix[] = {
         {0, 1},
         {0, .3, .7},
         {0, .2, .2, .6},
@@ -268,35 +270,111 @@ int main() {
     };
 
     size_t state = 0;
-    for (size_t time = 0; time < HORIZON; time++) {
+    for (size_t step = 0; step < 15; step++) {
         state = transition_matrix[state](random_engine);
         std::cout << state << std::endl;
     }
+
+    return 0;
 }
 ```
 ] <transition-matrix>
 
-==== ```cpp std::uniform_int_distribution``` <uniform-int>
+==== ```cpp uniform_int_distribution``` @docs_uniform_int_distribution <uniform-int>
 
-==== ```cpp std::uniform_real_distribution``` <uniform-real>
+// Consideriamo un semplice esercizio
+Let's consider a simple exercise
 
-==== ```cpp std::bernoulli_distribution``` <bernoulli>
+#note[
+To test a system $S$ we have to build a generator that every $T$ seconds sends a value $v$ at $S$. For each send, the value of $T$ is an *integer* chosen uniformly in the range $[20, 30]$
+// Per testare un sistema si vuole costruire un generatore che ogni $T$ secondi invia un valore $v$ ad un sistema da testare. Per ogni invio, il valore $T$ è un valore intero scelto uniformemente a random nell'interallo $[20, 30]$.
+]
+// mentre il valore $v$ è un valore scelto aggiungendo, uniformemete a random, il valore $-1$ o $+1$ al valore precedente di $v$. Il valore iniziale di $v$ è $0$.
+// Tradizionalmente, per generare i valori di $T$ e $v$ il codice è 
 
-==== ```cpp std::poisson_distribution``` <poisson>
+// Tradizionalmente, per generare i valori di $T$ il codice è 
+The code to calculate $T$ would be ```cpp T = 20 + rand() % 11;```, which is very *error prone*, hard to remember and has no semantic value. In `C++` we can do the same thing in a *simpler* and *cleaner* way:
 
-==== ```cpp std::geometric_distribution``` <geometric>
+#align(center)[
+```cpp
+std::uniform_int_distribution<> random_T(20, 30); t1
+size_t T = t2 random_T(random_engine); 
+```
+]
 
-==== ```cpp std::discrete_distribution``` <discrete>
+Now we can easily generate the numbers we want without doing any calculations #reft(1), and we don't have to remember how to generate $T$ #reft(2). We define the behaviour of $T$ only once #reft(1), so we can easily change it without introducing bugs or inconsistencies. It's also worth to take a look at the implementation of the exercise above (with the addition that $v = T$), as it comes up very often in our models.
+
+#figure(caption: `examples/interval_generator.cpp`)[
+```cpp
+#include <iostream>
+#include <random>
+
+int main() {
+    std::random_device random_device;
+    std::default_random_engine random_engine(random_device());
+    std::uniform_int_distribution<> random_T(20, 30);
+
+    size_t T = random_T(random_engine), next_request_time = T;
+    for (size_t time = 0; time < 1000; time++) {
+        if (time < next_request_time)
+            continue;
+
+        std::cout << T << std::endl;
+        T = random_T(random_engine);
+        next_request_time = time + T;
+    }
+
+    return 0;
+}
+```
+]
+
+The ```cpp uniform_int_distribution``` has many other uses, for example, we could want to uniformly generate a random state. If ```cpp STATES_SIZE``` is the number of states, then we instantiate ```cpp std::uniform_int_distribution<> random_state(0, STATES_SIZE - 1 t1);``` *BE CAREFUL!* Remember to use ```cpp STATES_SIZE - 1``` #reft(1), because ```cpp uniform_int_distribution``` is *inclusive*... forgettig it can lead to very sneaky bugs: it randomly segfaults at different points of the code. It's very hard to debug unless you use `gdb`.
+
+TODO: You can also generate negative numbers 
+TODO: the behaviour is undefined if a > b
+
+==== ```cpp uniform_real_distribution``` @docs_uniform_real_distribution <uniform-real>
+
+It is the same as above, with the difference that it generates *real* numbers ($RR$), and $b$ is excluded
+
+==== Bernoulli <bernoulli>
+
+TODO: ... you just have to specify the expected value, I haven't used it much up until now
+
+#pagebreak()
+
+==== Poisson <poisson>
+
+The Poisson distribution is very useful when simulating user requests (generally, the number requests to a servers in a certain instant is described by a Poisson distribution, you just have to specify the expected value)
+
+==== Geometric <geometric>
+
+Does the job
+
+==== ```cpp discrete_distribution``` <discrete>
+
+This one is *SUPER USEFUL!*, generates random integers in the range 0, number of items - 1, but it assigns a weight to each item, so each item as a certain weighted probability to be choose. It can be used in transition matrices, and for a bit more complex systems like the status of the project in @error-detection.
 
 == Dynamic structures 
 
+=== ```cpp new``` and ```cpp delete``` vs ```cpp malloc()``` and ```cpp free```
+
+If you allocate with ```cpp new```, you must deallocate with ```cpp delete```, you can't mixup them with malloc and free
+
 === ```cpp std::vector<T>()``` instead of ```cpp malloc()``` <vector>
+
+You don't have to allocate memory, basically never! You just use the structures that are implemented in the standard library, and most of the time they are enough for our use cases. They are really easy to use.
 
 === ```cpp std::deque<T>()```
 
 === Sets
 
+Not needed as much
+
 === Maps
+
+Could be useful
 
 == I/O
 
