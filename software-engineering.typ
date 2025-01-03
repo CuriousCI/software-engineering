@@ -7,7 +7,8 @@
 #show figure: set block(breakable: true)
 #show heading: set block(above: 1.4em, below: 1em, sticky: false)
 #show sym.emptyset : sym.diameter 
-#show raw.where(block: true): block.with(inset: 1em, stroke: (y: (thickness: .1pt, dash: "dashed")))
+// #show raw.where(block: true): block.with(inset: 1em, stroke: (y: (thickness: .1pt, dash: "dashed")))
+#show raw.where(block: true): block.with(inset: .5em)
 
 // #let note(body) = block(inset: 1em, stroke: (thickness: .1pt, dash: "dashed"), [*Note*: \ #body])
 #let note(body) = block(inset: 1em, stroke: (thickness: .1pt, dash: "dashed"), body)
@@ -49,11 +50,13 @@
 
 == The "Amazon Prime Video" article 
 
-If you were tasked with designing the software architecture for *Amazon Prime Video* _(a live streaming service for Amazon)_, how would you go about it? What if you had the *non-functional requirement* to keep the costs minimal? Would you use distributed services?
+// *non-functional requirement*
 
-More often than not, monolith applications are considered *more costly* than the counterpart due to an inefficient usage of resources. But, in a recent article, a Senior SDE at Prime Video describes how they _"*reduced the cost* of the audio/video monitoring infrastructure by *90%*"_ @primevideo2024 by using a monolith application instead of distributed microservices.  
+If you were tasked with designing the software architecture for *Amazon Prime Video* _(a live streaming service for Amazon)_, how would you go about it? What if you had the to keep the costs minimal? Would you use a distributed architecture or a monolith application?
 
-While there isn't always definitive answer, one way to go about this kind choice is building a model of the system to compare the solutions. In the case of Prime Video, _"the audio/video monitoring service consists of three major components:"_ @primevideo2024
+More often than not, monolith applications are considered *more costly* and *less scalable* than the counterpart due to an inefficient usage of resources. But, in a recent article, a Senior SDE at Prime Video describes how they _"*reduced the cost* of the audio/video monitoring infrastructure by *90%*"_ @primevideo2024 by using a monolith architecture.
+
+While there isn't always definitive answer, one way to go about this kind of choice is building a model of the system to compare the solutions. In the case of Prime Video, _"the audio/video monitoring service consists of three major components:"_ @primevideo2024
 - the *media converter* converts input audio/video streams 
 - the *defect detectors* analyze frames and audio buffers in real-time
 - the *orchestrator* controls the flow in the service
@@ -61,17 +64,17 @@ While there isn't always definitive answer, one way to go about this kind choice
 #align(center)[
   #figure({
     set text(font: "CaskaydiaCove NF", weight: "light", lang: "en")
-    image("public/audio-video-monitor.svg", width: 99%)
-  }, caption: "Model of the audio/video monitoring system") <prime-video>
+    image("public/audio-video-monitor.svg", width: 85%)
+  }, caption: "audio/video monitoring system") <prime-video>
 ]
 
 The system can be *simulated* by modeling its components as *connected probabilistic stateful automatons*.
 
-== Formal notation <traffic>
+== Formal theory <traffic>
 
 === Markov chains <markov-chain>
 
-A Markov Chain is defined by a set of *states* $S$ and the *transition probability* $p : S times S -> [0, 1]$ s.t. 
+A Markov Chain is defined by a set of *states* $S$ and the *transition probability* $p : S times S -> [0, 1]$ such that $p(s'|s)$ is the probability to transition to state $s'$ if the current state is $s$ and
 
 $ forall s in S space.en sum_(s' in S) p(s'|s) = 1 $ <markov-chain-constrain>
 
@@ -88,12 +91,8 @@ A simple model of the weather could be $S = { "sunny", "rainy" }$
       stroke: .1pt,
       align: center + horizon,
       table.header([], [sunny], [rainy]),
-      [sunny],
-      [0.8],
-      [0.2],
-      [rainy],
-      [0.5],
-      [0.5]
+      [sunny], [0.8], [0.2],
+      [rainy], [0.5], [0.5]
     )
   ],
   {
@@ -104,7 +103,9 @@ A simple model of the weather could be $S = { "sunny", "rainy" }$
 
 Unfortunately for us, Markov chains aren't enough: to describe complex systems (e.g. a server) we need the concepts of *input*, *output* and *time*.
 
-=== DTMC (Discrete Time Markov Chains) <dtmc>
+=== DTMCs (Discrete Time Markov Chains) <dtmc>
+
+// TODO: techincally we need a starting state, and possibly an end state if needed?
 
 A DTMC $M$ is a tuple $(U, X, Y, p, g)$ s.t.
 - $U, X "and" Y$ aren't empty _(otherwise stuff doesn't work)_
@@ -118,43 +119,34 @@ The same constrain in @markov-chain-constrain holds for the DTMC, with an import
 
 $ forall x in X space.en forall u in U space.en sum_(x' in X) p(x'|x, u) = 1 $
 
-Let $M$ be a DTMC, let $t$ be a time *instant* and $d$ a time *interval*
+Let $M$ be a DTMC, $t$ be a time *instant* and $d$ a time *interval*, we have
 
 $
   & X(0) = x_0 \
   & X(t + d) = cases(
-    x_0 quad "with probability " p(x_0 | X(t), U(t)) \
-    x_1 quad "with probability " p(x_1 | X(t), U(t)) \
+    x_0 quad "with prob. " p(x_0 | X(t), U(t)) \
+    x_1 quad "with prob. " p(x_1 | X(t), U(t)) \
     ...
-  )
+  ) \
+  & Y(t) = g(X(t))
 $
-
-(TODO: I don't like it...) We denote with $U(t)$ the *input value* of $M$ at time $t$ (the same goes for $X(t)$ and $Y(t)$), yada yada...
-
-// TODO: rewrite
-//
-// The models treated in the course evolve through *time*. Time can be modeled in many ways (I guess?), but, for the sake of simplicity, we will consider discrete time. Let $W$ be the _'weather system'_ and $D$ the _'driving ability' system _ in @traffic, we can define the evolution of $D$ as 
-//
-// \
-//
-// $ 
-//   & D(0) = "'good'" \
-//   & D(t + d) = f(D(t), W(t)) 
-// $
-//
-// \
-//
-// Given a time instant $t$ (let's suppose 12:32) and a time interval $d$ (1 minute), the driving ability of $D$ at 12:33 depends on the driving ability of $D$ at the time 12:32 and the weather at 12:32.
-
 
 #pagebreak()
 
 ==== An example of DTMC
 
 Let's consider the development process of a team. We can define a DTMC $M = (U, X, Y, p, g)$ s.t.
-- $U = {()}$, as it doesn't have any input
-- $X = {0, 1, 2, 3}$ 
-- $Y = "Cost" times "Duration (in months)"$
+- $U = {emptyset}$ because $M$ doesn't have any input and $U != emptyset$
+- $X = {0, 1, 2, 3, 4}$ 
+- $Y = "Cost" times "Duration"$
+
+$
+  g(x) = cases(
+    (0, 0) & quad x = 0 or x = 4 \
+    (20000, 2) & quad x = 1 or x = 3 \
+    (40000, 4) & quad x = 2
+  )
+$
 
 #align(center)[
   #figure({
@@ -162,21 +154,43 @@ Let's consider the development process of a team. We can define a DTMC $M = (U, 
     image("public/development-process-markov-chain.svg")
   }, caption: "the model of a team's development process") <development-process> 
 ]
- 
-\
 
-$
-  g(x) = cases(
-    (0, 0) & quad "if " x = 0 \
-    (20000, 2) & quad "if " x = 1 \
-    (40000, 4) & quad "if " x = 2 \
-    (20000, 2) & quad "if " x = 3
-  )
-$
+#v(1em)
+
+#align(center)[
+  #math.equation[
+    p = 
+    #table(
+      columns: (auto, auto, auto, auto, auto, auto),
+      stroke: .1pt,
+      align: center + horizon,
+      table.header([$emptyset$], [*0*], [*1*], [*2*], [*3*], [*4*]),
+      [*0*], [0], [1], [0], [0], [0],
+      [*1*], [0], [.3], [.7], [0], [0],
+      [*2*], [0], [.1], [.2], [.7], [0],
+      [*3*], [0], [.1], [.1], [.1], [.7],
+      [*4*], [1], [0], [0], [0], [0],
+    )
+  ]
+]
+
+#v(1em)
+
+Notice that we have only 1 table because $|U| = 1$ (we have exactly 1 input value). If we had $U = {"apple", "banana", "orange"}$ we would have had to describe 3 tables, one *for each input value*.
+
+// TODO: use UML notation and simplify the sentence above
 
 === Network of Markov Chains
 
-TODO...
+To describe complex systems we don't want to model a single big DTMC (the task would be hard and error prone). What we want to do instead is model many simple DTMCs and connect them.
+
+Let $M_1, M_2$ be two DTMCs, the input of $M_2$ depends on $M_1$'s output
+
+$ U_2(t) = f(Y_1(t)) $
+
+// TODO...
+
+#pagebreak()
 
 ==  Tips and tricks
 
@@ -188,16 +202,14 @@ $ epsilon_n = (sum_(i = 0)^n v_i) / n $
 
 The problem with this method is that, by adding up all the values before the division, the *numerator* could easily *overflow*, as the biggest integer we can represent precisely with singe-precision floating-point number is 16777216 @wikipediaSinglePrecisionFloatingPointFormat. 
 
-#pagebreak()
-
 There is a way to calculate $epsilon_(n + 1)$ given $epsilon_n$
 
 $
-  epsilon_(n + 1) = (sum_(i = 0)^(n + 1) v_i) / (n + 1) = 
-  ((sum_(i = 0)^(n) v_i) + v_(n + 1)) / (n + 1) = 
+  epsilon_(n + 1) = (sum_(i = 0)^(n + 1) v_i) / (n + 1) = \
+  ((sum_(i = 0)^(n) v_i) + v_(n + 1)) / (n + 1) = \
   (sum_(i = 0)^(n) v_i) / (n + 1) + v_(n + 1) / (n + 1) = \
-  = ((sum_(i = 0)^(n) v_i) n) / ((n + 1) n) + v_(n + 1) / (n + 1) = 
-  (sum_(i = 0)^(n) v_i) / n dot.c n / (n + 1) + v_(n + 1) / (n + 1) = 
+  ((sum_(i = 0)^(n) v_i) n) / ((n + 1) n) + v_(n + 1) / (n + 1) = \
+  (sum_(i = 0)^(n) v_i) / n dot.c n / (n + 1) + v_(n + 1) / (n + 1) = \
   (epsilon_n dot n + v_(n + 1)) / (n + 1)
 $
 
@@ -404,8 +416,6 @@ Let's begin our modeling journey by implementing a DTMC $M$ s.t.
 
 #figure(caption: `software/1100/main.cpp`)[
 ```cpp
-/* ... */ 
-
 using real_t t1 = double; 
 const size_t HORIZON = 10;
 
@@ -430,6 +440,7 @@ int main() {
 ```
 ]
 
+\
 \
 
 === `[1200]` Connect Markov chains pt.1 
@@ -935,3 +946,22 @@ TODO...
 // \
 //
 // It's interesting to notice that the transition function depends on the input values. If you consider the _'driving ability'_ system in @traffic, you can see that the probability to go from `good` to `bad` is higher if the weather is rainy and lower if it's sunny. 
+
+// (TODO: I don't like it...) We denote with $U(t)$ the *input value* of $M$ at time $t$ (the same goes for $X(t)$ and $Y(t)$), yada yada...
+
+// TODO: rewrite
+//
+// The models treated in the course evolve through *time*. Time can be modeled in many ways (I guess?), but, for the sake of simplicity, we will consider discrete time. Let $W$ be the _'weather system'_ and $D$ the _'driving ability' system _ in @traffic, we can define the evolution of $D$ as 
+//
+// \
+//
+//kjklj
+// $ 
+//   & D(0) = "'good'" \
+//   & D(t + d) = f(D(t), W(t)) 
+// $
+//
+// \
+//
+// Given a time instant $t$ (let's suppose 12:32) and a time interval $d$ (1 minute), the driving ability of $D$ at 12:33 depends on the driving ability of $D$ at the time 12:32 and the weather at 12:32.
+
