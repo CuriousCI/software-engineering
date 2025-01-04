@@ -9,28 +9,25 @@ enum Light { GREEN = 0, YELLOW = 1, RED = 2 };
 int main() {
     std::random_device random_device;
     std::default_random_engine random_engine(random_device());
-
-    auto random_timer_duration =
-        std::uniform_int_distribution<>(60, 120);
+    std::uniform_int_distribution<> random_interval(60, 120);
     std::ofstream log("log");
 
     Light traffic_light = Light::RED;
-    size_t timer = random_timer_duration(random_engine);
+    size_t next_switch = random_interval(random_engine);
 
     for (size_t time = 0; time <= HORIZON; time++) {
-        log << time << ' ' << timer << ' ' << traffic_light
-            << std::endl;
+        log << time << ' ' << next_switch - time << ' '
+            << traffic_light << std::endl;
 
-        if (timer > 0) {
-            timer--;
+        if (time < next_switch)
             continue;
-        }
 
         traffic_light =
             (traffic_light == RED
                  ? GREEN
                  : (traffic_light == GREEN ? YELLOW : RED));
-        timer = random_timer_duration(random_engine);
+
+        next_switch = time + random_interval(random_engine);
     }
 
     log.close();

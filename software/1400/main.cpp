@@ -14,7 +14,7 @@ int main() {
     std::uniform_real_distribution<real_t> uniform(0, 1);
 
     std::ofstream log("log");
-    std::vector<DTMC> dtmcs({{1, 1}, {2, 2}});
+    std::vector<DTMC> dtmcs({{2, 2}, {1, 1}});
 
     for (size_t time = 0; time <= HORIZON; time++) {
         dtmcs[0].state[0] =

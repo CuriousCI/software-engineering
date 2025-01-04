@@ -133,7 +133,7 @@ $
 
 #pagebreak()
 
-==== An example of DTMC
+==== An example of DTMC <dtmc-example>
 
 Let's consider the development process of a team. We can define a DTMC $M = (U, X, Y, p, g)$ s.t.
 - $U = {emptyset}$ because $M$ doesn't have any input and $U != emptyset$
@@ -221,18 +221,22 @@ Got it from here baby @EulerMethod
 
 = `C++`
 
-This section will cover the basics needed for the exam.
+This section will cover the basics for the exam.
 
-== How to use ```cpp #include <random>``` <random>
+== How to use the ```cpp random``` library <random>
 
-The ```cpp <random>``` library offers useful tools to build our models. It makes Markov chains and probabilistic models really easy to implement.
+The ```cpp random``` standard library offers useful tools to build our models. It makes Markov chains and probabilistic models easy to implement.
+
+// TODO: don't use "using namespace std;"
 
 // Randomness is fundamental in our models. There are key differences that make ```cpp <random>``` more ergonomic to use in `C++`
 // Even if you decide to not use any of the `C++` fancy features, t
 
-=== ```cpp random()``` vs ```cpp random_device``` vs ```cpp default_random_engine``` <random_engine>
+=== ```cpp random()```, ```cpp random_device()``` and ```cpp default_random_engine()``` <random_engine>
 
-In `C++` there are many ways to *generate random numbers*, I'm gonna keep it short and sweet: don't use ```cpp random()```, use ```cpp std::random_device``` to generate the *seed* and from then on just some random engine like ```cpp std::default_random_engine```.
+In `C++` there are many ways to *generate random numbers*, I'm gonna keep it short and sweet: don't use ```cpp random()```, use ```cpp random_device()``` to generate the *seed* to instantiate a ```cpp default_random_engine()```.
+
+// and from then on just some random engine like ```cpp std::default_random_engine```.
 
 #figure(caption: `examples/random.cpp`)[
 ```cpp
@@ -400,14 +404,14 @@ Could be useful
 
 Each exercise has 4 digits `xxxx` that are the same as the ones in the `software` folder in the course material.
 
-== `[1000]` First examples 
+== First examples
 
 Now we have to put together our *formal definitions* and our `C++` knowledge to build some simple DTMCs and networks.
 
-=== `[1100]` A simple Markov chain <a-simple-markov-chain>
+=== A simple Markov chain `[1100]` <a-simple-markov-chain>
 
 Let's begin our modeling journey by implementing a DTMC $M$ s.t.
-- $U = {()}$ s.t. '$()$' is the *empty tuple*
+- $U = {emptyset}$ (see @dtmc-example)
 - $X = [0,1] times [0,1]$, each state is a pair #reft(3) of *real* #reft(1) numbers in $[0, 1]$ 
 - $Y = [0,1] times [0,1]$
 - $p : X times X times U -> X = cal(U)(0, 1) times cal(U)(0, 1)$, the transition probability is a *uniform* distribution #reft(2)
@@ -440,10 +444,9 @@ int main() {
 ```
 ]
 
-\
-\
+#pagebreak()
 
-=== `[1200]` Connect Markov chains pt.1 
+=== Markov chains network pt.1 `[1200]`
 
 In this exercise we build 2 DTMCs $M_0, M_1$ like the one in the first example @a-simple-markov-chain, with the difference that, and $U_i = [0, 1] times [0, 1]$:
 - $U_0(t + d) = Y_1(t)$
@@ -476,7 +479,7 @@ int main() {
 ```
 ]
 
-=== `[1300]` Connect Markov Chains pt.2 
+=== Markov chains network pt.2 `[1300]`
 
 The same as above, but with a different connection
 
@@ -500,11 +503,11 @@ int main() {
 ```
 ]
 
-=== `[1400]` Connect Markov Chains pt.3 
+=== Markov chains network pt.3 `[1400]`
 
-The same as above, but with a different connection
+The same as above, but with a twist (in the original uses variables to indicate each input... which is sketcy... I can do it with CASE) 
 
-== `[2000]` Traffic light 
+== Traffic light `[2000]`
 
 In this example we want to model a *traffic light*. The three versions of the system on the drive (`2100`, `2200` and `2300`) do the same thing with a different code structure.
 
@@ -537,41 +540,43 @@ int main() {
 ]
 
 
-== `[3000]` Control center 
+== Control center
 
-=== `[3100]` No network 
+=== No network `[3100]`
 
-=== `[3200]` Network monitor (no faults) 
+=== Network monitor 
 
-=== `[3300]` Network monitor (faults, no repair) 
+==== No faults `[3200]`
 
-=== `[3400]` Network monitor (faults, repair) 
+==== Faults & no repair `[3300]`
 
-=== `[3500]` Network monitor (faults, repair, correct protocol) 
+=== Faults & repair `[3400]`
 
-== `[4000]` Statistics 
+=== Faults & repair + correct protocol `[3500]`
 
-=== `[4100]` Expected value 
+== Statistics
 
-=== `[4200]` Probability 
+=== Expected value `[4100]`
+
+In this one we just simulate a development process (phase 0, phase 1, and phase 2), and we calculate the average ...
+
+
+=== Probability `[4200]`
+
+In this one we simulate a more complex software developmen process, and we calculate the average cost (Wait, what? Do we simulate it multiple times?)
 
 #pagebreak()
 
-== `[5000]` Transition matrix
+== Development process simulation 
 
 One of the ways to implement a Markov Chain (like in @markov-chain) is by using a *transition matrix*. The simplest implemenation can be done by using a ```cpp std::discrete_distribution``` by using the trick in @transition-matrix.
 
-=== `[5100]` Random transition matrix
+=== Random transition matrix `[5100]`
 
 In this example we build a *random transition matrix*. 
 
 #figure(caption: `software/5100/main.cpp`)[
 ```cpp
-#include <fstream>
-#include <random>
-#include <vector>
-
-using real_t = double;
 const size_t HORIZON = 20, STATES_SIZE = 10;
 
 int main() {
@@ -715,25 +720,25 @@ TODO: ```cpp class enum``` vs ```cpp enum```. We can model the outcomes as an ``
 
 #pagebreak()
 
-=== `[5300]` Optimizing costs for the development team
+=== Optimizing costs for the development team `[5300]`
 
 If we want we can manipulate the "parameters" in real life: a better experienced team has a lower probability to introduce an error, but a higher cost. What we can do is:
 1. randomly generate the parameters (probability to introduce an error and to not detect it)
 2. simulate the development process with the random parameters
 By repeating this a bunch of times, we can find out which parameters have the best results, a.k.a generate the lowest development times (there are better techinques like simulated annealing, but this one is simple enough for us).
 
-=== `[5400]` Key performance index 
+=== Key performance index `[5400]`
 
 We can repeat the process in exercise `[5300]`, but this time we can assign a parameter a certain cost, and see which parameters optimize cost and time (or something like that? Idk, I should look up the code again).
 
 
-== `[6000]` Complex systems
+== Complex systems
 
-=== `[6100]` Insulin pump
+=== Insulin pump `[6100]`
 
-=== `[6200]` Buffer 
+=== Buffer `[6200]`
 
-=== `[6300]` Server
+=== Server `[6300]`
 
 = Exam
 
@@ -743,9 +748,48 @@ We can repeat the process in exercise `[5300]`, but this time we can assign a pa
 
 == Heater simulation
 
+#pagebreak()
+
 = CASE library
 
+== Observer Pattern
+
+== `C++` generics & virtual methods
+
 TODO...
+
+#pagebreak()
+
+= Extras
+
+== VDM (Vienna Development Method)
+
+=== It's cool, I promise 
+
+=== VDM++ to design correct UMLs
+
+== Advanced testing techinques in `Rust`
+
+TODO: cite "Rust for Rustaceans"
+TODO: unit tests aren't the only type of test
+
+=== Mocking (mockall)
+
+=== Fuzzying (cargo-fuzz)
+
+=== Property-based Testing 
+
+=== Test Augmentation (Miri, Loom)
+
+TODO: Valgrind
+
+=== Performance testing
+
+TODO: non-functional requirements
+
+=== Playwright & UI testing?
+
+
 
 
 #page(bibliography("bibliography.bib"))
