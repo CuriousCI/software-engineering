@@ -180,7 +180,7 @@ Notice that we have only 1 table because $|U| = 1$ (we have exactly 1 input valu
 
 // TODO: use UML notation and simplify the sentence above
 
-=== Network of Markov Chains
+=== Network of Markov chains
 
 To describe complex systems we don't want to model a single big DTMC (the task would be hard and error prone). What we want to do instead is model many simple DTMCs and connect them.
 
@@ -374,7 +374,7 @@ This one is *SUPER USEFUL!*, generates random integers in the range 0, number of
 
 == Dynamic structures 
 
-=== ```cpp new``` and ```cpp delete``` vs ```cpp malloc()``` and ```cpp free```
+=== ```cpp new``` and ```cpp delete``` vs ```cpp malloc()``` and ```cpp free()```
 
 If you allocate with ```cpp new```, you must deallocate with ```cpp delete```, you can't mixup them with malloc and free
 
@@ -768,7 +768,7 @@ TODO...
 
 === VDM++ to design correct UMLs
 
-== Advanced testing techinques in `Rust`
+== Advanced testing techinques (in `Rust`)
 
 TODO: cite "Rust for Rustaceans"
 TODO: unit tests aren't the only type of test
