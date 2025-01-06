@@ -746,6 +746,12 @@ We can repeat the process in exercise `[5300]`, but this time we can assign a pa
 
 == Backend load balancing
 
+=== Env
+
+=== Dispatcher, Server and Database
+
+=== Response time
+
 == Heater simulation
 
 #pagebreak()
