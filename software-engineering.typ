@@ -196,22 +196,34 @@ $ U_2(t) = f(Y_1(t)) $
 
 === Calculate average incrementally
 
-Given a set of values $V = {v_1, ..., v_n}$ s.t. $|V| = n$ the average $epsilon_n$ is s.t. 
+Given a set of values $V = {v_1, ..., v_n}$ s.t. $|V| = n$ the average $overline(x)_n$ is s.t. 
 
-$ epsilon_n = (sum_(i = 0)^n v_i) / n $
+$ overline(x)_n = (sum_(i = 0)^n v_i) / n $
 
-The problem with this method is that, by adding up all the values before the division, the *numerator* could easily *overflow*, as the biggest integer we can represent precisely with singe-precision floating-point number is 16777216 @wikipediaSinglePrecisionFloatingPointFormat. 
-
-There is a way to calculate $epsilon_(n + 1)$ given $epsilon_n$
+The problem with this method is that, by adding up all the values before the division, the *numerator* could easily *overflow*, as the biggest integer we can represent precisely with singe-precision floating-point number is 16777216 @wikipediaSinglePrecisionFloatingPointFormat. There is a way to calculate $overline(x)_(n + 1)$ given $overline(x)_n$
 
 $
-  epsilon_(n + 1) = (sum_(i = 0)^(n + 1) v_i) / (n + 1) = \
+  overline(x)_(n + 1) = (sum_(i = 0)^(n + 1) v_i) / (n + 1) = \
   ((sum_(i = 0)^(n) v_i) + v_(n + 1)) / (n + 1) = \
   (sum_(i = 0)^(n) v_i) / (n + 1) + v_(n + 1) / (n + 1) = \
   ((sum_(i = 0)^(n) v_i) n) / ((n + 1) n) + v_(n + 1) / (n + 1) = \
   (sum_(i = 0)^(n) v_i) / n dot.c n / (n + 1) + v_(n + 1) / (n + 1) = \
-  (epsilon_n dot n + v_(n + 1)) / (n + 1)
+  (overline(x)_n dot n + v_(n + 1)) / (n + 1)
 $
+
+=== Welford's online algorithm
+
+"It is often useful to be able to compute the variance in a single pass, inspecting each value $x_i$ only once; for example, when the data is being collected without enough storage to keep all the values, or when costs of memory access dominate those of computation." (#link("https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm")[Wikpedia])
+
+$ 
+M_(2, n) = sum_(i=1)^n (x_i - overline(x)_n)^2 \
+M_(2, n) = M_(2, n-1) + (x_n - overline(x)_(n - 1))(x_N - overline(x)_n) \
+sigma^2_n = M_(2, n) / n \
+s^2_n = M_(2, n) / (n - 1)
+
+$
+
+#pagebreak()
 
 === Euler's method for differential equations
 
@@ -360,6 +372,8 @@ TODO: ... you just have to specify the expected value, I haven't used it much up
 
 #pagebreak()
 
+=== Exponential <exponential>
+
 ==== Poisson <poisson>
 
 The Poisson distribution is very useful when simulating user requests (generally, the number requests to a servers in a certain instant is described by a Poisson distribution, you just have to specify the expected value)
@@ -505,7 +519,7 @@ int main() {
 
 === Markov chains network pt.3 `[1400]`
 
-The same as above, but with a twist (in the original uses variables to indicate each input... which is sketcy... I can do it with CASE) 
+The same as above, but with a twist (in the original uses variables to indicate each input... which is sketcy... I can do it with MOCC) 
 
 == Traffic light `[2000]`
 
@@ -756,7 +770,9 @@ We can repeat the process in exercise `[5300]`, but this time we can assign a pa
 
 #pagebreak()
 
-= CASE library
+= MOCC library
+
+Model CheCking
 
 == Observer Pattern
 
