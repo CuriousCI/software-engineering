@@ -6,6 +6,6 @@
 
 using urng_t = std::default_random_engine;
 using real_t = double;
-const size_t ID = 2048752, MY_MAGIC_NUMBER = 1 + ID % 173;
+const size_t ID = 0000000, MY_MAGIC_NUMBER = 1 + ID % 173;
 
 #endif
