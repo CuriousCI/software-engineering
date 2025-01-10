@@ -7,10 +7,8 @@
 #show figure: set block(breakable: true)
 #show heading: set block(above: 1.4em, below: 1em, sticky: false)
 #show sym.emptyset : sym.diameter 
-// #show raw.where(block: true): block.with(inset: 1em, stroke: (y: (thickness: .1pt, dash: "dashed")))
 #show raw.where(block: true): block.with(inset: .5em)
 
-// #let note(body) = block(inset: 1em, stroke: (thickness: .1pt, dash: "dashed"), [*Note*: \ #body])
 #let note(body) = block(inset: 1em, stroke: (thickness: .1pt, dash: "dashed"), body)
 
 #show outline.entry.where(level: 1): it => {
@@ -68,17 +66,17 @@ While there isn't always definitive answer, one way to go about this kind of cho
   }, caption: "audio/video monitoring system") <prime-video>
 ]
 
-The system can be *simulated* by modeling its components as *connected probabilistic stateful automatons*.
+The system can be *simulated* by modeling its components as *interconnected discrete time Markov chains*.
 
 == Formal theory <traffic>
 
-=== Markov chains <markov-chain>
+=== Markov chain <markov-chain>
 
-A Markov Chain is defined by a set of *states* $S$ and the *transition probability* $p : S times S -> [0, 1]$ such that $p(s'|s)$ is the probability to transition to state $s'$ if the current state is $s$ and
+A Markov chain is defined by a set of *states* $S$ and the *transition probability* $p : S times S -> [0, 1]$ such that $p(s'|s)$ is the probability to transition to state $s'$ if the current state is $s$, with the constraint that
 
 $ forall s in S space.en sum_(s' in S) p(s'|s) = 1 $ <markov-chain-constrain>
 
-A simple model of the weather could be $S = { "sunny", "rainy" }$
+For instance, the weather can be modeled with $S = { "sunny", "rainy" }$ and $p$ such that
 
 #grid(
   columns: (auto, auto),
@@ -101,44 +99,37 @@ A simple model of the weather could be $S = { "sunny", "rainy" }$
   }
 )
 
-Unfortunately for us, Markov chains aren't enough: to describe complex systems (e.g. a server) we need the concepts of *input*, *output* and *time*.
+If the chain transitions at discrete time steps, meaning the time steps $t_0, t_1, t_2, ...$ are a *countable*, then it's called a DTMC (discrete-time Markov chain), otherwise it's called a CTMC (continuous-time Markov chain).
 
-=== DTMCs (Discrete Time Markov Chains) <dtmc>
+This kind model is *limited*. To describe complex systems (e.g. servers, rockets, medical devices) the concepts of *input* and *output* are needed.
 
-// TODO: techincally we need a starting state, and possibly an end state if needed?
+=== Markov decision process 
 
-A DTMC $M$ is a tuple $(U, X, Y, p, g)$ s.t.
-- $U, X "and" Y$ aren't empty _(otherwise stuff doesn't work)_
+A Markov decision process (MDP) is *different* from a Markov chain. A MDP $M$ is a tuple $(U, X, Y, p, g)$ s.t.
 - $U$ is the set of *input values*
-- $X$ is the set of *states* 
+- $X$ is the set of *states*
 - $Y$ is the set of *output values* 
-- $p : X times X times U -> [0, 1]$ is the *transition probability*
+- $p : X times X times U -> [0, 1]$ is such that $p(x'|x, u)$ is the probability to *transition* from state $x$ to state $x'$ when the *input value* is $u$
 - $g : X -> Y$ is the *output function*
+- and let $x_0 in X$ be the *initial state*
 
-The same constrain in @markov-chain-constrain holds for the DTMC, with an important difference: the *probability depends on the input value*. This means that *for each input value*, the sum of the probabilities to transition for *that input value* must be 1.
+The same constrain in @markov-chain-constrain holds for the MDP, with an important difference: *for each input value*, the sum of the transition probabilities for *that input value* must be 1.
 
 $ forall x in X space.en forall u in U space.en sum_(x' in X) p(x'|x, u) = 1 $
 
-Let $M$ be a DTMC, $t$ be a time *instant* and $d$ a time *interval*, we have
+To be more precise, let $x_t$ be the state at the timestep $t$, then 
 
-$
-  & X(0) = x_0 \
-  & X(t + d) = cases(
-    x_0 quad "with prob. " p(x_0 | X(t), U(t)) \
-    x_1 quad "with prob. " p(x_1 | X(t), U(t)) \
-    ...
-  ) \
-  & Y(t) = g(X(t))
-$
+$ p(x'|x, u) = p(x_(t + 1) = x' | x_t = x, u_t = u) $ 
 
-#pagebreak()
+if the MDP is discrete-time.
 
-==== An example of DTMC <dtmc-example>
+=== Example <mdp-example>
 
-Let's consider the development process of a team. We can define a DTMC $M = (U, X, Y, p, g)$ s.t.
-- $U = {emptyset}$ because $M$ doesn't have any input and $U != emptyset$
+The development process of a company can be modeled as a MDP \ $M = (U, X, Y, p, g)$ s.t.
+- $U = {epsilon}$ because $U$ can't be empty
 - $X = {0, 1, 2, 3, 4}$ 
 - $Y = "Cost" times "Duration"$
+- $x_0 = 0$
 
 $
   g(x) = cases(
@@ -164,7 +155,7 @@ $
       columns: (auto, auto, auto, auto, auto, auto),
       stroke: .1pt,
       align: center + horizon,
-      table.header([$emptyset$], [*0*], [*1*], [*2*], [*3*], [*4*]),
+      table.header([$epsilon$], [*0*], [*1*], [*2*], [*3*], [*4*]),
       [*0*], [0], [1], [0], [0], [0],
       [*1*], [0], [.3], [.7], [0], [0],
       [*2*], [0], [.1], [.2], [.7], [0],
@@ -178,15 +169,13 @@ $
 
 Notice that we have only 1 table because $|U| = 1$ (we have exactly 1 input value). If we had $U = {"apple", "banana", "orange"}$ we would have had to describe 3 tables, one *for each input value*.
 
-// TODO: use UML notation and simplify the sentence above
-
-=== Network of Markov chains
-
-To describe complex systems we don't want to model a single big DTMC (the task would be hard and error prone). What we want to do instead is model many simple DTMCs and connect them.
-
-Let $M_1, M_2$ be two DTMCs, the input of $M_2$ depends on $M_1$'s output
-
-$ U_2(t) = f(Y_1(t)) $
+// === Network of Markov chains
+//
+// To describe complex systems we don't want to model a single big DTMC (the task would be hard and error prone). What we want to do instead is model many simple DTMCs and connect them.
+//
+// Let $M_1, M_2$ be two DTMCs, the input of $M_2$ depends on $M_1$'s output
+//
+// $ U_2(t) = f(Y_1(t)) $
 
 // TODO...
 
@@ -194,24 +183,55 @@ $ U_2(t) = f(Y_1(t)) $
 
 ==  Tips and tricks
 
-=== Calculate average incrementally
+=== Average
 
-Given a set of values $V = {v_1, ..., v_n}$ s.t. $|V| = n$ the average $overline(x)_n$ is s.t. 
+Given a set of values $X = {x_1, ..., x_n} subset RR$ the average $overline(x)_n = (sum_(i = 0)^n x_i) / n$ can be computed with a simple procedure 
 
-$ overline(x)_n = (sum_(i = 0)^n v_i) / n $
+#align(center)[
+```cpp
+float average(std::vector<float> X) {
+    float sum = 0;
+    for (auto x_i : X)
+        sum += x_i;
 
-The problem with this method is that, by adding up all the values before the division, the *numerator* could easily *overflow*, as the biggest integer we can represent precisely with singe-precision floating-point number is 16777216 @wikipediaSinglePrecisionFloatingPointFormat. There is a way to calculate $overline(x)_(n + 1)$ given $overline(x)_n$
+    return sum / X.size();
+}
+```
+]
+
+The problem with this procedure is that, by adding up all the values before the division, the *numerator* could *overflow*, even if the value of $overline(x)_n$ fits within the IEEE-754 limits. There is a way to calculate $overline(x)_n$ incrementally.
 
 $
-  overline(x)_(n + 1) = (sum_(i = 0)^(n + 1) v_i) / (n + 1) = \
-  ((sum_(i = 0)^(n) v_i) + v_(n + 1)) / (n + 1) = \
-  (sum_(i = 0)^(n) v_i) / (n + 1) + v_(n + 1) / (n + 1) = \
-  ((sum_(i = 0)^(n) v_i) n) / ((n + 1) n) + v_(n + 1) / (n + 1) = \
-  (sum_(i = 0)^(n) v_i) / n dot.c n / (n + 1) + v_(n + 1) / (n + 1) = \
-  (overline(x)_n dot n + v_(n + 1)) / (n + 1)
+  overline(x)_(n + 1) = (sum_(i = 0)^(n + 1) x_i) / (n + 1) = 
+  ((sum_(i = 0)^(n) x_i) + x_(n + 1)) / (n + 1) = 
+  (sum_(i = 0)^(n) x_i) / (n + 1) + x_(n + 1) / (n + 1) = \
+  ((sum_(i = 0)^(n) x_i) n) / ((n + 1) n) + x_(n + 1) / (n + 1) = 
+  (sum_(i = 0)^(n) x_i) / n dot.c n / (n + 1) + x_(n + 1) / (n + 1) = \ 
+  overline(x)_n dot n / (n + 1) + x_(n + 1) / (n + 1)
 $
 
-=== Welford's online algorithm
+With this formula the numbers added up are smaller: $overline(x)_n$ is multiplied by $n / (n + 1) tilde 1$, and if $x_(n + 1)$ fits in IEEE-754 then $x_(n + 1) / (n + 1)$ can also be encoded.
+
+#align(center)[
+```cpp
+float average_r(std::vector<float> X) {
+    float average = 0;
+    for (size_t n = 0; n < X.size(); n++)
+        average =
+            average * ((float)n / (n + 1)) + X[n] / (n + 1);
+
+    return average;
+}
+```
+]
+
+In `exapmles/average.cpp` the procedure `average_r()` is able to calculate the average and `average()` results in `Inf`.
+
+// #pagebreak()
+
+=== Welford's online algorithm (standard deviation)
+
+In a similar fashion, it could be faster and require less memory to calculate the *standard deviation* incrementally. Welford's online algorithm can be used for this purpose. 
 
 "It is often useful to be able to compute the variance in a single pass, inspecting each value $x_i$ only once; for example, when the data is being collected without enough storage to keep all the values, or when costs of memory access dominate those of computation." (#link("https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm")[Wikpedia])
 
@@ -220,14 +240,11 @@ M_(2, n) = sum_(i=1)^n (x_i - overline(x)_n)^2 \
 M_(2, n) = M_(2, n-1) + (x_n - overline(x)_(n - 1))(x_N - overline(x)_n) \
 sigma^2_n = M_(2, n) / n \
 s^2_n = M_(2, n) / (n - 1)
-
 $
-
-#pagebreak()
 
 === Euler's method for differential equations
 
-Got it from here baby @EulerMethod
+Got it from here @EulerMethod. Useful if a differential equation can't be solved analitically.
 
 #pagebreak()
 
@@ -235,18 +252,22 @@ Got it from here baby @EulerMethod
 
 This section will cover the basics for the exam.
 
-== How to use the ```cpp random``` library <random>
+== The ```cpp random``` library <random-library>
 
-The ```cpp random``` standard library offers useful tools to build our models. It makes Markov chains and probabilistic models easy to implement.
+The `C++` standard library offers powerful tools to easily implement MDPs.
 
 // TODO: don't use "using namespace std;"
 
 // Randomness is fundamental in our models. There are key differences that make ```cpp <random>``` more ergonomic to use in `C++`
 // Even if you decide to not use any of the `C++` fancy features, t
 
-=== ```cpp random()```, ```cpp random_device()``` and ```cpp default_random_engine()``` <random_engine>
+=== ```cpp std::default_random_engine```
+// === Random number generation
+// === ```cpp random()```, ```cpp random_device()``` and ```cpp default_random_engine()``` <random_engine>
 
-In `C++` there are many ways to *generate random numbers*, I'm gonna keep it short and sweet: don't use ```cpp random()```, use ```cpp random_device()``` to generate the *seed* to instantiate a ```cpp default_random_engine()```.
+In `C++` there are many ways to *generate random numbers* @pseudo-random-number-generation. Generally it's *not recommended* to use ```cpp random()``` #reft(1) (reasons...). It's recommended to instantiate a *random generator* #reft(4), because it's fast and deterministic (given a *seed*, the sequence of generated numbers is the same). To generate the *seed* a `random_device` is used: it's non deterministic because it uses a *hardware entropy source* (if available) to generate the random numbers. It's also slower.
+
+// I'm gonna keep it short and sweet: don't use ```cpp random()```, use ```cpp random_device()``` to generate the *seed* to instantiate a ```cpp default_random_engine()```.
 
 // and from then on just some random engine like ```cpp std::default_random_engine```.
 
@@ -265,29 +286,46 @@ int main() {
     std::cout << r_engine() t5 << std::endl;
 }
 ```
-] <random>
+] <random-example>
 
-I'll explain: ```cpp random()``` #reft(1) doesn't work very well (TODO: link to the article\*), you're encouraged to use the generators `C++` offers... but each works in a different way, and you have to choose the best one depending on your needs. ```cpp std::random_device``` #reft(2) is used to generate the *seed* #reft(4) because it uses device randomness (if available, TODO: link to docs / article \*), but it's really slow. That *seed* is used to to instantiate one of the other engines #reft(5), like ```std::default_random_engine``` (TODO: link with different engines and types). TODO BONUS: only r_eng used with distr
+The typical course of action is to instantiate a `random_device` #reft(2), and use it to generate a seed #reft(4) for a `random_engine`. The other reason random engines are more useful that ```cpp random()``` is that random engines can be passed to *distributions* (which can be used for MDPs).
 
-#note[
-  If you see #reft(3) and #reft(5), random_device and r_engine aren't functions, they are instances, but you can call the ```cpp ()``` operator on them because C++ has operator overloading, and it allows you to call custom operators on instances... the same goes for ```cpp std::cout``` and ```cpp <<```
+From this point on, ```cpp std::default_random_engine``` will be reffered to as ```cpp urng_t``` (uniform random number generator type).
+
+#align(center)[
+```cpp
+#include <random>
+// works like typedef in C
+using urng_t = std::default_random_engine; 
+int main() {
+    std::random_device random_device; 
+    urng_t urng(random_device()); 
+}
+```
 ]
 
-#pagebreak()
+=== Operator overloading _(quick note)_
+
+In @random-example in #reft(3) and #reft(5), to generate a number, `random_device` and `r_engine` are used like functions with the `()` operator, but they aren't functions, they're instances of a ```cpp class```.
+
+That's because in `C++` you can define how a certain operator (like `+`, `+=`, `<<`, `>>`, `[]`, `()` etc..) should behave when used on a instance of the ```cpp class```. It's called *operator overloading* (`Java` doesn't have operator overloading, in `Python` it can be done implementing methods with special names @python-operator-overloading, like ```python __add__()``` for `+`, in `Rust` it's done by implementing the `Trait` associated to that operation @rust-operator-overloading).
+
+For instance ```cpp std::cout``` is an instance of the ```cpp std::basic_ostream class```, which overloads the method ```cpp operator<<()``` @basic-ostream.
 
 === Distributions <distributions>
 
-Just the capability to generate random numbers isn't enough, we often need to manipulate those numbers to fit our needs. Luckly, `C++` covers *basically all of them*. For example, we can easily simulate the DTMC in @development-process like this:
-// this is how easy it is to simulate the transition matrix in @development-process:
+Just the capability to generate random numbers isn't enough, we often need to manipulate those numbers to fit our needs. Luckly, `C++` covers *basically all of them*. For example, we can easily simulate the MDP in @development-process like this:
 
 #figure(caption: `examples/transition_matrix.cpp`)[
 ```cpp
 #include <iostream>
 #include <random>
 
+using urng_t = std::default_random_engine;
+
 int main() {
     std::random_device random_device;
-    std::default_random_engine random_engine(random_device());
+    urng_t urng(random_device());
 
     std::discrete_distribution<> transition_matrix[] = {
         {0, 1},
@@ -299,7 +337,7 @@ int main() {
 
     size_t state = 0;
     for (size_t step = 0; step < 15; step++) {
-        state = transition_matrix[state](random_engine);
+        state = transition_matrix[state](urng);
         std::cout << state << std::endl;
     }
 
@@ -310,45 +348,43 @@ int main() {
 
 ==== ```cpp uniform_int_distribution``` @docs_uniform_int_distribution <uniform-int>
 
-// Consideriamo un semplice esercizio
 Let's consider a simple exercise
 
 #note[
-To test a system $S$ we have to build a generator that every $T$ seconds sends a value $v$ at $S$. For each send, the value of $T$ is an *integer* chosen uniformly in the range $[20, 30]$
-// Per testare un sistema si vuole costruire un generatore che ogni $T$ secondi invia un valore $v$ ad un sistema da testare. Per ogni invio, il valore $T$ è un valore intero scelto uniformemente a random nell'interallo $[20, 30]$.
+To test a system $S$ it's requried to build a generator that sends value $v_t$ to $S$ every $T_t$ seconds. For each send, the value of $T_t$ is an *integer* chosen uniformly in the range $[20, 30]$.
 ]
-// mentre il valore $v$ è un valore scelto aggiungendo, uniformemete a random, il valore $-1$ o $+1$ al valore precedente di $v$. Il valore iniziale di $v$ è $0$.
-// Tradizionalmente, per generare i valori di $T$ e $v$ il codice è 
+The `C` code to compute $T_t$ would be ```cpp T = 20 + rand() % 11;```, which is very *error prone*, hard to remember and has no semantic value. 
 
-// Tradizionalmente, per generare i valori di $T$ il codice è 
-The code to calculate $T$ would be ```cpp T = 20 + rand() % 11;```, which is very *error prone*, hard to remember and has no semantic value. In `C++` we can do the same thing in a *simpler* and *cleaner* way:
+In `C++` the same can be done in a *simpler* and *cleaner* way:
 
 #align(center)[
 ```cpp
 std::uniform_int_distribution<> random_T(20, 30); t1
-size_t T = t2 random_T(random_engine); 
+size_t T = t2 random_T(urng); 
 ```
 ]
 
-Now we can easily generate the numbers we want without doing any calculations #reft(1), and we don't have to remember how to generate $T$ #reft(2). We define the behaviour of $T$ only once #reft(1), so we can easily change it without introducing bugs or inconsistencies. It's also worth to take a look at the implementation of the exercise above (with the addition that $v = T$), as it comes up very often in our models.
+Now the interval $T_t$ can be easily generated #reft(1), and there's no need to remember any formula or trick. The behaviour of $T_t$ is defined only once #reft(1), so it can be easily changed without introducing bugs or inconsistencies. It's also worth to take a look at the implementation of the exercise above (with the addition that $v_t = T_t$), as it comes up very often in software models.
 
 #figure(caption: `examples/interval_generator.cpp`)[
 ```cpp
 #include <iostream>
 #include <random>
 
+using urng_t = std::default_random_engine;
+
 int main() {
     std::random_device random_device;
-    std::default_random_engine random_engine(random_device());
+    urng_t urng(random_device());
     std::uniform_int_distribution<> random_T(20, 30);
 
-    size_t T = random_T(random_engine), next_request_time = T;
+    size_t T = random_T(urng), next_request_time = T;
     for (size_t time = 0; time < 1000; time++) {
         if (time < next_request_time)
             continue;
 
         std::cout << T << std::endl;
-        T = random_T(random_engine);
+        T = random_T(urng);
         next_request_time = time + T;
     }
 
@@ -357,26 +393,33 @@ int main() {
 ```
 ]
 
-The ```cpp uniform_int_distribution``` has many other uses, for example, we could want to uniformly generate a random state. If ```cpp STATES_SIZE``` is the number of states, then we instantiate ```cpp std::uniform_int_distribution<> random_state(0, STATES_SIZE - 1 t1);``` *BE CAREFUL!* Remember to use ```cpp STATES_SIZE - 1``` #reft(1), because ```cpp uniform_int_distribution``` is *inclusive*... forgettig it can lead to very sneaky bugs: it randomly segfaults at different points of the code. It's very hard to debug unless you use `gdb`.
+The ```cpp uniform_int_distribution``` has many other uses, for example, it could uniformly generate a random state in a MDP. Let ```cpp STATES_SIZE``` be the number of states 
 
-TODO: You can also generate negative numbers 
-TODO: the behaviour is undefined if a > b
+#align(center)[
+```cpp 
+uniform_int_distribution<> random_state(0, STATES_SIZE - 1 t1);
+``` 
+]
+
+```cpp random_state``` generates a random state when used. *BE CAREFUL!* Remember to use ```cpp STATES_SIZE-1``` #reft(1), because ```cpp uniform_int_distribution``` is *inclusive*... forgettig it can lead to very sneaky bugs: it randomly segfaults at different points of the code. It's very hard to debug unless using `gdb`.
+
+The ```cpp uniform_int_distribution``` can also generate negative integers, for example $z in { z | z in ZZ and z in [-10, 15]}$. Its behaviour is *undefined* when the first argument is bigger than the second argument.
 
 ==== ```cpp uniform_real_distribution``` @docs_uniform_real_distribution <uniform-real>
 
-It is the same as above, with the difference that it generates *real* numbers ($RR$), and $b$ is excluded
+It's the same as above, with the difference that it generates *real* numbers $RR$, in the range $[a, b)$. 
 
 ==== Bernoulli <bernoulli>
 
-TODO: ... you just have to specify the expected value, I haven't used it much up until now
+TODO: ... you just have to specify the expected value.
 
-#pagebreak()
+==== Normal <normal>
 
-=== Exponential <exponential>
+==== Exponential <exponential>
+
+The Exponential distribution is very useful when simulating user requests (generally, the interval between requests to a servers is described by a Exponential distribution, you just have to specify $lambda$)
 
 ==== Poisson <poisson>
-
-The Poisson distribution is very useful when simulating user requests (generally, the number requests to a servers in a certain instant is described by a Poisson distribution, you just have to specify the expected value)
 
 ==== Geometric <geometric>
 
@@ -386,11 +429,19 @@ Does the job
 
 This one is *SUPER USEFUL!*, generates random integers in the range 0, number of items - 1, but it assigns a weight to each item, so each item as a certain weighted probability to be choose. It can be used in transition matrices, and for a bit more complex systems like the status of the project in @error-detection.
 
+#align(center)[
+  #figure({
+    set text(font: "CaskaydiaCove NF", weight: "light", lang: "en")
+    image("public/essays-authors.svg")
+  }, caption: "essays authors") <essays-authors>
+]
+
 == Dynamic structures 
 
-=== ```cpp new``` and ```cpp delete``` vs ```cpp malloc()``` and ```cpp free()```
+=== Memory allocation and deallocation
+// === ```cpp new```, ```cpp delete``` vs ```cpp malloc()``` and ```cpp free()```
 
-If you allocate with ```cpp new```, you must deallocate with ```cpp delete```, you can't mixup them with malloc and free
+If you allocate with ```cpp new```, you must deallocate with ```cpp delete```, you can't mixup them with ```c malloc()``` and ```c free()```
 
 === ```cpp std::vector<T>()``` instead of ```cpp malloc()``` <vector>
 
@@ -414,6 +465,13 @@ Could be useful
 
 #pagebreak()
 
+= Debugging with `gdb`
+
+It's super useful! Trust me, if you learn this everything is way easier
+
+
+#pagebreak()
+
 = Exercises 
 
 Each exercise has 4 digits `xxxx` that are the same as the ones in the `software` folder in the course material.
@@ -425,7 +483,7 @@ Now we have to put together our *formal definitions* and our `C++` knowledge to 
 === A simple Markov chain `[1100]` <a-simple-markov-chain>
 
 Let's begin our modeling journey by implementing a DTMC $M$ s.t.
-- $U = {emptyset}$ (see @dtmc-example)
+- $U = {epsilon}$ (see @mdp-example)
 - $X = [0,1] times [0,1]$, each state is a pair #reft(3) of *real* #reft(1) numbers in $[0, 1]$ 
 - $Y = [0,1] times [0,1]$
 - $p : X times X times U -> X = cal(U)(0, 1) times cal(U)(0, 1)$, the transition probability is a *uniform* distribution #reft(2)
@@ -1031,3 +1089,6 @@ TODO: non-functional requirements
 //
 // Given a time instant $t$ (let's suppose 12:32) and a time interval $d$ (1 minute), the driving ability of $D$ at 12:33 depends on the driving ability of $D$ at the time 12:32 and the weather at 12:32.
 
+// I'll explain: ```cpp random()``` #reft(1) doesn't work very well (TODO: link to the article\*), you're encouraged to use the generators `C++` offers... but each works in a different way, and you have to choose the best one depending on your needs. ```cpp std::random_device``` #reft(2) is used to generate the *seed* #reft(4) because it uses device randomness (if available, TODO: link to docs / article \*), but it's really slow. That *seed* is used to to instantiate one of the other engines #reft(5), like ```std::default_random_engine``` (TODO: link with different engines and types). TODO BONUS: only r_eng used with distr
+// #show raw.where(block: true): block.with(inset: 1em, stroke: (y: (thickness: .1pt, dash: "dashed")))
+// #let note(body) = block(inset: 1em, stroke: (thickness: .1pt, dash: "dashed"), [*Note*: \ #body])
