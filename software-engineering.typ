@@ -5,7 +5,7 @@
 #set math.equation(numbering: "(1)")
 
 #show figure: set block(breakable: true)
-#show heading: set block(above: 1.4em, below: 1em, sticky: false)
+#show heading: set block(above: 1.4em, below: 1em)
 #show sym.emptyset : sym.diameter 
 #show raw.where(block: true): block.with(inset: .5em)
 
@@ -42,13 +42,13 @@
 
 #page(outline(indent: auto, depth: 3))
 
+#set page(numbering: "1")
+
 = Software models
 
-*Software projects* require *design choices* that often can't be driven by experience or reasoning alone. That's why a *model* of the project is needed to compare different solutions. In this course *Markov decision processes* are used to describe software systems.
+*Software projects* require *design choices* that often can't be driven by experience or reasoning alone. That's why a *model* of the project is needed to compare different solutions. 
 
 == The "Amazon Prime Video" article 
-
-// *non-functional requirement*
 
 If you were tasked with designing the software architecture for *Amazon Prime Video* _(a live streaming service for Amazon)_, how would you go about it? What if you had the to keep the costs minimal? Would you use a distributed architecture or a monolith application?
 
@@ -62,7 +62,7 @@ There isn't a definitive way to answer these type of questions, but one way to g
 #align(center)[
   #figure(caption: "audio/video monitoring system")[#{
     set text(font: "CaskaydiaCove NF", weight: "light", lang: "en")
-    image("public/audio-video-monitor.svg", width: 85%)
+    image("public/audio-video-monitor.svg", width: 90%)
   }] <prime-video>
 ]
 
@@ -72,7 +72,7 @@ To derive conclusions the system can be *simulated* by modeling its components a
 
 === Markov chain <markov-chain>
 
-A Markov chain is defined by a set of *states* $S$ and the *transition probability* $p : S times S -> [0, 1]$ such that $p(s'|s)$ is the probability to transition to state $s'$ if the current state is $s$, with the constraint that
+A Markov chain $M$ is described by a set of *states* $S$ and the *transition probability* $p : S times S -> [0, 1]$ such that $p(s'|s)$ is the probability to transition to state $s'$ if the current state is $s$. The transition probability $p$ is constrained by @markov-chain-constrain
 
 $ forall s in S space.en sum_(s' in S) p(s'|s) = 1 $ <markov-chain-constrain>
 
@@ -99,13 +99,11 @@ For example, the weather can be modeled with $S = { "sunny", "rainy" }$ and $p$ 
   }
 )
 
-If a Markov chain transitions at discrete time steps, i.e. the time steps $t_0, t_1, t_2, ...$ are a *countable*, then it's called a DTMC (discrete-time Markov chain), otherwise it's called a CTMC (continuous-time Markov chain).
-
-This kind model is *limited*. To describe complex systems (e.g. servers, rockets, medical devices) the concepts of *input* and *output* are needed.
+If a Markov chain $M$ transitions at discrete time steps, i.e. the time steps $t_0, t_1, t_2, ...$ are a *countable*, then it's called a DTMC (discrete-time Markov chain), otherwise it's called a CTMC (continuous-time Markov chain).
 
 === Markov decision process <mdp>
 
-A Markov decision process (MDP) is *different* from a Markov chain. A MDP $M$ is a tuple $(U, X, Y, p, g)$ s.t.
+A Markov decision process (MDP), despite sharing the name, is *different* from a Markov chain, because transitions are influenced by an external environment. A MDP $M$ is a tuple $(U, X, Y, p, g)$ s.t.
 - $U$ is the set of *input values*
 - $X$ is the set of *states*
 - $Y$ is the set of *output values* 
@@ -113,20 +111,14 @@ A Markov decision process (MDP) is *different* from a Markov chain. A MDP $M$ is
 - $g : X -> Y$ is the *output function*
 - and let $x_0 in X$ be the *initial state*
 
-The same constrain in @markov-chain-constrain holds for the MDP, with an important difference: *for each input value*, the sum of the transition probabilities for *that input value* must be 1.
+The same constrain in @markov-chain-constrain holds for MDPs, with an important difference: *for each input value*, the sum of the transition probabilities for *that input value* must be 1.
 
 $ forall x in X space.en forall u in U space.en sum_(x' in X) p(x'|x, u) = 1 $
-
-To be more precise, let $x_t$ be the state at the timestep $t$, then 
-
-$ p(x'|x, u) = p(x_(t + 1) = x' | x_t = x, u_t = u) $ 
-
-if the MDP is discrete-time.
 
 === Example <mdp-example>
 
 The development process of a company can be modeled as a MDP \ $M = (U, X, Y, p, g)$ s.t.
-- $U = {epsilon}$ because $U$ can't be empty
+- $U = {epsilon}$ #footnote[If $U$ is empty $M$ can't transition, at least 1 input is required, i.e. $epsilon$]
 - $X = {0, 1, 2, 3, 4}$ 
 - $Y = "Cost" times "Duration"$
 - $x_0 = 0$
@@ -167,7 +159,10 @@ $
 
 #v(1em)
 
-Note that only *1 transition matrix* is defined, because $|U| = 1$ (there's 1 input value). If $U = {"apple", "banana", "orange"}$ 3 transition matrices must be defined, one *for each input value*.
+Only *1 transition matrix* is defined, as $|U| = 1$ (there's 1 input value). If $U$ had multiple input values, like ${"apple", "banana", "orange"}$, then 3 transition matrices would have been required, one *for each input value*.
+
+// u-non-empty
+
 
 // === Network of Markov decision processes
 //
@@ -214,7 +209,7 @@ With this formula the numbers added up are smaller: $overline(x)_n$ is multiplie
 
 #align(center)[
 ```cpp
-float average_r(std::vector<float> X) {
+float incr_average(std::vector<float> X) {
     float average = 0;
     for (size_t n = 0; n < X.size(); n++)
         average =
@@ -225,9 +220,7 @@ float average_r(std::vector<float> X) {
 ```
 ]
 
-In `examples/average.cpp` the procedure `average_r()` is able to calculate the average and `average()` results in `Inf`.
-
-// #pagebreak()
+In `examples/average.cpp` the procedure `average()` returns `Inf` and `incr_average()` successfuly computes the average.
 
 === Welford's online algorithm (standard deviation)
 
@@ -263,23 +256,17 @@ $ y_(n + 1) = y_n + h dot.c f(t_n, y_n) $
 
 #pagebreak()
 
-= `C++`
+= How to `C++`
 
-This section will cover the basics for the exam.
+This section covers the basics assuming the reader already knows `C`.
 
 == The ```cpp random``` library <random-library>
 
-The `C++` standard library offers powerful tools to easily implement MDPs.
-
-// TODO: don't use "using namespace std;"
+The `C++` standard library offers tools to easily implement MDPs.
 
 === Random engines 
 
-In `C++` there are many ways to *generate random numbers* @pseudo-random-number-generation. Generally it's *not recommended* to use ```cpp random()``` #reft(1) /*(reasons...)*/. It's recommended to use a *random generator* #reft(4), because it's fast, deterministic (given a *seed*, the sequence of generated numbers is the same) and can be used with *distributions*. To generate the seed a `random_device` is used: it's non deterministic because it uses a *hardware entropy source* (if available) to generate the random numbers.
-
-// I'm gonna keep it short and sweet: don't use ```cpp random()```, use ```cpp random_device()``` to generate the *seed* to instantiate a ```cpp default_random_engine()```.
-
-// and from then on just some random engine like ```cpp std::default_random_engine```.
+In `C++` there are many ways to *generate random numbers* @pseudo-random-number-generation. Generally it's *not recommended* to use ```cpp random()``` #reft(1) /*(reasons...)*/. It's recommended to use a *random generator* #reft(5), because it's fast, deterministic (given a *seed*, the sequence of generated numbers is the same) and can be used with *distributions*. A `random_device` is a non deterministic generator: it uses a *hardware entropy source* (if available) to generate the random numbers.
 
 #figure(caption: `examples/random.cpp`)[
 ```cpp
@@ -291,9 +278,9 @@ int main() {
 
     std::random_device random_device; t2
     std::cout << random_device() t3 << std::endl;
-
-    std::default_random_engine r_engine(random_device() t4 ); 
-    std::cout << r_engine() t5 << std::endl;
+    int seed = random_device(); t4
+    std::default_random_engine r_engine(seed); t5
+    std::cout << r_engine() t6 << std::endl;
 }
 ```
 ] <random-example>
@@ -307,6 +294,7 @@ From this point on, ```cpp std::default_random_engine``` will be reffered to as 
 #include <random>
 // works like typedef in C
 using urng_t = std::default_random_engine; 
+
 int main() {
     std::random_device random_device; 
     urng_t urng(random_device()); 
@@ -316,8 +304,8 @@ int main() {
 
 === Operator overloading _(quick note)_
 
-In @random-example, to generate a random number, ```cpp random_device()``` #reft(3) and ```cpp r_engine()``` #reft(5) are used like functions with the `()` operator, but they aren't functions, they're instances of a ```cpp class```. That's because in `C++` you can define how a certain operator (like `+`, `+=`, `<<`, `>>`, `[]`, `()` etc..) should behave when used on a instance of the ```cpp class```. 
-It's called *operator overloading* and other languages have it too: 
+In @random-example, to generate a random number, ```cpp random_device()``` #reft(3) and ```cpp r_engine()``` #reft(6) are used like functions, but they aren't functions, they're instances of a ```cpp class```. That's because in `C++` you can define how a certain operator (like `+`, `+=`, `<<`, `>>`, `[]`, `()` etc..) should behave when used on a instance of the ```cpp class```. 
+It's called *operator overloading*, a relatively common feature: 
 - in `Python` operation overloading is done by implementing methods with special names, like ```python __add__()``` @python-operator-overloading
 - in `Rust` it's done by implementing the `Trait` associated with the operation, like ```rust std::ops::Add``` @rust-operator-overloading.
 - `Java` and `C` don't have operator overloading
@@ -364,9 +352,7 @@ Let's consider a simple exercise
 #note[
 To test a system $S$ it's requried to build a generator that sends value $v_t$ to $S$ every $T_t$ seconds. For each send, the value of $T_t$ is an *integer* chosen uniformly in the range $[20, 30]$.
 ]
-The `C` code to compute $T_t$ would be ```cpp T = 20 + rand() % 11;```, which is very *error prone*, hard to remember and has no semantic value. 
-
-In `C++` the same can be done in a *simpler* and *cleaner* way:
+The `C` code to compute $T_t$ would be ```cpp T = 20 + rand() % 11;```, which is very *error prone*, hard to remember and has no semantic value. In `C++` the same can be done in a *simpler* and *cleaner* way:
 
 #align(center)[
 ```cpp
@@ -404,7 +390,7 @@ int main() {
 ```
 ]
 
-The ```cpp uniform_int_distribution``` has many other uses, for example, it could uniformly generate a random state in a MDP. Let ```cpp STATES_SIZE``` be the number of states 
+The ```cpp uniform_int_distribution``` has many other uses, for example, it could uniformly generate a random state in a MDP. Let ```cpp STATES_SIZE``` be the number of states
 
 #align(center)[
 ```cpp 
@@ -412,11 +398,11 @@ uniform_int_distribution<> random_state(0, STATES_SIZE - 1 t1);
 ``` 
 ]
 
-```cpp random_state``` generates a random state when used. Be careful! Remember to use ```cpp STATES_SIZE - 1``` #reft(1), because ```cpp uniform_int_distribution``` is inclusive... forgettig it can lead to very sneaky bugs: random segfaults at different points of the code. It's very hard to debug unless using `gdb`. The ```cpp uniform_int_distribution``` can also generate negative integers, for example $z in { x | x in ZZ and x in [-10, 15]}$. 
+```cpp random_state``` generates a random state when used. Be careful! Remember to use ```cpp STATES_SIZE - 1``` #reft(1), because ```cpp uniform_int_distribution``` is inclusive. Forgettig ```cpp -1``` can lead to very sneaky bugs, like random segfaults at different instructions. It's very hard to debug unless using `gdb`. The ```cpp uniform_int_distribution``` can also generate negative integers, for example $z in { x | x in ZZ and x in [-10, 15]}$. 
 
 ==== Uniform continuous @docs-uniform-real-distribution <uniform-real>
 
-It's the same as above, with the difference that it generates *real* numbers $RR$, in the range $[a, b)$. 
+It's the same as above, with the difference that it generates *real* numbers in the range $[a, b) subset RR$. 
 
 ==== Bernoulli @docs-bernoulli-distribution <bernoulli>
 
@@ -437,7 +423,7 @@ if (r > 0.001)
 ```
 ]
 
-The `std::bernoulli_distribution` is a better tool to implement this specification
+The `std::bernoulli_distribution` works better for this specification
 
 #align(center)[
 ```cpp 
@@ -1022,3 +1008,15 @@ Generics allow to connect MDPs more safely, as the inputs and outputs are typed!
 == Model checking with Bevy (`Rust`)
 
 #page(bibliography("bibliography.bib"))
+
+// To be more precise, let $x_t$ be the state at the timestep $t$, then 
+//
+// $ p(x'|x, u) = p(x_(t_(n + 1)) = x' | x_(t_n) = x, u_(t_n) = u) $ 
+//
+// if the MDP is discrete-time.
+// #show heading: set block(above: 1.4em, below: 1em, sticky: false)
+// In this course *Markov decision processes* are used to describe software systems.
+// *non-functional requirement*
+
+
+// TODO: don't use "using namespace std;"
