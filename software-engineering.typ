@@ -222,11 +222,13 @@ float incr_average(std::vector<float> X) {
 
 In `examples/average.cpp` the procedure `average()` returns `Inf` and `incr_average()` successfuly computes the average.
 
+#pagebreak()
+
 === Welford's online algorithm (standard deviation)
 
 In a similar fashion, it could be faster and require less memory to calculate the *standard deviation* incrementally. Welford's online algorithm can be used for this purpose. 
 
-_"It is often useful to be able to compute the variance in a single pass, inspecting each value $x_i$ only once; for example, when the data is being collected without enough storage to keep all the values, or when costs of memory access dominate those of computation."_ (#link("https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm")[Wikpedia])
+// _"It is often useful to be able to compute the variance in a single pass, inspecting each value $x_i$ only once; for example, when the data is being collected without enough storage to keep all the values, or when costs of memory access dominate those of computation."_ (#link("https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm")[Wikpedia])
 
 $ 
 M_(2, n) = sum_(i=1)^n (x_i - overline(x)_n)^2 \
@@ -245,14 +247,17 @@ real_t Stat::stddev_welford() const {
 ```
 ]
 
-=== Euler's method for differential equations
+=== Euler method for ordinary differential equations
 
-Got it from here @EulerMethod. Useful if a differential equation can't be solved analitically.
+When a differential equation can't be solved analitically (because it models a complex system, i.e. a drone, cruise control etc...) the integral must be approximated. There are many ways to approximate an integral: one of the simplest, yet less accurate and efficient, methods is the forward Euler method.
 
-$ y_(n + 1) = y_n + h dot.c f(t_n, y_n) $
+$ y_(n + 1) = y_n + Delta dot.c f(t_n, y_n) $
 
-- TODO: approximation graphs, maybe with gnuplot
-- `gnuplot -e "set terminal png size 400,300; set output 'xyz.png'; plot [-4:4] exp(-x**2 / 2)"`
+#align(center)[
+  #figure(caption: "examples/euler.png")[
+    #image("examples/euler.png", width: 92%)
+  ]
+]
 
 #pagebreak()
 
