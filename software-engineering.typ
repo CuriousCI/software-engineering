@@ -161,9 +161,6 @@ $
 
 Only *1 transition matrix* is defined, as $|U| = 1$ (there's 1 input value). If $U$ had multiple input values, like ${"apple", "banana", "orange"}$, then 3 transition matrices would have been required, one *for each input value*.
 
-// u-non-empty
-
-
 // === Network of Markov decision processes
 //
 // To describe complex systems we don't want to model a single big DTMC (the task would be hard and error prone). What we want to do instead is model many simple DTMCs and connect them.
@@ -173,6 +170,12 @@ Only *1 transition matrix* is defined, as $|U| = 1$ (there's 1 input value). If 
 // $ U_2(t) = f(Y_1(t)) $
 
 // TODO...
+
+// #pagebreak()
+
+=== Network of MDPs
+
+Let $M_1, M_2$ be two MDPs s.t. $M_1 = (U_1, X_1, Y_1, p_1, g_1)$ and $M_2 = (U_2, X_2, Y_2, p_2, g_2)$, then $M = (U_1, X_1 times X_2, Y_2, p, g)$ s.t. etc... is a MDP. #footnote[It's not so easy to describe, I'll work on it later]
 
 #pagebreak()
 
@@ -330,7 +333,8 @@ int main() {
 ```
 ] <random-example>
 
-The typical course of action is to instantiate a `random_device` #reft(2), and use it to generate a seed #reft(4) for a `random_engine`.  Given that random engines can be used with distributions, they're really useful to implement MDPs.
+The typical course of action is to instantiate a `random_device` #reft(2), and use it to generate a seed #reft(4) for a `random_engine`.  Given that random engines can be used with distributions, they're really useful to implement MDPs. 
+- TODO: note to operator overloading #reft(3) #reft(6)
 
 From this point on, ```cpp std::default_random_engine``` will be reffered to as ```cpp urng_t``` (uniform random number generator type).
 
@@ -341,21 +345,10 @@ From this point on, ```cpp std::default_random_engine``` will be reffered to as 
 using urng_t = std::default_random_engine; 
 
 int main() {
-    std::random_device random_device; 
-    urng_t urng(random_device()); 
+    urng_t urng(190201); 
 }
 ```
 ]
-
-=== Operator overloading _(quick note)_
-
-In @random-example, to generate a random number, ```cpp random_device()``` #reft(3) and ```cpp r_engine()``` #reft(6) are used like functions, but they aren't functions, they're instances of a ```cpp class```. That's because in `C++` you can define how a certain operator (like `+`, `+=`, `<<`, `>>`, `[]`, `()` etc..) should behave when used on a instance of the ```cpp class```. 
-It's called *operator overloading*, a relatively common feature: 
-- in `Python` operation overloading is done by implementing methods with special names, like ```python __add__()``` @python-operator-overloading
-- in `Rust` it's done by implementing the `Trait` associated with the operation, like ```rust std::ops::Add``` @rust-operator-overloading.
-- `Java` and `C` don't have operator overloading
-
-For example, ```cpp std::cout``` is an instance of the ```cpp std::basic_ostream class```, which overloads the method "```cpp operator<<()```" @basic-ostream.
 
 === Distributions <distributions>
 
@@ -584,7 +577,21 @@ Could be useful
 
 === Files <files>
 
-Working with files is way to easy in `C++`
+Working with files is way easier in `C++`
+
+```cpp
+#include <fstream>
+
+int main(){
+    std::ofstream output("output.txt");
+    std::ifstream params("params.txt");
+
+    while (etc...) {}
+
+    output.close();
+    params.close();
+}
+```
 
 #align(center)[
 ```cpp
@@ -596,28 +603,60 @@ int main(){
     output << "some text" << std::endl;
     output.close();
 
-    ifstream inputs("inputs.txt");
+    ifstream params("params.txt");
     int number;
-    while (inputs >> number) {
+    while (params >> number) {
         // do stuff with number...
     }
-    inputs.close();
+    params.close();
 
     return 0;
 }
 ```
 ]
 
+== Operator overloading _(quick note)_
+
+In @random-example, to generate a random number, ```cpp random_device()``` #reft(3) and ```cpp r_engine()``` #reft(6) are used like functions, but they aren't functions, they're instances of a ```cpp class```. That's because in `C++` you can define how a certain operator (like `+`, `+=`, `<<`, `>>`, `[]`, `()` etc..) should behave when used on a instance of the ```cpp class```. 
+It's called *operator overloading*, a relatively common feature: 
+- in `Python` operation overloading is done by implementing methods with special names, like ```python __add__()``` @python-operator-overloading
+- in `Rust` it's done by implementing the `Trait` associated with the operation, like ```rust std::ops::Add``` @rust-operator-overloading.
+- `Java` and `C` don't have operator overloading
+
+For example, ```cpp std::cout``` is an instance of the ```cpp std::basic_ostream class```, which overloads the method "```cpp operator<<()```" @basic-ostream.
+
+- TODO: Operator overloading in files (section above)
+
+== Code structure
+
+=== Classes
+
+- Maybe constructor
+- Maybe operators? (more like nah)
+- virtual stuff (interfaces)
+
+=== Structs
+
+- basically like classes, but with everything public by default 
+
+=== Enums
+
+- enum vs enum class
+- an example maybe 
+- they are useful enough to model a finite domain
+
+=== Inheritance
+
 #pagebreak()
 
 = Debugging with `gdb`
 
-It's super useful! Trust me, if you learn this everything is way easier
+It's super useful! Trust me, if you learn this everything is way easier (printf won't be useful anymore)
 
-First of all, use the `-ggdb` flags to compile the code. Remember to not use any optimization like `-O3`... using optimizations makes the program harder to debug.
+First of all, use the `-ggdb3` flags to compile the code. Remember to not use any optimization like `-O3`... using optimizations makes the program harder to debug.
 
 ```makefile
-DEBUG_FLAGS := -lm -std=c++11 -ggdb3 -Wall -Wextra -pedantic
+DEBUG_FLAGS := -lm -ggdb3 -Wall -Wextra -pedantic
 ```
 
 Then it's as easy as running `gdb ./main`
@@ -643,42 +682,39 @@ Then it's as easy as running `gdb ./main`
 
 = Examples 
 
-Each example has 4 digits `xxxx` that are the same as the ones in the `software` folder in the course material.
+Each example has 4 digits `xxxx` that are the same as the ones in the `software` folder in the course material. The code will be *as simple as possible* to better explain the core functionality, but it's *strongly suggested* to try to add structure _(classes etc..)_ where it *seems fit*.
 
 == First examples
 
 This section puts together the *formal definitions* and the `C++` knowledge to implement some simple MDPs.
 
-=== A simple Markov decision process `[1100]` <a-simple-markov-chain>
+=== A simple MDP `[1100]` <a-simple-markov-chain>
 
 The first MDP $M = (U, X, Y, p, g)$ is such that
-- $U = {epsilon}$ (see @mdp-example)
-- $X = [0,1] times [0,1]$, each state is a pair #reft(3) of *real* numbers #reft(1) 
+- $U = {epsilon}$ #footnote[See @mdp-example]
+- $X = [0,1] times [0,1]$, each state is a pair #reft(3) of *real* numbers #reft(2) 
 - $Y = [0,1] times [0,1]$
-- $p : X times X times U -> X = cal(U)(0, 1) times cal(U)(0, 1)$, the transition probability is a *uniform continuous* distribution #reft(2)
+- $p : X times X times U -> X = cal(U)(0, 1) times cal(U)(0, 1)$, the transition probability is a *uniform continuous* distribution #reft(1)
 - $g : X -> Y : (r_0, r_1) |-> (r_0, r_1)$ outputs the current state #reft(4)
 - $x_0 = (0, 0)$ is the initial state #reft(3)
 
 #figure(caption: `software/1100/main.cpp`)[
 ```cpp
-#include <random>
-
-using real_t t1 = double; 
-const size_t HORIZON = 10;
-
 int main() {
     std::random_device random_device;
     urng_t urng(random_device());
-    std::uniform_real_distribution<real_t> uniform(0, 1); t2
+    std::uniform_real_distribution<real_t> uniform(0, 1); t1
 
-    std::vector<real_t> state(2, 0); t3
+    std::vector<real_t t2 > state(2, 0); t3
     std::ofstream log("log");
 
     for (size_t time = 0; time <= HORIZON; time++) {
         for (auto &r : state) 
-            r = uniform(urng); t2
+            r = uniform(urng); t1
+
         log << time << ' ';
-        for (auto r : state) log << r << ' '; t t4
+        for (auto r : state) 
+            log << r << ' '; t t4
         log << std::endl;
     }
 
@@ -688,45 +724,67 @@ int main() {
 ```
 ]
 
-=== Markov decision processes network pt.1 `[1200]`
+=== MDPs network pt.1 `[1200]` <simple-mdps-connection-1>
 
-This example has 2 MDPs $M_0, M_1$ like the one in the first example @a-simple-markov-chain, with the difference that, and $U_i = [0, 1] times [0, 1]$:
-- $U_0(t + d) = Y_1(t)$
-- $U_1(t + d) = Y_0(t)$
-TODO: formula to get input from other stuff and calculate the state..., maybe define 
-$ 
-  p : X times X times U &-> [0, 1] \
-  (x_0, x_1), (x'_0, x'_1), (u_0, u_1) &|-> ...
+This example has 2 MDPs $M_0, M_1$ s.t.
+- $M_0 = (U^0, X^0, Y^0, p^0, g^0)$ 
+- $M_1 =(U^1, X^1, Y^1, p^1, g^1)$ 
+
+$M_0$ and $M_1$ are similar to the MDP in @a-simple-markov-chain, with the difference that $U^i = [0, 1] times [0, 1]$, having $U^i = X^i$, meaning $p$ must be redefined:
+
+$ p^i (x'|x, u) = cases(1 & "if" x' = u \ 0 & "otherwise") $
+
+Then the 2 MDPs can be connected 
+
 $
+  & U^0_(t + 1) = (r_0 dot.c cal(U)(0, 1), r_1 dot.c cal(U)(0, 1)) "where" g^1 (X^1_t) = (r_0, r_1) \
+  & U^1_(t + 1) = (r_0 + cal(U)(0, 1), r_1 + cal(U)(0, 1)) "where" g^0 (X^0_t) = (r_0, r_1)
+$ <mdps-connection-1>
 
-#lorem(20)
+Given that $g^i (X^i_t) = X^i_t$ and $U^i_t = X^i_t$, the connection in @mdps-connection-1 can be simplified:
+
+$
+  & X^0_(t + 1) = (r_0 dot.c cal(U)(0, 1), r_1 dot.c cal(U)(0, 1)) "where" X^1_t = (r_0, r_1) \
+  & X^1_(t + 1) = (r_0 + cal(U)(0, 1), r_1 + cal(U)(0, 1)) "where" X^0_t = (r_0, r_1)
+$ <mdps-connection-2>
+
+With @mdps-connection-2 the code is easier to write, but this approach works for small examples like this one. For more complex systems it's better to design a module for each component and handle the connections more explicitly.
 
 #figure(caption: `software/1200/main.cpp`)[
 ```cpp
 const size_t HORIZON = 100;
-struct DTMC { real_t state[2]; };
+struct MDP { real_t state[2]; };
 
 int main() {
-    std::vector<DTMC> mdps(2, {0, 0});
+    std::vector<MDP> mdps(2, {0, 0});
 
-    for (size_t time = 0; time <= HORIZON; time++) {
+    for (size_t time = 0; time <= HORIZON; time++) 
         for (size_t r = 0; r < 2; r++) {
             mdps[0].state[r] = mdps[1].state[r] * uniform(urng);
             mdps[1].state[r] = mdps[0].state[r] + uniform(urng);
         }
-    } 
 }
 ```
 ]
 
-=== Markov decision processes network pt.2 `[1300]`
+=== MDPs network pt.2 `[1300]`
 
-The same as above, but with a different connection
+This example is similar to the one in @simple-mdps-connection-1, with a few notable differences:
+- $U^i = X^i = Y^i = RR times RR$
+- the initial states are $x^0_0 = (1, 1), x^1_0 = (2, 2)$
+- the connections are slightly more complex.
+- no probability is involved
+
+Having 
+
+$ p((x_0 ', x_1 ')|(x_0, x_1), (u_0, u_1)) = cases(1 & "if" x_0 ' = ... \ 0 & "otherwise" ) $
+
+The implementation would be
 
 #figure(caption: `software/1300/main.cpp`)[
 ```cpp
 int main() {
-    std::vector<DTMC> mdps({{1, 1}, {2, 2}});
+    std::vector<MDP> mdps({{1, 1}, {2, 2}});
 
     for (size_t time = 0; time <= HORIZON; time++) {
         mdps[0].state[0] =
@@ -741,46 +799,83 @@ int main() {
     }
 }
 ```
-]
+] <mdps-connection-3>
 
-=== Markov decision processes network pt.3 `[1400]`
+=== MDPs network pt.3 `[1400]`
 
-The same as above, but with a twist (in the original uses variables to indicate each input... which is sketcy... I can do it with MOCC) 
+The original model behaves exactly lik @mdps-connection-3, with a different implementation. As an exercise, the reader is encouraged to come up with a different implementation for @mdps-connection-3.
 
 == Traffic light `[2000]`
 
-In this example we want to model a *traffic light*. The three versions of the system on the drive (`2100`, `2200` and `2300`) do the same thing with a different code structure.
+This example models a *traffic light*. The three original versions (`2100`, `2200` and `2300`) have the same behaviour, with a different implementation.
+
+Let $T$ be the MDP that describes the traffic light, s.t.
+- $U = {epsilon, sigma}$ where 
+  - $epsilon$ means "do nothing" 
+  - $sigma$ means "switch light"
+- $X = {"green", "yellow", "red"}$
+- $Y = X$
+- $g(x) = x$
+- $p(x'|x, epsilon) = cases(1 & "if " x' = x \ 0 & "otherwise")$
+- $p(x'|x, sigma) = cases(
+  1 & "if " (x = "green" and x' = "yellow") or (x = "yellow" and x' = "red") or (x ="red" and x' = "green") \ 
+  0 & "otherwise"
+)$
+
+Meaning that, if the input is $epsilon$, $T$ maintains the same color with probability 1. Otherwise, if the input is $sigma$, $T$ changes color with probability 1, iif the transition is valid (green $->$ yellow, yellow $->$ red, red $->$ green)
 
 #figure(caption: `software/2000/main.cpp`)[
 ```cpp
+#include <fstream>
+#include <random>
+
+using real_t = double;
+using urng_t = std::default_random_engine;
 const size_t HORIZON = 1000;
-enum Light { GREEN = 0, YELLOW = 1, RED = 2 };
+
+enum Light { GREEN = 0, YELLOW = 1, RED = 2 }; t1
 
 int main() {
-    auto random_timer_duration =
-        std::uniform_int_distribution<>(60, 120);
+    std::random_device random_device;
+    urng_t urng(random_device());
+    std::uniform_int_distribution<> random_interval(60, 120) t2;
+    std::ofstream log("log");
 
     Light traffic_light = Light::RED;
-    size_t timer = random_timer_duration(random_engine);
+    size_t next_switch = random_interval(urng);
 
     for (size_t time = 0; time <= HORIZON; time++) {
-        if (timer > 0) {
-            timer--;
-            continue;
-        }
+        log << time << ' ' << next_switch - time << ' '
+            << traffic_light << std::endl;
 
-        traffic_light =
+        if (time < next_switch)
+            continue;
+
+        traffic_light = t3
             (traffic_light == RED
                  ? GREEN
                  : (traffic_light == GREEN ? YELLOW : RED));
-        timer = random_timer_duration(random_engine);
+
+        next_switch = time + random_interval(urng);
     }
+
+    log.close();
+    return 0;
 }
 ```
 ]
 
+TODO: 
+  - #reft(1) ```cpp enum``` vs ```cpp enum class```
+  - #reft(2) reference the same trick used in the uniform int distribution example
+  - #reft(3) is basically the behaviour of the formula described above
+  - how is the time rapresented?
+  - how can it be implemented with ```cpp mocc```?
+
 
 == Control center
+
+This example adds complexity to the traffic light by introducing a *remote control center*, network faults and repairs. It requries some time (it has too many variants), I'll work on it later.
 
 === No network `[3100]`
 
@@ -1001,6 +1096,14 @@ We can repeat the process in exercise `[5300]`, but this time we can assign a pa
 
 == Task management
 
+=== Worker
+
+=== Generator
+
+=== Dispatcher (not the correct name)
+
+=== Manager (not the correct name)
+
 #pagebreak()
 
 = MOCC library
@@ -1021,9 +1124,12 @@ Generics allow to connect MDPs more safely, as the inputs and outputs are typed!
 
 == VDM (Vienna Development Method)
 
+_"The Vienna Development Method (VDM) is one of the longest established model-oriented formal methods for the development of computer-based systems and software. It consists of a group of mathematically well-founded languages and tools for expressing and analyzing system models during early design stages, before expensive implementation commitments are made. The construction and analysis of the model help to identify areas of incompleteness or ambiguity in informal system specifications, and provide some level of confidence that a valid implementation will have key properties, especially those of safety or security. VDM has a strong record of industrial application, in many cases by practitioners who are not specialists in the underlying formalism or logic. Experience with the method suggests that the effort expended on formal modeling and analysis can be recovered in reduced rework costs arising from design errors."_ @vdm-overture
+
 === It's cool, I promise 
 
 - Alloy? Maybe it's a good alternative, haven't tried it enough 
+- VDM is basically OCL (Object Constraint Language) but better.
 
 === VDM++ to design valid UMLs
 
