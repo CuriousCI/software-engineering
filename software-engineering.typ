@@ -249,10 +249,50 @@ real_t Stat::stddev_welford() const {
 
 === Euler method for ordinary differential equations
 
-When a differential equation can't be solved analitically (because it models a complex system, i.e. a drone, cruise control etc...) the integral must be approximated. There are many ways to approximate an integral: one of the simplest, yet less accurate and efficient, methods is the forward Euler method.
+When an ordinary differential equation can't be solved analitically, the solution must be approximated. There are many techniques: one of the simplest ones (yet less accurate and efficient) is the forward Euler method, described by the following equation:
 
-$ y_(n + 1) = y_n + Delta dot.c f(t_n, y_n) $
+$ y_(n + 1) = y_n + Delta dot.c f(x_n, y_n) $ <euler-method>
 
+Let the function $y$ be the solution to the following problem 
+
+$ 
+cases(
+  y(x_0) = y_0 \
+  y'(x) = f(x, y(x))
+) 
+$
+
+Let $y(x_0) = y_0$ be the initial condition of the system, and $y' = f(x, y(x))$ be the known *derivative* of $y$ ($y'$ is a function of $x$ and $y(x)$). To approximate $y$, a $Delta$ is chosen (the smaller, the more precise the approximation), then $x_(n + 1) = x_n + Delta$. Now, understanding @euler-method should be easier: the value of $y$ at the next *step* is the current value of $y$ plus the value of its derivative $y'$ (multiplied by $Delta$). In @euler-method $y'$ is multiplied by $Delta$ because when going to the next step, all the derivatives from $x_n$ to $x_(n + 1)$ must be added up, and it's done by adding up 
+
+$ (x_(n + 1) - x_n) dot.c f(x_n, y_n) = Delta dot.c f(x_n, y_n) $
+
+Where $y_n = y(x_n)$. Given this theoretical understanding, implementing the code should be simple enough.
+
+#pagebreak()
+
+The following program approximates $y = x^2$ with $Delta = 1, 1/2, 1/3, 1/4$, knowing that $y' = 2x$.
+
+#figure(caption: `examples/euler.cpp`)[
+```cpp
+#define SIZE 4
+float derivative(float x) { return 2 * x; }
+
+int main() {
+    size_t x[SIZE];
+
+    for (size_t i = 0; i < SIZE; i++) {
+        x[i] = 0;
+        float delta = 1. / (i + 1);
+        for (float t = 0; t <= 10; t += delta) 
+            x[i] += delta * derivative(t);
+    }
+
+    return 0;
+}
+```
+]
+
+When plotting the results, it can be observed that the approximation is close, but not very precise. The error analysis in the Euler method is beyond this guide's scope. 
 #align(center)[
   #figure(caption: "examples/euler.png")[
     #image("examples/euler.png", width: 92%)
@@ -928,7 +968,7 @@ TODO: ```cpp class enum``` vs ```cpp enum```. We can model the outcomes as an ``
 If we want we can manipulate the "parameters" in real life: a better experienced team has a lower probability to introduce an error, but a higher cost. What we can do is:
 1. randomly generate the parameters (probability to introduce an error and to not detect it)
 2. simulate the development process with the random parameters
-By repeating this a bunch of times, we can find out which parameters have the best results, a.k.a generate the lowest development times (there are better techinques like simulated annealing, but this one is simple enough for us).
+By repeating this a bunch of times, we can find out which parameters have the best results, a.k.a generate the lowest development times (there are better techniques like simulated annealing, but this one is simple enough for us).
 
 === Key performance index `[5400]`
 
