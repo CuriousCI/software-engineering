@@ -161,21 +161,9 @@ $
 
 Only *1 transition matrix* is defined, as $|U| = 1$ (there's 1 input value). If $U$ had multiple input values, like ${"apple", "banana", "orange"}$, then 3 transition matrices would have been required, one *for each input value*.
 
-// === Network of Markov decision processes
-//
-// To describe complex systems we don't want to model a single big DTMC (the task would be hard and error prone). What we want to do instead is model many simple DTMCs and connect them.
-//
-// Let $M_1, M_2$ be two DTMCs, the input of $M_2$ depends on $M_1$'s output
-//
-// $ U_2(t) = f(Y_1(t)) $
-
-// TODO...
-
-// #pagebreak()
-
 === Network of MDPs
 
-Let $M_1, M_2$ be two MDPs s.t. $M_1 = (U_1, X_1, Y_1, p_1, g_1)$ and $M_2 = (U_2, X_2, Y_2, p_2, g_2)$, then $M = (U_1, X_1 times X_2, Y_2, p, g)$ s.t. etc... is a MDP. #footnote[It's not so easy to describe, I'll work on it later]
+Let $M_1, M_2$ be two MDPs s.t. $M_1 = (U_1, X_1, Y_1, p_1, g_1)$ and $M_2 = (U_2, X_2, Y_2, p_2, g_2)$, then $M = (U_1, X_1 times X_2, Y_2, p, g)$ s.t. etc... is a MDP. #footnote[It's not so easy to describe, I'll work on it later, TODO]
 
 #pagebreak()
 
@@ -201,10 +189,10 @@ The problem with this procedure is that, by adding up all the values before the 
 
 $
   overline(x)_(n + 1) = (sum_(i = 0)^(n + 1) x_i) / (n + 1) = 
-  ((sum_(i = 0)^(n) x_i) + x_(n + 1)) / (n + 1) = 
-  (sum_(i = 0)^(n) x_i) / (n + 1) + x_(n + 1) / (n + 1) = \
-  ((sum_(i = 0)^(n) x_i) n) / ((n + 1) n) + x_(n + 1) / (n + 1) = 
-  (sum_(i = 0)^(n) x_i) / n dot.c n / (n + 1) + x_(n + 1) / (n + 1) = \ 
+  ((sum_(i = 0)^n x_i) + x_(n + 1)) / (n + 1) = 
+  (sum_(i = 0)^n x_i) / (n + 1) + x_(n + 1) / (n + 1) = \
+  ((sum_(i = 0)^n x_i) n) / ((n + 1) n) + x_(n + 1) / (n + 1) = 
+  (sum_(i = 0)^n x_i) / n dot.c n / (n + 1) + x_(n + 1) / (n + 1) = \ 
   overline(x)_n dot n / (n + 1) + x_(n + 1) / (n + 1)
 $
 
@@ -278,7 +266,10 @@ The following program approximates $y = x^2$ with $Delta = 1, 1/2, 1/3, 1/4$, kn
 #figure(caption: `examples/euler.cpp`)[
 ```cpp
 #define SIZE 4
-float derivative(float x) { return 2 * x; }
+
+float derivative(float x) { 
+    return 2 * x; 
+}
 
 int main() {
     size_t x[SIZE];
@@ -327,14 +318,13 @@ int main() {
     std::random_device random_device; t2
     std::cout << random_device() t3 << std::endl;
     int seed = random_device(); t4
-    std::default_random_engine r_engine(seed); t5
-    std::cout << r_engine() t6 << std::endl;
+    std::default_random_engine random_engine(seed); t5
+    std::cout << random_engine() t6 << std::endl;
 }
 ```
 ] <random-example>
 
-The typical course of action is to instantiate a `random_device` #reft(2), and use it to generate a seed #reft(4) for a `random_engine`.  Given that random engines can be used with distributions, they're really useful to implement MDPs. 
-- TODO: note to operator overloading #reft(3) #reft(6)
+The typical course of action is to instantiate a `random_device` #reft(2), and use it to generate a seed #reft(4) for a `random_engine`.  Given that random engines can be used with distributions, they're really useful to implement MDPs. Also, #reft(3) and #reft(6) are examples of *operator overloading* (@operator-overloading).
 
 From this point on, ```cpp std::default_random_engine``` will be reffered to as ```cpp urng_t``` (uniform random number generator type).
 
@@ -384,8 +374,6 @@ int main() {
 ] <transition-matrix>
 
 ==== Uniform discrete @docs-uniform-int-distribution <uniform-int>
-
-Let's consider a simple exercise
 
 #note[
 To test a system $S$ it's requried to build a generator that sends value $v_t$ to $S$ every $T_t$ seconds. For each send, the value of $T_t$ is an *integer* chosen uniformly in the range $[20, 30]$.
@@ -444,30 +432,27 @@ It's the same as above, with the difference that it generates *real* numbers in 
 
 ==== Bernoulli @docs-bernoulli-distribution <bernoulli>
 
-Let's consider the following exercise
-
 #note[
-  To model a network protocol $P$ it's required to model a request. The request can randomly fail with probability $p = 0.001$.
+  To model a network protocol $P$ it's necessary to model requests. When sent, a request can randomly fail with probability $p = 0.001$.
 ]
 
-Traditionally, a random real numer $r in [0, 1]$ is generated, and it's checked if $r$ is above or below $p$.
+Generally, a random fail can be simulated by generating $r in [0, 1]$ and checking whether $r < p$.
 
 #align(center)[
 ```cpp 
-std::uniform_real_distribution<> random_r(0, 1);
-r = random_r(urng);
-if (r > 0.001) 
-  fail();
+std::uniform_real_distribution<> uniform(0, 1);
+if (uniform(urng) < 0.001) 
+    fail();
 ```
 ]
 
-The `std::bernoulli_distribution` works better for this specification
+A `std::bernoulli_distribution` is a better fit for this specification, as it generates a boolean value and its semantics represents "an event that could happen with a certain probability $p$".
 
 #align(center)[
 ```cpp 
 std::bernoulli_distribution random_fail(0.001);
 if (random_fail(urng)) 
-  fail();
+    fail();
 ```
 ]
 
@@ -483,70 +468,46 @@ The Exponential distribution is very useful when simulating user requests (gener
 
 ==== Discrete distribution <discrete>
 
-Let's consider the following exercise.
-
 #note[
-  To choose the architecture for an e-commerce it's required to implement a model $C$ of the customers that simulates the requests. After interviewing 678 people it's determined that 232 of them would buy a hat, 158 would buy a hoodie and the other 288 would buy a mug. 
+  To choose the architecture for an e-commerce it's necessary to simulate realistic purchases. After interviewing 678 people it's determined that 232 of them would buy a shirt from your e-commerce, 158 would buy a hoodie and the other 288 would buy pants. 
 ]
 
-A discrete distribution can be used for this case. Let's say that "hat" = $0$, "hoodie" = $1$ and mug = $2$. 
+The objective is to simulate random purchases reflecting the results of the interviews. One way to do it is to calculate the percentage of buyers for each item, generate $r in [0, 1]$, and do some checks on $r$. However, this specification can be implemented very easily in `C++` by using a ```cpp std::discrete_distribution```, without having to do any calculation or write complex logic.
 
-#align(center)[
+// #align(center)[
+#figure(caption: `examples/TODO.cpp`)[
 ```cpp
-#include <random>
-#include <iostream>
+enum Item { Shirt = 0, Hoodie = 1, Pants = 2 };
 
 int main() { 
-  std::random_device random_device;
-  urng_t urng(random_device());
-  std::discrete_distribution<> random_item = {232, 158, 288};
+    std::discrete_distribution<> random_item = {232, 158, 288} t1;
 
-  for (int request = 0; request < 1000; request++) {
-    size_t item = random_item(urng);
-    switch (item) {
-      case 0:
-        std::cout << "hat" << std::endl;
-        break;
-      case 1:
-        std::cout << "hoodie" << std::endl;
-        break;
-      case 2:
-        std::cout << "mug" << std::endl;
-        break;
+    for (int request = 0; request < 1000; request++) {
+        switch (random_item(urng)) {
+            case Shirt: t2
+                std::cout << "shirt";
+                break;
+            case Hoodie: t2
+                std::cout << "hoodie";
+                break;
+            case Pants: t2
+                std::cout << "pants";
+                break;
+        }
+
+        std::cout << std::endl;
     }
-  }
 
-  return 0;
+    return 0;
 }
 ```
 ]
 
-With the discrete distribution, the generated items are proportional to the data.
-
-// For the "Computation Theory" exam mr. White has to study 42 proofs: 10 proofs on automata, 15 on computability and 17 on complexity. To practice, mr. White needs a random question generator that 
-
-// "The Federalist Papers" is a series of 85 essays written by Alexander Hamilton, John Jay, and James Madison between October 1787 and May 1788. Jhon Jay got sick after writing 5, James Madison wrote 29, Hamilton wrote the other 51! \
-
-// You want to *randomly* assign an author to each of your 32 students for a school project, proportionally to how many essays the author has written (e.g. Hamilton has written $60%$ of the essays, so you must assign Hamilton to roughly $60%$ of your students).
-// You want each of your 32 students to write a paragraph on one of the authors.   
-
-// "Alexander joins forces with James Madison and John Jay to write a series of essays Defending the new United States Constitution, entitled The Federalist Papers \
-// The plan was to write a total of twenty-five essays \
-// The work divided evenly among the three men \
-// In the end, they wrote eighty-five essays in the span of six months \
-// John Jay got sick after writing five \
-// James Madison wrote twenty-nine \
-// Hamilton wrote the other FIFTY-ONE!"
-
-// ```cpp discrete_distribution```
-// This one is *SUPER USEFUL!*, generates random integers in the range 0, number of items - 1, but it assigns a weight to each item, so each item as a certain weighted probability to be choose. It can be used in transition matrices, and for a bit more complex systems like the status of the project in @error-detection.
-
-// #align(center)[
-//   #figure({
-//     set text(font: "CaskaydiaCove NF", weight: "light", lang: "en")
-//     image("public/essays-authors.svg")
-//   }, caption: "essays' authors") <essays-authors>
-// ]
+- TODO:
+  - #reft(1) why can the {a, b, c} syntax be used
+  - #reft(1) the weight thing and the formula (accumulated sums prob)
+  - #reft(2) how can enums be used here
+  - with the discrete distribution, the generated items are proportional to the data.
 
 == Dynamic structures 
 
@@ -557,17 +518,19 @@ If you allocate with ```cpp new```, you must deallocate with ```cpp delete```, y
 
 To avoid manual memory allocation, most of the time it's enough to use the structures in the standard library, like ```cpp std::vector<T>```.
 
-=== ```cpp std::vector<T>()``` <std-vector>
+=== Vectors <std-vector>
+// === ```cpp std::vector<T>()``` <std-vector>
 
 You don't have to allocate memory, basically never! You just use the structures that are implemented in the standard library, and most of the time they are enough for our use cases. They are really easy to use.
 
-=== ```cpp std::deque<T>()``` <std-deque>
+=== Deques <std-deque>
+// === ```cpp std::deque<T>()``` <std-deque>
 
-=== Sets
+=== Sets <std-set>
 
 Not needed as much
 
-=== Maps
+=== Maps <std-map>
 
 Could be useful
 
@@ -592,48 +555,47 @@ int main(){
     params.close();
 }
 ```
+//
+// #align(center)[
+// ```cpp
+// #include <ofstream>
+// #include <ifstream>
+//
+// int main(){ 
+//     ofstream output("output.txt");
+//     output << "some text" << std::endl;
+//     output.close();
+//
+//     ifstream params("params.txt");
+//     int number;
+//     while (params >> number) {
+//         // do stuff with number...
+//     }
+//     params.close();
+//
+//     return 0;
+// }
+// ```
+// ]
 
-#align(center)[
-```cpp
-#include <ofstream>
-#include <ifstream>
+== Operator overloading _(quick note)_ <operator-overloading>
 
-int main(){ 
-    ofstream output("output.txt");
-    output << "some text" << std::endl;
-    output.close();
-
-    ifstream params("params.txt");
-    int number;
-    while (params >> number) {
-        // do stuff with number...
-    }
-    params.close();
-
-    return 0;
-}
-```
-]
-
-== Operator overloading _(quick note)_
-
-In @random-example, to generate a random number, ```cpp random_device()``` #reft(3) and ```cpp r_engine()``` #reft(6) are used like functions, but they aren't functions, they're instances of a ```cpp class```. That's because in `C++` you can define how a certain operator (like `+`, `+=`, `<<`, `>>`, `[]`, `()` etc..) should behave when used on a instance of the ```cpp class```. 
+In @random-example, to generate a random number, ```cpp random_device()``` #reft(3) and ```cpp random_engine()``` #reft(6) are used like functions, but they aren't functions, they're instances of a ```cpp class```. That's because in `C++` you can define how a certain operator (like `+`, `+=`, `<<`, `>>`, `[]`, `()` etc..) should behave when used on a instance of the ```cpp class```. 
 It's called *operator overloading*, a relatively common feature: 
 - in `Python` operation overloading is done by implementing methods with special names, like ```python __add__()``` @python-operator-overloading
 - in `Rust` it's done by implementing the `Trait` associated with the operation, like ```rust std::ops::Add``` @rust-operator-overloading.
 - `Java` and `C` don't have operator overloading
 
-For example, ```cpp std::cout``` is an instance of the ```cpp std::basic_ostream class```, which overloads the method "```cpp operator<<()```" @basic-ostream.
-
-- TODO: Operator overloading in files (section above)
+For example, ```cpp std::cout``` is an instance of the ```cpp std::basic_ostream class```, which overloads the method "```cpp operator<<()```" @basic-ostream. The same applies to to file streams.
 
 == Code structure
 
 === Classes
 
-- Maybe constructor
-- Maybe operators? (more like nah)
-- virtual stuff (interfaces)
+- TODO:
+  - Maybe constructor
+  - Maybe operators? (more like nah)
+  - virtual stuff (interfaces)
 
 === Structs
 
