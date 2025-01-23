@@ -5,8 +5,7 @@
 
 #include "observer.hpp"
 
-template <typename... T>
-class Notifier {
+template <typename... T> class Notifier {
   protected:
     std::vector<Observer<T...> *> observers;
 

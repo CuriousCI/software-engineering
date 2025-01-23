@@ -3,8 +3,7 @@
 
 #include "observer.hpp"
 
-template <typename T>
-class Recorder : public Observer<T> {
+template <typename T> class Recorder : public Observer<T> {
   protected:
     T record;
 
@@ -12,13 +11,9 @@ class Recorder : public Observer<T> {
     Recorder() {}
     Recorder(T record) : record(record) {}
 
-    void update(T args) override {
-        record = args;
-    }
+    void update(T args) override { record = args; }
 
-    operator T() const {
-        return record;
-    }
+    operator T() const { return record; }
 };
 
 #endif

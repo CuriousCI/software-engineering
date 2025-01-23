@@ -14,4 +14,6 @@ class Stat {
     real_t stddev() const;
 };
 
+/*bucket*/
+
 #endif

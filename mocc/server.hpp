@@ -7,10 +7,8 @@
 namespace mocc {
 
 template <typename T, typename... U>
-class Client
-    : public Observer<U...>,
-      public Notifier<Observer<U...> *, T> {
-
+class Client : public Observer<U...>,
+               public Notifier<Observer<U...> *, T> {
   public:
     using Host = Observer<U...> *;
 };

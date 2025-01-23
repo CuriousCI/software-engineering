@@ -1044,17 +1044,162 @@ We can repeat the process in exercise `[5300]`, but this time we can assign a pa
 
 = Exam
 
+In short, every system can be divided into 4 steps:
+- reading parameters from a file (from files as of 2024/2025)
+- initializing the system
+  - this include instantiating the MDPs and connecting them
+- simulating the system
+- saving outputs to a file
+
+#figure(caption: `practice/1/main.cpp`)[
+```cpp
+std::ifstream params("parameters.txt");
+char c;
+
+while (params >> c) t1
+    switch (c) {
+        case 'A': params >> A; break;
+        case 'B': params >> B; break;
+        case 'C': params >> C; break;
+        case 'D': params >> D; break;
+        case 'F': params >> F; break;
+        case 'G': params >> G; break;
+        case 'N': params >> N; break;
+        case 'W': params >> W; break;
+    }
+
+params.close();
+```
+]
+
+Reading the input: `std::ifstream` can read (from a file) based on the type of the variable read. For exapmle, `c` is a ```cpp char```, so #reft(1) will read exactly 1 character. If `c` was a string, ```cpp params >> c``` would have read a whole word (up to the first whitespace). For example, `A` is a float and `N` is a int, so ```cpp params >> A``` will try to read a float and ```cpp params >> N``` will *try* to read an int. (TODO: float $->$ real_t, int $->$ size_t)
+
+#figure(caption: `practice/1/parameters.hpp`)[
+```cpp
+#ifndef PARAMETERS_HPP_
+#define PARAMETERS_HPP_
+
+#include "../../mocc/alias.hpp" t1
+#include "../../mocc/mocc.hpp" t2
+
+ALIAS_TYPE(ProjInit, real_t) t3
+ALIAS_TYPE(TaskDone, real_t) t3
+ALIAS_TYPE(EmplCost, real_t) t3
+
+static t4 real_t A, B, C, D, F, G;
+static size_t N, W, HORIZON = 100000;
+
+#endif
+```
+]
+
+The parameters are declared in a `parameters.hpp` file, for a few reasons
+- they are declared globally, and are globally accessible without having to pass to classes constructors
+- any class can just import the file with the parameters to access the parameters
+- they are static #reft(4) (otherwise clang doesn't like global variables)
+- in `parameters.hpp` there are also auxiliary types #reft(3), used in the connections between entities
+
+#align(center)[
+```cpp
+System system; t1
+Stopwatch stopwatch; t2
+
+system.addObserver(&stopwatch); t3
+
+while (stopwatch.elapsed() <= HORIZON) t4
+    system.next(); t5
+```
+]
+
+Simulating the system is actually easy:
+- declare the system #reft(1)
+- add a stopwatch #reft(2) (which starts from time 0, and everytime the system is updated, it adds up time)
+  - it is needed to stop the simulation after a certain amount of time, called `HORIZON`
+- connect the stopwatch to the system #reft(3)
+- run a loop (like how a game loop would work) #reft(4)
+- in the loop, transition the system to the next state #reft(5)
+
 == Development team (time & cost)
 
-== Backend load balancing
+=== Employee
 
-=== Env
+#figure(caption: `practice/1/employee.hpp`)[
+```cpp
+#ifndef EMPLOYEE_HPP_
+#define EMPLOYEE_HPP_
 
-=== Dispatcher, Server and Database
+#include <random>
 
-=== Response time
+#include "../../mocc/stat.hpp"
+#include "../../mocc/time.hpp"
+#include "parameters.hpp"
 
-== Heater simulation
+class Employee : public Observer<T>,
+                 public Observer<ProjInit>,
+                 public Notifier<TaskDone, EmplCost> {
+
+    std::vector<std::discrete_distribution<>>
+        transition_matrix;
+    urng_t &urng;
+    size_t phase = 0;
+    real_t proj_init = 0;
+
+  public:
+    const size_t id;
+    const real_t cost;
+    Stat comp_time_stat;
+
+    Employee(urng_t &urng, size_t k)
+        : urng(urng), id(k),
+          cost(1000.0 - 500.0 * (real_t)(k - 1) / (W - 1)) {
+
+        transition_matrix =
+            std::vector<std::discrete_distribution<>>(N);
+
+        for (size_t i = 1; i < N; i++) {
+            size_t i_0 = i - 1;
+            real_t tau = A + B * k * k + C * i * i + D * k * i,
+                   alpha = 1 / (F * (G * W - k));
+
+            std::vector<real_t> p(N, 0.0);
+            p[i_0] = 1 - 1 / tau;
+            p[i_0 + 1] =
+                (i_0 == 0 ? (1 - p[i_0])
+                          : (1 - alpha) * (1 - p[i_0]));
+
+            for (size_t prev = 0; prev < i_0; prev++)
+                p[prev] = alpha * (1 - p[i_0]) / i_0;
+
+            transition_matrix[i_0] =
+                std::discrete_distribution<>(p.begin(),
+                                             p.end());
+        }
+
+        transition_matrix[N - 1] =
+            std::discrete_distribution<>{1};
+    }
+
+    void update(T t) override {
+        if (phase < N - 1) {
+            phase = transition_matrix[phase](urng);
+            if (phase == N - 1) {
+                comp_time_stat.save(t - proj_init);
+                notify((real_t)t, cost);
+            }
+        }
+    };
+
+    void update(ProjInit proj_init) override {
+        this->proj_init = proj_init;
+        phase = 0;
+    };
+};
+
+#endif
+```
+]
+
+=== Director
 
 == Task management
 
@@ -1065,6 +1210,17 @@ We can repeat the process in exercise `[5300]`, but this time we can assign a pa
 === Dispatcher (not the correct name)
 
 === Manager (not the correct name)
+
+
+== Backend load balancing
+
+=== Env
+
+=== Dispatcher, Server and Database
+
+=== Response time
+
+== Heater simulation
 
 #pagebreak()
 

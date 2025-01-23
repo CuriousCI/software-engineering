@@ -1,68 +1,89 @@
-#include <ctime>
+#include "../../mocc/system.hpp"
+#include "../../mocc/time.hpp"
+#include "director.hpp"
+#include "employee.hpp"
+#include "parameters.hpp"
 #include <fstream>
-#include <ostream>
+#include <iostream>
 
-#include "../case/case.hpp"
-#include "../case/time.hpp"
-#include "data.hpp"
-#include "project.hpp"
-#include "team.hpp"
+/* 07/07/2023 - ex2 */
 
 int main() {
-    std::random_device random_device;
-    std::default_random_engine random_engine(random_device());
+    {
+        std::ifstream params("parameters.txt");
+        char c;
 
-    Timer timer(T);
-    Project project;
-    std::vector<Team *> teams;
+        // clang-format off
+        while (params >> c)
+            switch (c) {
+            case 'A': params >> A; break;
+            case 'B': params >> B; break;
+            case 'C': params >> C; break;
+            case 'D': params >> D; break;
+            case 'F': params >> F; break;
+            case 'G': params >> G; break;
+            case 'N': params >> N; break;
+            case 'W': params >> W; break;
+            }
+        // clang-format on
 
-    for (size_t k = 1; k <= W; k++) {
-        Team *team = new Team(random_engine, k);
-
-        project.addSubscriber(team);
-        teams.push_back(team);
-        timer.addSubscriber(team);
-        team->addSubscriber(&project);
+        params.close();
     }
 
-    while (timer.time < HORIZON) {
-        bool stop = timer.time > 1000;
+    /* Setup */
+    std::random_device random_device;
+    urng_t urng(random_device());
 
-        for (auto t : teams)
-            if (t->completion_time.stddev() > 0.01 * t->completion_time.mean()) {
-                stop = false;
+    System system;
+    Director director;
+    Stopwatch stopwatch;
+    std::vector<Employee *> employees;
+
+    {
+        system.addObserver(&stopwatch);
+
+        for (size_t k = 1; k <= W; k++) {
+            auto e = new Employee(urng, k);
+
+            e->addObserver(&director);
+            director.addObserver(e);
+            stopwatch.addObserver(e);
+            employees.push_back(e);
+        }
+    }
+
+    /* Simulation */
+    while (stopwatch.elapsed() < HORIZON) {
+        bool terminate = stopwatch.elapsed() > 1000;
+        for (auto e : employees)
+            if (e->comp_time_stat.stddev() >
+                0.01 * e->comp_time_stat.mean()) {
+                terminate = false;
                 break;
             }
 
-        if (stop)
+        if (terminate)
             break;
 
-        timer.tick();
+        system.next();
     }
 
-    std::ofstream("outputs.txt")
-        << "Dipendente AvgTime AvgCost StdDevTime StdDevCost ("
-        << "ID = " << ID << ", "
-        << "MyMagicNumber = " << MY_MAGIC_NUMBER << ", "
-        << "time = " << time(NULL) << ")" << std::endl
-        << "A = " << A << ", "
-        << "B = " << B << ", "
-        << "C = " << C << ", "
-        << "D = " << D << ", "
-        << "F = " << F << ", "
-        << "G = " << G << ", "
-        << "N = " << N << ", "
-        << "W = " << W << ", "
-        << "AvgTime = " << project.time.mean() << ", "
-        << "AvgCosto = " << project.cost.mean() << std::endl;
+    {
+        // clang-format off
+        std::ofstream ("output.txt") 
+            << "AvgTime " << director.time_stat.mean() << std::endl
+            << "AvgCost " << director.cost_stat.mean() << std::endl;
 
-    for (auto t : teams)
-        std::ofstream("outputs.txt", std::ios_base::app)
-            << t->id << ' '
-            << t->completion_time.mean() << ' '
-            << t->completion_time.mean() * t->cost << ' '
-            << t->completion_time.stddev() << ' '
-            << t->completion_time.stddev() * t->cost << std::endl;
+        for (auto e : employees)
+            std::ofstream("output.txt", std::ios_base::app)
+                << e->id << ' ' 
+                << e->comp_time_stat.mean() << ' ' 
+                << e->comp_time_stat.mean() * e->cost << ' ' 
+                << e->comp_time_stat.stddev() << ' '
+                << e->comp_time_stat.stddev() * e->cost
+                << std::endl;
+        // clang-format on
+    }
 
     return 0;
 }
