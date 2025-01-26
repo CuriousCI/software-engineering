@@ -19,6 +19,7 @@ class Stopwatch : public Observer<>, public Notifier<T> {
     void update() override;
 };
 
+/*ALIAS_TYPE(U, real_t)*/
 enum class TimerMode { Once, Repeating };
 
 /* docs.rs/bevy/latest/bevy/time/struct.Timer.html */

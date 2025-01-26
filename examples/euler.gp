@@ -1,4 +1,5 @@
-set terminal png size 600,400
-set output 'euler.png'
+set terminal svg font "CaskaydiaCove NFM"
+set output 'euler.svg'
 
-plot [0:10] x**2, for [i=0:3] sprintf("approx-%d.csv", i) title sprintf("delta %.2f", 1. / (i + 1))
+set yr[0:120]
+plot [0:10] x**2, for [i=0:3] sprintf("approx-%d.csv", i) title sprintf("delta %.2g", 1. / (i + 1))

@@ -4,41 +4,30 @@
 #set heading(numbering: "1.1")
 #set math.equation(numbering: "(1)")
 
-#show figure: set block(breakable: true)
+#show figure.caption: set align(center)
 #show heading: set block(above: 1.4em, below: 1em)
+#show outline.entry.where(level: 1): it => { show repeat : none; v(1.1em, weak: true); text(size: 1em, strong(it)) }
+#show raw.where(block: true): block.with(inset: 1em, width: 100%, fill: luma(254), stroke: (left: 5pt + luma(245), rest: 1pt + luma(245)))
+#show figure.where(kind: raw): it => { set align(left); it }
+#show raw: set text(font:"CaskaydiaCove NFM", lang: "en", weight: "light", size: 9pt)
 #show sym.emptyset : sym.diameter 
-#show raw.where(block: true): block.with(inset: .5em)
 
-#let note(body) = block(inset: 1em, stroke: (thickness: .1pt, dash: "dashed"), body)
-
-#show outline.entry.where(level: 1): it => {
-  show repeat : none
-  v(1.1em, weak: true)
-  text(size: 1em, strong(it))
-}
-
-#show raw: r => {
-  show regex("t(\d)"): it => {
-    box(baseline: .2em, circle(stroke: .5pt, inset: .1em, align(center + horizon, 
-          text(size: .8em, strong(repr(it).slice(2, -1)))
-    )))
-  }
-
-  r
-}
-
-#let reft(reft) = box(width: 9pt, height: 9pt, clip: true, radius: 100%, stroke: .5pt, baseline: 1pt,
-  align(center + horizon,
-    text(font: "CaskaydiaCove NF", size: 6pt, strong(str(reft)))
+#let reft(reft) = box(width: 8pt, place(dy: -8pt, 
+  box(radius: 100%, width: 9pt, height: 9pt, inset: 1pt, stroke: .5pt, // fill: black,
+    align(center + horizon, text(font: "CaskaydiaCove NFM", size: 7pt, repr(reft)))
   )
-)
+))
 
-#page(align(center + horizon)[
-    #heading(outlined: false, numbering: none, text(size: 1.5em)[Software Engineering]) 
-    #text(size: 1.3em)[Cicio Ionuț]
-    #align(bottom, datetime.today().display("[day]/[month]/[year]"))
-  ]
-)
+#show raw: r => { show regex("t(\d)"): it => { reft(int(repr(it).slice(2, -1))) }; r }
+
+#let note(body) = block(inset: 1em, stroke: (paint: silver, dash: "dashed"), body)
+// #let note(body) = block(inset: 1em, fill: luma(254), stroke: (thickness: 1pt, paint: luma(245)), body)
+
+#page(align(center + horizon, {
+  heading(outlined: false, numbering: none, text(size: 1.5em)[Software Engineering]) 
+  text(size: 1.3em)[Cicio Ionuț]
+  align(bottom, datetime.today().display("[day]/[month]/[year]"))
+}))
 
 #page(outline(indent: auto, depth: 3))
 
@@ -46,31 +35,29 @@
 
 = Software models
 
-*Software projects* require *design choices* that often can't be driven by experience or reasoning alone. That's why a *model* of the project is needed to compare different solutions. 
+Software projects require *design choices* that often can't be driven by experience or reasoning alone. That's why a *model* of the project is needed to compare different solutions.
 
-== The "Amazon Prime Video" article 
+== The _"Amazon Prime Video"_ article 
 
-If you were tasked with designing the software architecture for *Amazon Prime Video* _(a live streaming service for Amazon)_, how would you go about it? What if you had the to keep the costs minimal? Would you use a distributed architecture or a monolith application?
+If you were tasked with designing the software architecture for Amazon Prime Video, which choices would you make? What if you had the to keep the costs minimal? Would you use a distributed architecture or a monolith application?
 
-More often than not, monolith applications are considered *more costly* and *less scalable* than the counterpart due to an inefficient usage of resources. But, in a recent article, a Senior SDE at Prime Video describes how they _"*reduced the cost* of the audio/video monitoring infrastructure by *90%*"_ @primevideo2024 by using a monolith architecture.
+More often than not, monolith applications are considered more costly and less scalable than the counterpart, due to an inefficient usage of resources. But, in a recent article, a Senior SDE at Prime Video describes how they _"*reduced the cost* of the audio/video monitoring infrastructure by *90%*"_ @prime by using a monolith architecture.
 
-There isn't a definitive way to answer these type of questions, but one way to go about it is building a model of the system to compare the solutions. In the case of Prime Video, _"the audio/video monitoring service consists of three major components:"_ @primevideo2024
-- the *media converter* converts input audio/video streams 
-- the *defect detectors* analyze frames and audio buffers in real-time
-- the *orchestrator* controls the flow in the service
+There isn't a definitive way to answer these type of questions, but one way to go about it is building a model of the system to compare the solutions. In the case of Prime Video, _"the audio/video monitoring service consists of three major components:"_ @prime
+- the _media converter_ converts input audio/video streams 
+- the _defect detectors_ analyze frames and audio buffers in real-time
+- the _orchestrator_ controls the flow in the service
 
-#align(center)[
-  #figure(caption: "audio/video monitoring system")[#{
-    set text(font: "CaskaydiaCove NF", weight: "light", lang: "en")
-    image("public/audio-video-monitor.svg", width: 90%)
-  }] <prime-video>
-]
+#figure(caption: "audio/video monitoring system")[#{
+  set text(font: "CaskaydiaCove NFM", weight: "light", lang: "en")
+  image("public/audio-video-monitor.svg", width: 90%)
+}] <audio-video-monitor>
 
-To derive conclusions the system can be *simulated* by modeling its components as *Markov decision processes*.
+To derive conclusions on this system, its components can be modeled as *Markov decision processes*.
 
-== Formal theory <traffic>
+== Models // Formal theory <traffic>
 
-=== Markov chain <markov-chain>
+=== Markov chains <markov-chain>
 
 A Markov chain $M$ is described by a set of *states* $S$ and the *transition probability* $p : S times S -> [0, 1]$ such that $p(s'|s)$ is the probability to transition to state $s'$ if the current state is $s$. The transition probability $p$ is constrained by @markov-chain-constrain
 
@@ -101,7 +88,7 @@ For example, the weather can be modeled with $S = { "sunny", "rainy" }$ and $p$ 
 
 If a Markov chain $M$ transitions at discrete time steps, i.e. the time steps $t_0, t_1, t_2, ...$ are a *countable*, then it's called a DTMC (discrete-time Markov chain), otherwise it's called a CTMC (continuous-time Markov chain).
 
-=== Markov decision process <mdp>
+=== Markov decision processes <mdp>
 
 A Markov decision process (MDP), despite sharing the name, is *different* from a Markov chain, because transitions are influenced by an external environment. A MDP $M$ is a tuple $(U, X, Y, p, g)$ s.t.
 - $U$ is the set of *input values*
@@ -109,13 +96,13 @@ A Markov decision process (MDP), despite sharing the name, is *different* from a
 - $Y$ is the set of *output values* 
 - $p : X times X times U -> [0, 1]$ is such that $p(x'|x, u)$ is the probability to *transition* from state $x$ to state $x'$ when the *input value* is $u$
 - $g : X -> Y$ is the *output function*
-- and let $x_0 in X$ be the *initial state*
+- $x_0 in X$ is the *initial state*
 
 The same constrain in @markov-chain-constrain holds for MDPs, with an important difference: *for each input value*, the sum of the transition probabilities for *that input value* must be 1.
 
 $ forall x in X space.en forall u in U space.en sum_(x' in X) p(x'|x, u) = 1 $
 
-=== Example <mdp-example>
+==== Example <mdp-example>
 
 The development process of a company can be modeled as a MDP \ $M = (U, X, Y, p, g)$ s.t.
 - $U = {epsilon}$ #footnote[If $U$ is empty $M$ can't transition, at least 1 input is required, i.e. $epsilon$]
@@ -167,13 +154,12 @@ Let $M_1, M_2$ be two MDPs s.t. $M_1 = (U_1, X_1, Y_1, p_1, g_1)$ and $M_2 = (U_
 
 #pagebreak()
 
-==  Tips and tricks
+== Other methods // Tips and tricks
 
-=== Average
+=== Incremental average
 
 Given a set of values $X = {x_1, ..., x_n} subset RR$ the average $overline(x)_n = (sum_(i = 0)^n x_i) / n$ can be computed with a simple procedure 
 
-#align(center)[
 ```cpp
 float average(std::vector<float> X) {
     float sum = 0;
@@ -183,7 +169,6 @@ float average(std::vector<float> X) {
     return sum / X.size();
 }
 ```
-]
 
 The problem with this procedure is that, by adding up all the values before the division, the *numerator* could *overflow*, even if the value of $overline(x)_n$ fits within the IEEE-754 limits. Nonetheless, $overline(x)_n$ can be calculated incrementally.
 
@@ -198,7 +183,6 @@ $
 
 With this formula the numbers added up are smaller: $overline(x)_n$ is multiplied by $n / (n + 1) tilde 1$, and, if $x_(n + 1)$ fits in IEEE-754, then $x_(n + 1) / (n + 1)$ can also be encoded.
 
-#align(center)[
 ```cpp
 float incr_average(std::vector<float> X) {
     float average = 0;
@@ -209,36 +193,33 @@ float incr_average(std::vector<float> X) {
     return average;
 }
 ```
-]
 
 In `examples/average.cpp` the procedure `average()` returns `Inf` and `incr_average()` successfuly computes the average.
 
 #pagebreak()
 
-=== Welford's online algorithm (standard deviation)
+=== Welford's online algorithm // (standard deviation)
 
 In a similar fashion, it could be faster and require less memory to calculate the *standard deviation* incrementally. Welford's online algorithm can be used for this purpose. 
 
-// _"It is often useful to be able to compute the variance in a single pass, inspecting each value $x_i$ only once; for example, when the data is being collected without enough storage to keep all the values, or when costs of memory access dominate those of computation."_ (#link("https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm")[Wikpedia])
-
 $ 
 M_(2, n) = sum_(i=1)^n (x_i - overline(x)_n)^2 \
-M_(2, n) = M_(2, n-1) + (x_n - overline(x)_(n - 1))(x_N - overline(x)_n) \
+M_(2, n) = M_(2, n-1) + (x_n - overline(x)_(n - 1))(x_n - overline(x)_n) \
 sigma^2_n = M_(2, n) / n \
 s^2_n = M_(2, n) / (n - 1)
 $
 
 Given $M_2$, the standard deviation can be calculated as $sqrt(M_(2, n) / n)$ if $n > 0$.
 
-#figure(caption: `mocc/stat.hpp`)[
+#figure(caption: `mocc/math.cpp`)[
 ```cpp
-real_t Stat::stddev_welford() const {
-    return sqrt(n > 0 ? m_2__ / n : 0);
+real_t Stat::stddev() const {
+    return n > 0 ? sqrt(m_2__ / n) : 0;
 }
 ```
 ]
 
-=== Euler method for ordinary differential equations
+=== Euler method // for ordinary differential equations
 
 When an ordinary differential equation can't be solved analitically, the solution must be approximated. There are many techniques: one of the simplest ones (yet less accurate and efficient) is the forward Euler method, described by the following equation:
 
@@ -261,7 +242,7 @@ Where $y_n = y(x_n)$. Given this theoretical understanding, implementing the cod
 
 #pagebreak()
 
-The following program approximates $y = x^2$ with $Delta = 1, 1/2, 1/3, 1/4$, knowing that $y' = 2x$.
+The following program approximates $cases(y(x_0) = 0 \ y'(x) = 2x)$ with $Delta = 1/1, 1/2, 1/3, 1/4$ //, knowing that $y' = 2x$.
 
 #figure(caption: `examples/euler.cpp`)[
 ```cpp
@@ -287,11 +268,24 @@ int main() {
 ]
 
 When plotting the results, it can be observed that the approximation is close, but not very precise. The error analysis in the Euler method is beyond this guide's scope. 
+
 #align(center)[
-  #figure(caption: "examples/euler.png")[
-    #image("examples/euler.png", width: 92%)
+  #figure(caption: "examples/euler.svg")[
+    #image("examples/euler.svg", width: 99%)
   ]
 ]
+
+=== Monte Carlo method
+
+The Monte Carlo method is used to approximate values. For example, if you want to approximate the area under a function, just scale the function to a $1 times 1$ square, generate $n$ random x points, count how many of them are under the curve (let that number be $s$) and the area is $s / n$. It can also be used to approximate $pi$ for example.
+
+The Monte Carlo method can be used to approximate probabilities:
+- run a simulation $n$ times (where $n$ is very big)
+- for each simulation
+  - get the cost of the simulation 
+  - add $1$ to $s$ if the cost is below a certain threshold $t$ 
+- the probability that the cost of the system is below $t$ is $s / n$
+- TODO: this can be seen in `practice/etc...`
 
 #pagebreak()
 
@@ -305,7 +299,7 @@ The `C++` standard library offers tools to easily implement MDPs.
 
 === Random engines 
 
-In `C++` there are many ways to *generate random numbers* @pseudo-random-number-generation. Generally it's *not recommended* to use ```cpp random()``` #reft(1) /*(reasons...)*/. It's recommended to use a *random generator* #reft(5), because it's fast, deterministic (given a *seed*, the sequence of generated numbers is the same) and can be used with *distributions*. A `random_device` is a non deterministic generator: it uses a *hardware entropy source* (if available) to generate the random numbers.
+In `C++` there are many ways to *generate random numbers* @pseudo-random-number-generation. Generally it's not recommended to use ```cpp random()``` #reft(1) /*(reasons...)*/. It's better to use a *random generator* #reft(5), because it's fast, deterministic (given a seed, the sequence of generated numbers is the same) and can be used with distributions. A `random_device` is a non deterministic generator: it uses a *hardware entropy source* (if available) to generate the random numbers.
 
 #figure(caption: `examples/random.cpp`)[
 ```cpp
@@ -317,6 +311,7 @@ int main() {
 
     std::random_device random_device; t2
     std::cout << random_device() t3 << std::endl;
+
     int seed = random_device(); t4
     std::default_random_engine random_engine(seed); t5
     std::cout << random_engine() t6 << std::endl;
@@ -328,7 +323,7 @@ The typical course of action is to instantiate a `random_device` #reft(2), and u
 
 From this point on, ```cpp std::default_random_engine``` will be reffered to as ```cpp urng_t``` (uniform random number generator type).
 
-#align(center)[
+#figure()[
 ```cpp
 #include <random>
 // works like typedef in C
@@ -438,23 +433,19 @@ It's the same as above, with the difference that it generates *real* numbers in 
 
 Generally, a random fail can be simulated by generating $r in [0, 1]$ and checking whether $r < p$.
 
-#align(center)[
 ```cpp 
 std::uniform_real_distribution<> uniform(0, 1);
 if (uniform(urng) < 0.001) 
     fail();
 ```
-]
 
 A `std::bernoulli_distribution` is a better fit for this specification, as it generates a boolean value and its semantics represents "an event that could happen with a certain probability $p$".
 
-#align(center)[
 ```cpp 
 std::bernoulli_distribution random_fail(0.001);
 if (random_fail(urng)) 
     fail();
 ```
-]
 
 ==== Normal <normal>
 
@@ -480,19 +471,14 @@ The objective is to simulate random purchases reflecting the results of the inte
 enum Item { Shirt = 0, Hoodie = 1, Pants = 2 };
 
 int main() { 
-    std::discrete_distribution<> random_item = {232, 158, 288} t1;
+    std::discrete_distribution<> 
+        rand_item = {232, 158, 288}; t1
 
-    for (int request = 0; request < 1000; request++) {
-        switch (random_item(urng)) {
-            case Shirt: t2
-                std::cout << "shirt";
-                break;
-            case Hoodie: t2
-                std::cout << "hoodie";
-                break;
-            case Pants: t2
-                std::cout << "pants";
-                break;
+    for (size_t request = 0; request < 1000; request++) {
+        switch (rand_item(urng)) {
+            case Shirt: t2 std::cout << "shirt"; break;
+            case Hoodie: t2 std::cout << "hoodie"; break;
+            case Pants: t2 std::cout << "pants"; break;
         }
 
         std::cout << std::endl;
@@ -509,28 +495,29 @@ int main() {
   - #reft(2) how can enums be used here
   - with the discrete distribution, the generated items are proportional to the data.
 
-== Dynamic structures 
+== Data 
 
-=== Manual memory allocation _(and how to *avoid* it)_
-// === ```cpp new```, ```cpp delete``` vs ```cpp malloc()``` and ```cpp free()```
+=== Manual memory allocation
 
 If you allocate with ```cpp new```, you must deallocate with ```cpp delete```, you can't mixup them with ```c malloc()``` and ```c free()```
 
 To avoid manual memory allocation, most of the time it's enough to use the structures in the standard library, like ```cpp std::vector<T>```.
 
-=== Vectors <std-vector>
+=== Data structures
+
+==== Vectors <std-vector>
 // === ```cpp std::vector<T>()``` <std-vector>
 
 You don't have to allocate memory, basically never! You just use the structures that are implemented in the standard library, and most of the time they are enough for our use cases. They are really easy to use.
 
-=== Deques <std-deque>
+==== Deques <std-deque>
 // === ```cpp std::deque<T>()``` <std-deque>
 
-=== Sets <std-set>
+==== Sets <std-set>
 
 Not needed as much
 
-=== Maps <std-map>
+==== Maps <std-map>
 
 Could be useful
 
@@ -578,7 +565,7 @@ int main(){
 // ```
 // ]
 
-== Operator overloading _(quick note)_ <operator-overloading>
+== Operator overloading <operator-overloading>
 
 In @random-example, to generate a random number, ```cpp random_device()``` #reft(3) and ```cpp random_engine()``` #reft(6) are used like functions, but they aren't functions, they're instances of a ```cpp class```. That's because in `C++` you can define how a certain operator (like `+`, `+=`, `<<`, `>>`, `[]`, `()` etc..) should behave when used on a instance of the ```cpp class```. 
 It's called *operator overloading*, a relatively common feature: 
@@ -739,7 +726,7 @@ This example is similar to the one in @simple-mdps-connection-1, with a few nota
 
 Having 
 
-$ p((x_0 ', x_1 ')|(x_0, x_1), (u_0, u_1)) = cases(1 & "if" x_0 ' = ... \ 0 & "otherwise" ) $
+$ p((x_0 ', x_1 ')|(x_0, x_1), (u_0, u_1)) = cases(1 & "if" ... \ 0 & "otherwise" ) $
 
 The implementation would be
 
@@ -800,11 +787,11 @@ enum Light { GREEN = 0, YELLOW = 1, RED = 2 }; t1
 int main() {
     std::random_device random_device;
     urng_t urng(random_device());
-    std::uniform_int_distribution<> random_interval(60, 120) t2;
+    std::uniform_int_distribution<> rand_interval(60, 120); t2
     std::ofstream log("log");
 
     Light traffic_light = Light::RED;
-    size_t next_switch = random_interval(urng);
+    size_t next_switch = rand_interval(urng);
 
     for (size_t time = 0; time <= HORIZON; time++) {
         log << time << ' ' << next_switch - time << ' '
@@ -818,7 +805,7 @@ int main() {
                  ? GREEN
                  : (traffic_light == GREEN ? YELLOW : RED));
 
-        next_switch = time + random_interval(urng);
+        next_switch = time + rand_interval(urng);
     }
 
     log.close();
@@ -1042,7 +1029,21 @@ We can repeat the process in exercise `[5300]`, but this time we can assign a pa
 
 #pagebreak()
 
-= Exam
+= MOCC library
+
+Model CheCking
+
+== Observer Pattern
+
+Basically: the "Observer Pattern" @observer-pattern can be used because a MDP is like an entity that "is notified" when something happens (receives an input, in fact, in the case of MDPs, another name for input is "action"), and notifies other entities (output, or reward)
+
+== `C++` generics & virtual methods
+
+Generics allow to connect MDPs more safely, as the inputs and outputs are typed! (It's still not fault-proof)
+
+#pagebreak()
+
+= Practice
 
 In short, every system can be divided into 4 steps:
 - reading parameters from a file (from files as of 2024/2025)
@@ -1224,20 +1225,6 @@ class Employee : public Observer<T>,
 
 #pagebreak()
 
-= MOCC library
-
-Model CheCking
-
-== Observer Pattern
-
-Basically: the "Observer Pattern" @observer-pattern can be used because a MDP is like an entity that "is notified" when something happens (receives an input, in fact, in the case of MDPs, another name for input is "action"), and notifies other entities (output, or reward)
-
-== `C++` generics & virtual methods
-
-Generics allow to connect MDPs more safely, as the inputs and outputs are typed! (It's still not fault-proof)
-
-#pagebreak()
-
 = Extras
 
 == VDM (Vienna Development Method)
@@ -1289,3 +1276,70 @@ _"The Vienna Development Method (VDM) is one of the longest established model-or
 
 
 // TODO: don't use "using namespace std;"
+
+// #show raw.where(block: true): block.with(inset: .5em)
+// #let note(body) = block(inset: 1em,  body)
+// #let note(body) = block(inset: 1em, stroke: silver, body)
+// #show raw.where(block: true): set text("New Computer Modern")
+
+// #show figure: set block(breakable: true)
+// #show figure.where(kind: raw): set block(width: 100%, fill: luma(254), stroke: (left: 5pt + luma(240)))
+// #show raw.where(block: true): block.with(inset: 1em)
+// #show raw.where(block: true): block.with(inset: 1em)
+
+// #show figure.where(kind: raw): 
+// #show raw.where(block: true): block.with(inset: 1em, width: 100%, fill: luma(254), stroke: (left: 5pt + luma(245)))
+// #show align.where(alignment: center): it => {
+//   show raw.where(block: true): block.with(inset: 1em, width: 100%, storke: none, fill: white)
+//   set block(width: 10pt)
+// }
+
+    // box(width: 6pt, place(dx: -1pt, dy: -7pt, 
+    //   box(radius: 100%, width: 8pt, height: 8pt, inset: 1pt, fill: black, // stroke: .2pt, 
+    //     align(center + horizon, text(white, size: 6pt, strong()))
+    //   )
+    // ))
+
+    // box(circle(width: .65em, fill: black,
+    //   align(center + horizon, text(white, size: .6em, strong(repr(it).slice(2, -1))))
+    // )) 
+
+    // text(size: .9em, strong("[" + repr(it).slice(2, -1) + "]"))
+    // box(width: .7em, height: .7em, clip: true, radius: 100%,  fill: black,
+    //   align(center + horizon, text(white, size: .6em, strong(repr(it).slice(2, -1))))
+    // )
+    // box(align(center + horizon, 
+    // ))
+    // box(baseline: .0em, circle(stroke: none, inset: 0em, align(center + horizon, 
+    //   text(size: .8em, strong(repr(it).slice(2, -1)))
+    // )))
+
+// #let reft(reft) = text(size: .8em, font: "CaskaydiaCove NF", strong("[" + str(reft) + "]"))
+// #let reft(reft) = box(circle(width: .65em, fill: black,
+//       align(center + horizon, text(white,font: "CaskaydiaCove NF", size: .6em, strong([#reft])))
+//     )) 
+
+// box(circle(width: .65em, fill: black,
+//       align(center + horizon, text(white,font: "CaskaydiaCove NF", size: .6em, strong([#reft])))
+//     )) 
+
+
+// box(width: 9pt, height: 9pt, clip: true, radius: 100%, stroke: .5pt, baseline: 1pt,
+//   align(center + horizon, )
+// )
+
+// #let reft(reft) = box(width: 9pt, height: 9pt, clip: true, radius: 100%, stroke: .5pt, baseline: 1pt,
+//   align(center + horizon, text(font: "CaskaydiaCove NF", size: 6pt, strong(str(reft))))
+// )
+
+
+// _(a live streaming service for Amazon)_how would you go about it?
+// The components can be modeled as *Markov decision processes* to derive conclusions on the system.
+// To derive conclusions the system can be *simulated* by modeling its components as *Markov decision processes*.
+
+// _"It is often useful to be able to compute the variance in a single pass, inspecting each value $x_i$ only once; for example, when the data is being collected without enough storage to keep all the values, or when costs of memory access dominate those of computation."_ (#link("https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm")[Wikpedia])
+
+// == Dynamic structures 
+// === Manual memory allocation _(and how to *avoid* it)_
+// === ```cpp new```, ```cpp delete``` vs ```cpp malloc()``` and ```cpp free()```
+// #show raw.where(block: true): block.with(inset: 1em)

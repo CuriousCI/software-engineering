@@ -13,5 +13,5 @@ void Stat::save(real_t data_point) {
 real_t Stat::mean() const { return mean_; }
 
 real_t Stat::stddev() const {
-    return sqrt(n > 0 ? m_2__ / n : 0);
+    return n > 0 ? sqrt(m_2__ / n) : 0;
 }
