@@ -4,6 +4,7 @@
 #set heading(numbering: "1.1")
 #set math.equation(numbering: "(1)")
 
+#show figure: set block(breakable: true)
 #show figure.caption: set align(center)
 #show heading: set block(above: 1.4em, below: 1em)
 #show outline.entry.where(level: 1): it => { show repeat : none; v(1.1em, weak: true); text(size: 1em, strong(it)) }
@@ -57,42 +58,42 @@ There isn't a definitive way to answer these type of questions, but one way to g
 
 To answer questions about the system, it can be simulated by modeling its components as *Markov decision processes*.
 
-== Models // Formal theory <traffic>
+== Models <traffic>
 
-=== Markov chains <markov-chain>
+=== Markov chain <markov-chain>
 
-In simple terms, a Markov chain $M$ is described by a set of *states* $S$ and the *transition probability* $p : S times S -> [0, 1]$ such that $p(s'|s)$ is the probability to transition to state $s'$ if the current state is $s$. The transition probability $p$ is constrained by @markov-chain-constrain
+In simple terms, a Markov chain $M$ is described by a set of *states* $S$ and the *transition probability* $p : S times S -> [0, 1]$ such that $p(s'|s)$ is the probability to transition from $s$ to $s'$. The transition probability $p$ is constrained by @markov-chain-constrain
 
 $ forall s in S space.en sum_(s' in S) p(s'|s) = 1 $ <markov-chain-constrain>
 
-For example, the weather can be modeled with $S = { "sunny", "rainy" }$ and $p$ such that
+A Markov chain (or Markov process) is characterized by memorylesness (called the Markov property), meaning that predictions can be made solely on its present state, and aren't influenced by its history.
 
-#grid(
-  columns: (auto, auto),
-  align: center + horizon,
-  gutter: 1em,
-  math.equation[
-    p = 
-    #table(
-      columns: (auto, auto, auto),
-      stroke: .1pt,
-      align: center + horizon,
-      table.header([], [sunny], [rainy]),
-      [sunny], [0.8], [0.2],
-      [rainy], [0.5], [0.5]
-    )
-  ],
-  {
+#figure(caption: [Example Markov chain with $S = {"rainy", "sunny"}$])[
+  #{
     set text(font: "CaskaydiaCove NF", weight: "light", lang: "en")
-    image("public/weather-system.svg")
+    block(width: 100%, inset: 1em, fill: luma(254), stroke: 1pt + luma(245),
+      image("public/weather-system.svg", width: 70%)
+    )
   }
-)
+] <rainy-sunny>
 
-If a Markov chain $M$ transitions at discrete time steps, i.e. the time steps $t_0, t_1, t_2, ...$ are a *countable*, then it's called a DTMC (discrete-time Markov chain), otherwise it's called a CTMC (continuous-time Markov chain).
+#figure(caption: [Transition probability of @rainy-sunny])[
+  #table(
+    columns: (auto, auto, auto),
+    stroke: .1pt,
+    table.header([], [sunny], [rainy]),
+    [sunny], [0.8], [0.2],
+    [rainy], [0.5], [0.5]
+  )
+] <rainy-sunny-transition-matrix>
 
-=== Markov decision processes <mdp>
+If a Markov chain $M$ transitions at *discrete time* steps (i.e. the time steps $t_0, t_1, t_2, ...$ are a countable) and the *state space* is countable, then it's called a DTMC (discrete-time Markov chain). There are other classifications for continuous state space and continuous-time.
 
-A Markov decision process (MDP), despite sharing the name, is *different* from a Markov chain, because transitions are influenced by an external environment. A MDP $M$ is a tuple $(U, X, Y, p, g)$ s.t.
+The Markov process is characterized by a *transition matrix* which describes the probability of certain transitions, like the on in @rainy-sunny-transition-matrix. Later in the guide it will be shown that implementing transition matrices in `C++` is really simple when using the `<random>` library.
+
+=== Markov decision process <mdp>
+
+A Markov decision process (MDP), despite sharing the name, is *different* from a Markov chain, because it interacts with an *external environment*. A MDP $M$ is a tuple $(U, X, Y, p, g)$ s.t.
 - $U$ is the set of *input values*
 - $X$ is the set of *states*
 - $Y$ is the set of *output values* 
@@ -107,10 +108,7 @@ $ forall x in X space.en forall u in U space.en sum_(x' in X) p(x'|x, u) = 1 $
 ==== MDP example <mdp-example>
 
 The development process of a company can be modeled as a MDP \ $M = (U, X, Y, p, g)$ s.t.
-- $U = {epsilon}$ #footnote[If $U$ is empty $M$ can't transition, at least 1 input is required, i.e. $epsilon$]
-- $X = {0, 1, 2, 3, 4}$ 
-- $Y = "Cost" times "Duration"$
-- $x_0 = 0$
+- $U = {epsilon}$ #footnote[If $U$ is empty $M$ can't transition, at least 1 input is required, i.e. $epsilon$], $X = {0, 1, 2, 3, 4}, Y = "Cost" times "Duration", x_0 = 0$
 
 $ 
 g(x) = cases(
@@ -133,7 +131,7 @@ $
 #v(1em)
 
 #grid(
-  columns: (auto, 1fr),
+  columns: (auto, auto),
   gutter: 1em,
   [
     #table(
@@ -153,34 +151,21 @@ $
   ]
 )
 
-// ]
-
-// #align(center)[
-//   #math.equation[
-//     p = 
-//     #table(
-//       columns: (auto, auto, auto, auto, auto, auto),
-//       stroke: .1pt,
-//       align: center + horizon,
-//       table.header([$epsilon$], [*0*], [*1*], [*2*], [*3*], [*4*]),
-//       [*0*], [0], [1], [0], [0], [0],
-//       [*1*], [0], [.3], [.7], [0], [0],
-//       [*2*], [0], [.1], [.2], [.7], [0],
-//       [*3*], [0], [.1], [.1], [.1], [.7],
-//       [*4*], [0], [0], [0], [0], [1],
-//     )
-//   ]
-// ]
-
-
-
 === Network of MDPs
 
-Let $M_1, M_2$ be two MDPs s.t. $M_1 = (U_1, X_1, Y_1, p_1, g_1)$ and $M_2 = (U_2, X_2, Y_2, p_2, g_2)$, then $M = (U_1, X_1 times X_2, Y_2, p, g)$ s.t. etc... is a MDP. #footnote[It's not so easy to describe, I'll work on it later, TODO]
+Let $M_1, M_2$ be two MDPs s.t. 
+- $M_1 = (U_1, X_1, Y_1, p_1, g_1)$
+- $M_2 = (U_2, X_2, Y_2, p_2, g_2)$
+
+Then $M = (U_1, X_1 times X_2, Y_2, p, g)$ s.t.
+- $p((x_1', x_2') | (x_1, x_2), u_1) = (p(x_1'|x_1, u_1), p(x_2'|x_2, g_1(x_1)))$ 
+- $g((x_1, x_2)) = g_2(x_2)$
+
+- TODO the connection can also be partial
 
 #pagebreak()
 
-== Other methods // Tips and tricks
+== Other methods
 
 === Incremental average <incremental-average>
 
@@ -273,7 +258,7 @@ cases(
 ) 
 $
 
-Let $y(x_0) = y_0$ be the initial condition of the system, and $y' = f(x, y(x))$ be the known *derivative* of $y$ ($y'$ is a function of $x$ and $y(x)$). To approximate $y$, a $Delta$ is chosen (the smaller, the more precise the approximation), then $x_(n + 1) = x_n + Delta$. Now, understanding @euler-method should be easier: the value of $y$ at the next *step* is the current value of $y$ plus the value of its derivative $y'$ (multiplied by $Delta$). In @euler-method $y'$ is multiplied by $Delta$ because when going to the next step, all the derivatives from $x_n$ to $x_(n + 1)$ must be added up, and it's done by adding up 
+Let $y(x_0) = y_0$ be the initial condition of the system, and $y' = f(x, y(x))$ be the known *derivative* of $y$ ($y'$ is a function of $x$ and $y(x)$). To approximate $y$, a $Delta$ is chosen (the smaller, the more precise the approximation) s.t. $x_(n + 1) = x_n + Delta$. Now, understanding @euler-method should be easier: the value of $y$ at the *next step* is the current value of $y$ plus the value of its derivative $y'$ (multiplied by $Delta$). In @euler-method $y'$ is multiplied by $Delta$ because when going to the next step, all the derivatives from $x_n$ to $x_(n + 1)$ must be added up, and it's done by adding up 
 
 $ (x_(n + 1) - x_n) dot.c f(x_n, y_n) = Delta dot.c f(x_n, y_n) $
 
@@ -283,7 +268,7 @@ $
   cases(y(x_0) = 0 \ y'(x) = 2x), quad "with" Delta = 1, 0.5, 0.3, 0.25 
 $ <euler-method-example>
 
-The following program approximates it with different $Delta$ values.
+The following program approximates @euler-method-example with different $Delta$ values.
 
 #figure(caption: `examples/euler.cpp`)[
 ```cpp
@@ -309,15 +294,54 @@ The approximation is close, but not very precise. However, the error analysis is
 
 === Monte Carlo method
 
-The Monte Carlo method is used to approximate values. For example, if you want to approximate the area under a function, just scale the function to a $1 times 1$ square, generate $n$ random x points, count how many of them are under the curve (let that number be $s$) and the area is $s / n$. It can also be used to approximate $pi$ for example.
+"Monte Carlo methods, or Monte Carlo experiments, are a broad class of computational algorithms that rely on repeated random sampling to obtain numerical results." @monte-carlo-method
 
-The Monte Carlo method can be used to approximate probabilities:
-- run a simulation $n$ times (where $n$ is very big)
-- for each simulation
-  - get the cost of the simulation 
-  - add $1$ to $s$ if the cost is below a certain threshold $t$ 
-- the probability that the cost of the system is below $t$ is $s / n$
-- TODO: this can be seen in `practice/etc...`
+"The underlying concept is to use randomness to solve problems that might be deterministic in principle [...] Monte Carlo methods are mainly used in three distinct problem classes: optimization, numerical integration, and generating draws from a probability distribution" @monte-carlo-method
+
+#note[
+  The cost to develop a feature is described by an uniform discrete distribution $cal(U){300, 1000}$. Determine the probability that the cost is less than $550$.
+]
+
+The problem above can be easily solved analitically, but let's use the Monte Carlo method to approximate its value.
+
+#figure()[
+```cpp
+#include <iostream>
+#include <random>
+
+int main() {
+    std::random_device random_device;
+    std::default_random_engine rand_engine(random_device());
+    std::uniform_int_distribution<> rand_cost(300, 1000);
+
+    const size_t ITERATIONS = 10000;
+    size_t below_550 = 0;
+
+    for (size_t i = 0; i < ITERATIONS; i++) t1
+        if (rand_cost(rand_engine) < 550) t2
+            below_550++; t3
+
+    std::cout << (double)below_550/ITERATIONS t4 << std::endl;
+    return 0;
+}
+```
+]
+
+The first step is to simulate for a certain number of iterations #reft(1) the system (in this example, "simulating the system" means generating a random integer cost between 300 and 1000 #reft(2)). If the the iteration respects the requested condition, then it's counted #reft(3).
+
+At the end of the simulations, the probability is calculated as #math.frac([iterations below 550], [total iterations]) #reft(4) . The bigger is the number of iterations, the more precise is the approximation. This type of calculation can be very easily distributed in a HPC (high performance computing) context.
+
+// === Simulated annealing would be cool
+
+// The Monte Carlo method is used to approximate values. For example, if you want to approximate the area under a function, just scale the function to a $1 times 1$ square, generate $n$ random x points, count how many of them are under the curve (let that number be $s$) and the area is $s / n$. It can also be used to approximate $pi$ for example.
+//
+// The Monte Carlo method can be used to approximate probabilities:
+// - run a simulation $n$ times (where $n$ is very big)
+// - for each simulation
+//   - get the cost of the simulation 
+//   - add $1$ to $s$ if the cost is below a certain threshold $t$ 
+// - the probability that the cost of the system is below $t$ is $s / n$
+// - TODO: this can be seen in `practice/etc...`
 
 #pagebreak()
 
@@ -407,12 +431,10 @@ To test a system $S$ it's requried to build a generator that sends value $v_t$ t
 ]
 The `C` code to compute $T_t$ would be ```cpp T = 20 + rand() % 11;```, which is very *error prone*, hard to remember and has no semantic value. In `C++` the same can be done in a *simpler* and *cleaner* way:
 
-#align(center)[
 ```cpp
 std::uniform_int_distribution<> random_T(20, 30); t1
 size_t T = t2 random_T(urng); 
 ```
-]
 
 The interval $T_t$ can be easily generated #reft(2) without needing to remember any formula or trick. The behaviour of $T_t$ is defined only once #reft(1), so it can be easily changed without introducing bugs or inconsistencies. It's also worth to take a look at the implementation of the exercise above (with the addition that $v_t = T_t$), as it comes up very often in software models.
 
@@ -445,11 +467,9 @@ int main() {
 
 The ```cpp uniform_int_distribution``` has many other uses, for example, it could uniformly generate a random state in a MDP. Let ```cpp STATES_SIZE``` be the number of states
 
-#align(center)[
 ```cpp 
 uniform_int_distribution<> random_state(0, STATES_SIZE - 1 t1);
 ``` 
-]
 
 ```cpp random_state``` generates a random state when used. Be careful! Remember to use ```cpp STATES_SIZE - 1``` #reft(1), because ```cpp uniform_int_distribution``` is inclusive. Forgettig ```cpp -1``` can lead to very sneaky bugs, like random segfaults at different instructions. It's very hard to debug unless using `gdb`. The ```cpp uniform_int_distribution``` can also generate negative integers, for example $z in { x | x in ZZ and x in [-10, 15]}$. 
 
@@ -1136,7 +1156,6 @@ The parameters are declared in a `parameters.hpp` file, for a few reasons
 - they are static #reft(4) (otherwise clang doesn't like global variables)
 - in `parameters.hpp` there are also auxiliary types #reft(3), used in the connections between entities
 
-#align(center)[
 ```cpp
 System system; t1
 Stopwatch stopwatch; t2
@@ -1146,7 +1165,6 @@ system.addObserver(&stopwatch); t3
 while (stopwatch.elapsed() <= HORIZON) t4
     system.next(); t5
 ```
-]
 
 Simulating the system is actually easy:
 - declare the system #reft(1)
@@ -1293,9 +1311,9 @@ _"The Vienna Development Method (VDM) is one of the longest established model-or
 - Rust is very focused on performance
 - TODO: non-functional requirements
 
-== UI testing?
-
-=== Playwright
+// == UI testing?
+//
+// === Playwright
 
 == Model checking with Bevy (`Rust`)
 
