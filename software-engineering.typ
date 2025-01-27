@@ -48,18 +48,20 @@ There isn't a definitive way to answer these type of questions, but one way to g
 - the _defect detectors_ analyze frames and audio buffers in real-time
 - the _orchestrator_ controls the flow in the service
 
-#figure(caption: "audio/video monitoring system")[#{
+#figure(caption: "audio/video monitoring system process")[#{
   set text(font: "CaskaydiaCove NFM", weight: "light", lang: "en")
-  image("public/audio-video-monitor.svg", width: 90%)
-}] <audio-video-monitor>
+  block(inset: 1em, stroke: 1pt + luma(245), fill: luma(254),
+  image("public/audio-video-monitor.svg", width: 100%)
+)
+}]
 
-To derive conclusions on this system, its components can be modeled as *Markov decision processes*.
+To answer questions about the system, it can be simulated by modeling its components as *Markov decision processes*.
 
 == Models // Formal theory <traffic>
 
 === Markov chains <markov-chain>
 
-A Markov chain $M$ is described by a set of *states* $S$ and the *transition probability* $p : S times S -> [0, 1]$ such that $p(s'|s)$ is the probability to transition to state $s'$ if the current state is $s$. The transition probability $p$ is constrained by @markov-chain-constrain
+In simple terms, a Markov chain $M$ is described by a set of *states* $S$ and the *transition probability* $p : S times S -> [0, 1]$ such that $p(s'|s)$ is the probability to transition to state $s'$ if the current state is $s$. The transition probability $p$ is constrained by @markov-chain-constrain
 
 $ forall s in S space.en sum_(s' in S) p(s'|s) = 1 $ <markov-chain-constrain>
 
@@ -102,7 +104,7 @@ The same constrain in @markov-chain-constrain holds for MDPs, with an important 
 
 $ forall x in X space.en forall u in U space.en sum_(x' in X) p(x'|x, u) = 1 $
 
-==== Example <mdp-example>
+==== MDP example <mdp-example>
 
 The development process of a company can be modeled as a MDP \ $M = (U, X, Y, p, g)$ s.t.
 - $U = {epsilon}$ #footnote[If $U$ is empty $M$ can't transition, at least 1 input is required, i.e. $epsilon$]
@@ -110,26 +112,30 @@ The development process of a company can be modeled as a MDP \ $M = (U, X, Y, p,
 - $Y = "Cost" times "Duration"$
 - $x_0 = 0$
 
-$
-  g(x) = cases(
-    (0, 0) & quad x = 0 or x = 4 \
-    (20000, 2) & quad x = 1 or x = 3 \
-    (40000, 4) & quad x = 2
-  )
-$
+$ 
+g(x) = cases(
+  (0, 0) & quad x in {0, 4} \
+  (20000, 2) & quad x in {1, 3} \
+  (40000, 4) & quad x = 2
+ ) 
+$ 
+
+#v(1em)
 
 #align(center)[
   #figure({
     set text(font: "CaskaydiaCove NF", weight: "light", lang: "en")
-    image("public/development-process-markov-chain.svg")
+    block(inset: 1em, fill: luma(254), stroke: 1pt + luma(245),
+      image("public/development-process-markov-chain.svg"))
   }, caption: "the model of a team's development process") <development-process> 
 ]
 
 #v(1em)
 
-#align(center)[
-  #math.equation[
-    p = 
+#grid(
+  columns: (auto, 1fr),
+  gutter: 1em,
+  [
     #table(
       columns: (auto, auto, auto, auto, auto, auto),
       stroke: .1pt,
@@ -139,14 +145,34 @@ $
       [*1*], [0], [.3], [.7], [0], [0],
       [*2*], [0], [.1], [.2], [.7], [0],
       [*3*], [0], [.1], [.1], [.1], [.7],
-      [*4*], [1], [0], [0], [0], [0],
+      [*4*], [0], [0], [0], [0], [1],
     )
+  ],
+  [
+    Only *1 transition matrix* is needed, as $|U| = 1$ (there's 1 input value). If $U$ had multiple input values, like ${"on", "off", "wait"}$, then 3 transition matrices would have been required, one *for each input value*.
   ]
-]
+)
 
-#v(1em)
+// ]
 
-Only *1 transition matrix* is defined, as $|U| = 1$ (there's 1 input value). If $U$ had multiple input values, like ${"apple", "banana", "orange"}$, then 3 transition matrices would have been required, one *for each input value*.
+// #align(center)[
+//   #math.equation[
+//     p = 
+//     #table(
+//       columns: (auto, auto, auto, auto, auto, auto),
+//       stroke: .1pt,
+//       align: center + horizon,
+//       table.header([$epsilon$], [*0*], [*1*], [*2*], [*3*], [*4*]),
+//       [*0*], [0], [1], [0], [0], [0],
+//       [*1*], [0], [.3], [.7], [0], [0],
+//       [*2*], [0], [.1], [.2], [.7], [0],
+//       [*3*], [0], [.1], [.1], [.1], [.7],
+//       [*4*], [0], [0], [0], [0], [1],
+//     )
+//   ]
+// ]
+
+
 
 === Network of MDPs
 
@@ -156,10 +182,11 @@ Let $M_1, M_2$ be two MDPs s.t. $M_1 = (U_1, X_1, Y_1, p_1, g_1)$ and $M_2 = (U_
 
 == Other methods // Tips and tricks
 
-=== Incremental average
+=== Incremental average <incremental-average>
 
 Given a set of values $X = {x_1, ..., x_n} subset RR$ the average $overline(x)_n = (sum_(i = 0)^n x_i) / n$ can be computed with a simple procedure 
 
+#figure(caption: `examples/average.cpp`)[
 ```cpp
 float average(std::vector<float> X) {
     float sum = 0;
@@ -169,6 +196,7 @@ float average(std::vector<float> X) {
     return sum / X.size();
 }
 ```
+]
 
 The problem with this procedure is that, by adding up all the values before the division, the *numerator* could *overflow*, even if the value of $overline(x)_n$ fits within the IEEE-754 limits. Nonetheless, $overline(x)_n$ can be calculated incrementally.
 
@@ -183,6 +211,7 @@ $
 
 With this formula the numbers added up are smaller: $overline(x)_n$ is multiplied by $n / (n + 1) tilde 1$, and, if $x_(n + 1)$ fits in IEEE-754, then $x_(n + 1) / (n + 1)$ can also be encoded.
 
+#figure(caption: `examples/average.cpp`)[
 ```cpp
 float incr_average(std::vector<float> X) {
     float average = 0;
@@ -193,6 +222,7 @@ float incr_average(std::vector<float> X) {
     return average;
 }
 ```
+]
 
 In `examples/average.cpp` the procedure `average()` returns `Inf` and `incr_average()` successfuly computes the average.
 
@@ -204,17 +234,26 @@ In a similar fashion, it could be faster and require less memory to calculate th
 
 $ 
 M_(2, n) = sum_(i=1)^n (x_i - overline(x)_n)^2 \
-M_(2, n) = M_(2, n-1) + (x_n - overline(x)_(n - 1))(x_n - overline(x)_n) \
+M_(2, n) = M_(2, n-1) + (x_n - overline(x)_(n - 1))(x_n - overline(x)_n) #reft(2) \
 sigma^2_n = M_(2, n) / n \
 s^2_n = M_(2, n) / (n - 1)
 $
 
-Given $M_2$, the standard deviation can be calculated as $sqrt(M_(2, n) / n)$ if $n > 0$.
+Given $M_2$, if $n > 0$, the standard deviation is $sqrt(M_(2, n) / n)$ #reft(3) . The average can be calculated incrementally like in @incremental-average #reft(1) .
 
 #figure(caption: `mocc/math.cpp`)[
 ```cpp
+void Stat::save(real_t x_i) {
+    real_t next_mean =
+        mean_ * ((real_t)n / (n + 1)) + x_i / (n + 1); t1
+
+    m_2__ += (x_i - mean_) * (x_i - next_mean); t2
+    mean_ = next_mean;
+    n++;
+}
+
 real_t Stat::stddev() const {
-    return n > 0 ? sqrt(m_2__ / n) : 0;
+    return n > 0 ? sqrt(m_2__ / n) : 0; t3
 }
 ```
 ]
@@ -238,42 +277,35 @@ Let $y(x_0) = y_0$ be the initial condition of the system, and $y' = f(x, y(x))$
 
 $ (x_(n + 1) - x_n) dot.c f(x_n, y_n) = Delta dot.c f(x_n, y_n) $
 
-Where $y_n = y(x_n)$. Given this theoretical understanding, implementing the code should be simple enough.
+Where $y_n = y(x_n)$. Let's consider the example in @euler-method-example.
 
-#pagebreak()
+$ 
+  cases(y(x_0) = 0 \ y'(x) = 2x), quad "with" Delta = 1, 0.5, 0.3, 0.25 
+$ <euler-method-example>
 
-The following program approximates $cases(y(x_0) = 0 \ y'(x) = 2x)$ with $Delta = 1/1, 1/2, 1/3, 1/4$ //, knowing that $y' = 2x$.
+The following program approximates it with different $Delta$ values.
 
 #figure(caption: `examples/euler.cpp`)[
 ```cpp
 #define SIZE 4
-
-float derivative(float x) { 
-    return 2 * x; 
-}
+float derivative(float x) { return 2 * x; }
 
 int main() {
     size_t x[SIZE];
-
     for (size_t i = 0; i < SIZE; i++) {
         x[i] = 0;
         float delta = 1. / (i + 1);
         for (float t = 0; t <= 10; t += delta) 
             x[i] += delta * derivative(t);
     }
-
     return 0;
 }
 ```
 ]
 
-When plotting the results, it can be observed that the approximation is close, but not very precise. The error analysis in the Euler method is beyond this guide's scope. 
+The approximation is close, but not very precise. However, the error analysis is beyond this guide's scope. 
 
-#align(center)[
-  #figure(caption: "examples/euler.svg")[
-    #image("examples/euler.svg", width: 99%)
-  ]
-]
+#figure(caption: "examples/euler.svg", image("examples/euler.svg", width: 77%))
 
 === Monte Carlo method
 
@@ -709,8 +741,8 @@ int main() {
 
     for (size_t time = 0; time <= HORIZON; time++) 
         for (size_t r = 0; r < 2; r++) {
-            mdps[0].state[r] = mdps[1].state[r] * uniform(urng);
-            mdps[1].state[r] = mdps[0].state[r] + uniform(urng);
+            mdps[0].state[r] = mdps[1].state[r]*uniform(urng);
+            mdps[1].state[r] = mdps[0].state[r]+uniform(urng);
         }
 }
 ```
@@ -1036,6 +1068,10 @@ Model CheCking
 == Observer Pattern
 
 Basically: the "Observer Pattern" @observer-pattern can be used because a MDP is like an entity that "is notified" when something happens (receives an input, in fact, in the case of MDPs, another name for input is "action"), and notifies other entities (output, or reward)
+
+#figure()[
+  #image("public/observer.png")
+]
 
 == `C++` generics & virtual methods
 
