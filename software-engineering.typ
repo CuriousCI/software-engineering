@@ -21,8 +21,11 @@
 
 #show raw: r => { show regex("t(\d)"): it => { reft(int(repr(it).slice(2, -1))) }; r }
 
-#let note(body) = block(inset: 1em, stroke: (paint: silver, dash: "dashed"), body)
+// #let note(body) = block(width: 100%, inset: 1em, stroke: (paint: silver, dash: "dashed"), body)
+#let note(body) = box(width: 100%, inset: 1em, fill: luma(254), stroke: (paint: silver, dash: "dashed"), body)
 // #let note(body) = block(inset: 1em, fill: luma(254), stroke: (thickness: 1pt, paint: luma(245)), body)
+
+#let docs(dest) = link("https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution", [`(`#underline(offset: 2pt, `docs`)`)`])
 
 #page(align(center + horizon, {
   heading(outlined: false, numbering: none, text(size: 1.5em)[Software Engineering]) 
@@ -213,7 +216,7 @@ In `examples/average.cpp` the procedure `average()` returns `Inf` and `incr_aver
 
 #pagebreak()
 
-=== Welford's online algorithm // (standard deviation)
+=== Welford's online algorithm <welford>
 
 In a similar fashion, it could be faster and require less memory to calculate the *standard deviation* incrementally. Welford's online algorithm can be used for this purpose. 
 
@@ -327,7 +330,7 @@ int main() {
 ```
 ]
 
-The first step is to simulate for a certain number of iterations #reft(1) the system (in this example, "simulating the system" means generating a random integer cost between 300 and 1000 #reft(2)). If the the iteration respects the requested condition, then it's counted #reft(3).
+The first step is to simulate for a certain number of iterations #reft(1) the system (in this example, "simulating the system" means generating a random integer cost between 300 and 1000 #reft(2) ). If the the iteration respects the requested condition, then it's counted #reft(3).
 
 At the end of the simulations, the probability is calculated as #math.frac([iterations below 550], [total iterations]) #reft(4) . The bigger is the number of iterations, the more precise is the approximation. This type of calculation can be very easily distributed in a HPC (high performance computing) context.
 
@@ -408,9 +411,9 @@ int main() {
     std::discrete_distribution<> transition_matrix[] = {
         {0, 1},
         {0, .3, .7},
-        {0, .2, .2, .6},
-        {0, .1, .2, .1, .6},
-        {1},
+        {0, .1, .2, .7},
+        {0, .1, .1, .1, .7},
+        {0, 0, 0, 0, 1},
     };
 
     size_t state = 0;
@@ -424,7 +427,7 @@ int main() {
 ```
 ] <transition-matrix>
 
-==== Uniform discrete @docs-uniform-int-distribution <uniform-int>
+==== Uniform discrete distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution") <uniform-int>
 
 #note[
 To test a system $S$ it's requried to build a generator that sends value $v_t$ to $S$ every $T_t$ seconds. For each send, the value of $T_t$ is an *integer* chosen uniformly in the range $[20, 30]$.
@@ -473,11 +476,11 @@ uniform_int_distribution<> random_state(0, STATES_SIZE - 1 t1);
 
 ```cpp random_state``` generates a random state when used. Be careful! Remember to use ```cpp STATES_SIZE - 1``` #reft(1), because ```cpp uniform_int_distribution``` is inclusive. Forgettig ```cpp -1``` can lead to very sneaky bugs, like random segfaults at different instructions. It's very hard to debug unless using `gdb`. The ```cpp uniform_int_distribution``` can also generate negative integers, for example $z in { x | x in ZZ and x in [-10, 15]}$. 
 
-==== Uniform continuous @docs-uniform-real-distribution <uniform-real>
+==== Uniform continuous distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution") <uniform-real>
 
 It's the same as above, with the difference that it generates *real* numbers in the range $[a, b) subset RR$. 
 
-==== Bernoulli @docs-bernoulli-distribution <bernoulli>
+==== Bernoulli distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution") <bernoulli>
 
 #note[
   To model a network protocol $P$ it's necessary to model requests. When sent, a request can randomly fail with probability $p = 0.001$.
@@ -499,17 +502,97 @@ if (random_fail(urng))
     fail();
 ```
 
-==== Normal <normal>
+==== Normal distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/normal_distribution") <normal>
 
-==== Exponential <exponential>
+Typical Normal distribution, requires the mean #reft(1) and the stddev #reft(2) .
 
-The Exponential distribution is very useful when simulating user requests (generally, the interval between requests to a servers is described by a Exponential distribution, you just have to specify $lambda$)
+#figure(caption: `examples/normal.cpp`)[
+```cpp
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <random>
 
-==== Poisson <poisson>
+using urng_t = std::default_random_engine;
 
-==== Geometric <geometric>
+int main() {
+    std::random_device random_device;
+    urng_t urng(random_device());
+    std::normal_distribution<> normal(12 t1, 2 t2);
 
-==== Discrete distribution <discrete>
+    std::map<long, unsigned> histogram{};
+    for (size_t i = 0; i < 10000; i++)
+        ++histogram[(size_t)normal(urng)];
+
+    for (const auto [k, v] : histogram)
+        if (v / 200 > 0)
+            std::cout << std::setw(2) << k << ' '
+                      << std::string(v / 200, '*') << '\n';
+
+    return 0;
+}
+```
+]
+
+```bash
+ 8 **
+ 9 ****
+10 *******
+11 *********
+12 *********
+13 *******
+14 ****
+15 **
+```
+
+==== Exponential distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/exponential_distribution") <exponential>
+
+#note[
+  A server receives requests at a rate of 5 requests per minute from each client. You want to rebuild the architecture of the server to make it cheaper. To test if the new architecture can handle the load, its required to build a model of client that sends requests at random intervals with an expected rate of 5 requests per minute.
+]
+
+It's easier to simulate the system in seconds (to have more precise measurements). If the client sends 5/min, the rate in seconds should be $lambda = 5 / 60 ~ 0.083$ requests per second. 
+
+#figure(caption: `examples/exponential.cpp`)[
+```cpp
+int main() {
+    std::random_device random_device;
+    urng_t urng(random_device());
+    std::exponential_distribution<> random_interval(5. / 60.);
+
+    real_t next_request_time = 0;
+    std::vector<real_t> req_per_min = {0};
+    for (real_t time_s = 0; time_s < HORIZON; time_s++) {
+        if (((size_t)time_s) % 60 == 0)
+            req_per_min.push_back(0); t1
+
+        if (time_s < next_request_time)
+            continue;
+
+        req_per_min.back()++; t2
+        next_request_time = time_s + random_interval(urng);
+    }
+
+    real_t mean = 0;
+    for (auto x : req_per_min) t3
+        mean += x;
+
+    std::cout << mean / req_per_min.size() << std::endl;
+}
+```
+]
+
+The code above has a counter to measure how many requests were sent each minute. A new counter is added every 60 seconds #reft(1)  , and it's incremented by 1 each time a request is sent #reft(2) . At the end, the average of the counts is calculated #reft(3) , and it comes out to be about 5 requests every 60 seconds (or 5 requests per minute).
+
+==== Poisson distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/poisson_distribution") <poisson>
+
+- TODO: The Poisson distribution is closely related to the Exponential distribution, as it generates a number of items given the rate.
+
+==== Geometric distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/geometric_distribution") <geometric>
+
+- TODO: A typical geometric distribution
+
+==== Discrete distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/discrete_distribution") <discrete>
 
 #note[
   To choose the architecture for an e-commerce it's necessary to simulate realistic purchases. After interviewing 678 people it's determined that 232 of them would buy a shirt from your e-commerce, 158 would buy a hoodie and the other 288 would buy pants. 
@@ -541,11 +624,36 @@ int main() {
 ```
 ]
 
-- TODO:
-  - #reft(1) why can the {a, b, c} syntax be used
-  - #reft(1) the weight thing and the formula (accumulated sums prob)
-  - #reft(2) how can enums be used here
-  - with the discrete distribution, the generated items are proportional to the data.
+The `rand_item` instance generates a random integer $x in {0, 1, 2}$ (because 3 items were sepcified in the array #reft(1) , if the items were 10, then $x$ would have been s.t. $0 <= x <= 9$). The ```cpp = {a, b, c}``` syntax can be used to intialize the a discrete distribution because `C++` allows to pass a ```cpp std::array``` to a constructor @std-array.
+
+The ```cpp discrete_distribution``` uses the in the array to generates the probability for each integer. For example, the probability to generate `0` would be calculated as $232 / (232 + 158 + 288)$, the probability to generate `1` would be $158 / (232 + 158 + 288)$ an the probability to generate `2` would be $288 / (232 + 158 + 288)$. This way, the sum of the probabilities is always 1, and the probability is proportional to the weight.
+
+To map the integers to the actual items #reft(2) an ```cpp enum``` is used: for simple enums each entry can be converted automatically to its integer value (and viceversa). In `C++` there is another construct, the ```cpp enum class``` which doesn't allow implicit conversion (the conversion must be done with a function or with ```cpp static_cast```), but it's more typesafe (see @enum).
+
+The ```cpp discrete_distribution``` can also be used for transition matrices, like the one in @rainy-sunny-transition-matrix. It's enough to assign each state a number (e.g. ```cpp sunny = 0, rainy = 1```), and model the transition probability of *each state* as a discrete distribution.
+
+```cpp
+std::discrete_distribution[] transition_matrix = {
+    /* 0 */ { /* 0 */ 0.8, /* 1 */ 0.2},
+    /* 1 */ { /* 0 */ 0.5, /* 1 */ 0.5}
+}
+```
+
+In the example above the probability to go from state ```cpp 0 (sunny)``` to ```cpp 0 (sunny)``` is 0.8, the probability to go from state ```cpp 0 (sunny)``` to ```cpp 1 (rainy)``` is 0.2 etc...
+
+The `discrete_distribution` can be initialized if the weights aren't already know and must be calculated.
+
+#figure(caption: `practice/2025-01-09/1/main.cpp`)[
+```cpp
+for (auto &weights t1 : matrix)
+    transition_matrix.push_back(
+        std::discrete_distribution<>(
+            weights.begin(), t2  weights.end() t3 )
+    );
+```
+]
+
+The weights are stored in a ```cpp vector``` #reft(1) , and the ```cpp discrete_distribution``` for each state is initialized by indicating the pointer at the beginning reft(2) and at the end #reft(3) of the vector. This works with dynamic arrays too.
 
 == Data 
 
@@ -562,18 +670,24 @@ To avoid manual memory allocation, most of the time it's enough to use the struc
 
 You don't have to allocate memory, basically never! You just use the structures that are implemented in the standard library, and most of the time they are enough for our use cases. They are really easy to use.
 
+Vectors can be used as stacks.
+
 ==== Deques <std-deque>
+
 // === ```cpp std::deque<T>()``` <std-deque>
+Deques are very common, they are like vectors, but can be pushed and popped in both ends, and can b used as queues.
 
 ==== Sets <std-set>
 
-Not needed as much
+Not needed as much, works like the Python set. Can be either a set (ordered) or an unordered set (uses hashes)
 
 ==== Maps <std-map>
 
-Could be useful
+Could be useful. Can be either a map (ordered) or an unordered map (uses hashes)
 
 == I/O
+
+Input output is very simple in C++.
 
 === Standard I/O  <iostream>
 
@@ -640,7 +754,7 @@ For example, ```cpp std::cout``` is an instance of the ```cpp std::basic_ostream
 
 - basically like classes, but with everything public by default 
 
-=== Enums
+=== Enums <enum>
 
 - enum vs enum class
 - an example maybe 
@@ -657,7 +771,7 @@ It's super useful! Trust me, if you learn this everything is way easier (printf 
 First of all, use the `-ggdb3` flags to compile the code. Remember to not use any optimization like `-O3`... using optimizations makes the program harder to debug.
 
 ```makefile
-DEBUG_FLAGS := -lm -ggdb3 -Wall -Wextra -pedantic
+DEBUG_FLAGS := -ggdb3 -Wall -Wextra -pedantic
 ```
 
 Then it's as easy as running `gdb ./main`
@@ -1083,19 +1197,247 @@ We can repeat the process in exercise `[5300]`, but this time we can assign a pa
 
 = MOCC library
 
-Model CheCking
+Model CheCking library for the exam
 
-== Observer Pattern
+== Design
 
-Basically: the "Observer Pattern" @observer-pattern can be used because a MDP is like an entity that "is notified" when something happens (receives an input, in fact, in the case of MDPs, another name for input is "action"), and notifies other entities (output, or reward)
+Basically: the "Observer Pattern" @observer-pattern can be used to implement MDPs, because a MDP is like an entity that "is notified" when something happens (receives an input, in fact, in the case of MDPs, another name for input is "action"), and notifies other entities (gives an output, or reward).
 
-#figure()[
-  #image("public/observer.png")
+#figure(caption: `https://refactoring.guru/design-patterns/observer`)[
+  #block(width: 100%, inset: 1em, stroke: luma(245), fill: luma(254), image("public/observer.png"))
 ]
 
-== `C++` generics & virtual methods
+By using the generics (templates) in `C++` it's possible to model type-safe MDPs, whose connections are easier to handle (if an entity receives inputs of type ```cpp Request```, it cannot be mistakenly connected to an entity that gives an output of type ```cpp Time```). 
 
-Generics allow to connect MDPs more safely, as the inputs and outputs are typed! (It's still not fault-proof)
+#pagebreak()
+
+== ```cpp mocc```
+
+```cpp
+using real_t = double;
+```
+
+The ```cpp real_t``` type is used as an alias for floating point numbers to ensure the same format is used everywhere in the library.
+
+```cpp
+using urng_t = std::default_random_engine;
+```
+
+The ```cpp urng_t``` type is used as an alias for ```cpp std::default_random_engine``` to make the code easier to write.
+
+== ```cpp math```
+
+```cpp
+class Stat
+```
+
+The ```cpp Stat``` class is used to calculate the mean and the standard deviation of a set of values (as discussed in @incremental-average and @welford)
+
+#block(inset:(left: 1em))[
+```cpp
+void save(real_t x);
+```
+
+The ```cpp save()``` method is used to add a value to the set of values. The mean and the standard deviation are automatically updated when a new value is saved.
+
+```cpp
+real_t mean() const;
+```
+
+Returns the precalculated mean.
+
+```cpp
+real_t stddev() const;
+```
+
+Returns the precalculated standard deviation.
+
+#heading(level: 3, outlined: false, numbering: none)[Example]
+
+```cpp
+Stat cost_stat;
+
+cost_stat.save(302);
+cost_stat.save(305);
+cost_stat.save(295);
+cost_stat.save(298);
+
+std::cout 
+  << cost_stat.mean() << " " 
+  << cost_stat.stddev() << std::endl;
+```
+]
+
+#pagebreak()
+
+== ```cpp time```
+
+```cpp
+ALIAS_TYPE(T, real_t)
+```
+
+The ```class T``` is the type for the *time*, it's reperesented as a ```cpp real_t``` to allow working in smaller units of time (for exapmle, when the main unit of time of the simulation is the _minute_, it could still be useful to work with _seconds_). ```class T``` is a *strong alias*, meaning that if a MDP takes in input ```cpp T```, it cannot be connected to a MDP that gives in output a simple ```cpp real_t```.
+
+```cpp
+class Stopwatch : public Observer<>, public Notifier<T>
+```
+
+A ```cpp Stopwatch``` starts at time ```cpp 0```, and each iteration of the system it increments it's time counter by $Delta$. It can be used to measure time from a certain point of the simulation (it can be at any point of the simulation). It sends a notification with the elapsed time at each iteration.
+
+#block(inset: (left: 1em))[
+```cpp 
+Stopwatch(real_t delta = 1);
+```
+
+The default $Delta$ for the ```cpp Stopwatch``` is ```cpp 1```, but it can be changed. Usually, a ```cpp Stopwatch``` is connected to a ```cpp System```.
+
+```cpp
+real_t elapsed();
+```
+
+Returns the time elapsed since the ```cpp Stopwatch``` was started.
+
+```cpp
+void update() override;
+```
+
+This method *must* be called to update the ```cpp Stopwatch```. It is automatically called when the ```cpp Stopwatch``` is connected to a ```cpp System```, or, more generally, to a ```cpp Notifier<>```.
+
+#heading(level: 3, outlined: false, numbering: none)[Example]
+
+```cpp
+System system;
+Stopwatch s1, s2(2.5);
+
+size_t iteration = 0;
+system.addObserver(&s1);
+
+while (s1.elapse() < 10000) {
+    if (iteration == 1000) system.addObserver(&s2);
+    system.next(); iteration++;
+}
+
+std::cout << s1.elapsed() <<' '<< s2.elapsed() << std::endl;
+```
+]
+
+```cpp
+enum class TimerMode { Once, Repeating }
+```
+
+A ```cpp Timer``` can be either in ```cpp Repeating``` mode or in ```cpp Once``` mode: 
+- In ```cpp Repeating``` mode, everytime the timer hits 0, it resets
+- In ```cpp Once``` mode, when the timer hits 0, it stops 
+
+```cpp
+class Timer : public Observer<>, public Notifier<> 
+```
+
+A ```cpp Timer``` starts with a certain duration. At every iteration the duration decreases by $Delta$. When a ```cpp Timer``` hits 0, it sends a notification to its subscribers (with no input value).
+
+#block(inset: (left: 1em))[
+
+```cpp
+Timer(real_t duration, TimerMode mode, real_t delta = 1);
+```
+
+A ```cpp Timer``` requires the starting duration and it's mode. It's more useful to use the ```cpp Once``` mode if the duration is different at each reset, this way it can be set manually.
+
+```cpp
+void set_duration(real_t time);
+```
+
+Sets the current duration of the ```cpp Timer```. It's useful when the duration is generated randomly each time the ```cpp Timer``` hits 0.
+
+```cpp
+void update() override;
+```
+
+This method must be called to updated the time of the ```cpp Timer```. Generally the ```cpp Timer``` is connected to a ```cpp System```.
+
+#heading(level: 3, outlined: false, numbering: none)[Example]
+
+```cpp
+TODO: example
+```
+]
+
+#pagebreak()
+
+== ```cpp alias```
+
+```cpp
+template <typename T> class Alias
+```
+
+The ```cpp class Alias``` is used to create *strong aliases* (a strong alias is a type that can be used in place of its underlying type, except in templates, as its considere a totally different type). 
+
+#block(inset: (left: 1em))[
+```cpp
+Alias() {}
+```
+
+It initialized the value for the underlying type to it's default one.
+
+```cpp
+Alias(T value)
+```
+
+It initialized the underlying type with a certain value. Useful when the underlying type needs complex initialization. It also allows to assign a value of the underlying type (e.g. ```cpp Alias<int> a_int = 5;```)
+
+```cpp
+operator T() const
+```
+
+Allows the ```cpp Alias<T>``` to be casted to ```cpp T``` (e.g. ```cpp Alias<int> a_int = 5; int v = (int)a_int;```). The casting doesn't need to be explicit. 
+]
+
+```cpp
+ALIAS_TYPE(ALIAS, TYPE)
+```
+
+The ```cpp ALIAS_TYPE``` macro is used to quickly create a strong alias. The ```cpp Alias<T>``` class is never used directly.
+
+== ```cpp observer```
+
+```cpp
+template <typename... T> class Observer
+```
+
+- TODO
+
+== ```cpp notifier```
+
+```cpp
+template <typename... T> class Notifier
+```
+
+- TODO
+
+== Auxiliary
+
+```cpp
+template <typename T> class Recorder : public Observer<T>
+```
+
+```cpp
+class Client : public Observer<U...>,
+               public Notifier<Observer<U...> *, T>
+```
+
+- TODO (+ ```cpp using Host```)
+
+```cpp
+class Server : public Observer<Observer<U...> *, T>
+```
+
+- TODO (+ ```cpp using Host```)
+
+```cpp
+class System : public Notifier<>
+```
+
+- TODO
 
 #pagebreak()
 
