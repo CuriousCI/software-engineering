@@ -29,9 +29,15 @@
 
 #page(align(center + horizon, {
   heading(outlined: false, numbering: none, text(size: 1.5em)[Software Engineering]) 
-  text(size: 1.3em)[Cicio Ionuț]
+  text(size: 1.3em)[
+    Cicio Ionuț \
+  ] 
   align(bottom, datetime.today().display("[day]/[month]/[year]"))
 }))
+
+#page[
+    The latest version of the `.pdf` and the referenced material can be found at the following link: #underline(link("https://github.com/CuriousCI/software-engineering")[https://github.com/CuriousCI/software-engineering])
+]
 
 #page(outline(indent: auto, depth: 3))
 
