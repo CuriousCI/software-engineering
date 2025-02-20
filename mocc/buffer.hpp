@@ -1,5 +1,4 @@
-#ifndef MOCC_BUFFER_HPP_
-#define MOCC_BUFFER_HPP_
+#pragma once
 
 #include "observer.hpp"
 #include <deque>
@@ -22,5 +21,3 @@ template <typename T> class Buffer : public Observer<T> {
         buffer.push_back(args);
     }
 };
-
-#endif

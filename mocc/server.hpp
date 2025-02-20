@@ -1,5 +1,4 @@
-#ifndef MOCC_SERV_HPP_
-#define MOCC_SERV_HPP_
+#pragma once
 
 #include "notifier.hpp"
 #include "observer.hpp"
@@ -20,5 +19,3 @@ class Server : public Observer<Observer<U...> *, T> {
 };
 
 } // namespace mocc
-
-#endif

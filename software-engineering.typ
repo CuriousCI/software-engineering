@@ -35,9 +35,7 @@
   align(bottom, datetime.today().display("[day]/[month]/[year]"))
 }))
 
-#page[
-    The latest version of the `.pdf` and the referenced material can be found at the following link: #underline(link("https://github.com/CuriousCI/software-engineering")[https://github.com/CuriousCI/software-engineering])
-]
+#page[The latest version of the `.pdf` and the referenced material can be found at the following link: #underline(link("https://github.com/CuriousCI/software-engineering")[https://github.com/CuriousCI/software-engineering])]
 
 #page(outline(indent: auto, depth: 3))
 
@@ -1000,6 +998,70 @@ This example adds complexity to the traffic light by introducing a *remote contr
 
 === No network `[3100]`
 
+The first step into building a complex system is to model it's components as units that can communicate with eachother. This example takes the traffic light and adds some twists to it. The first step is to re-implement the traffic light as a component (which is very easy to do with the ```c mocc``` library).
+
+```cpp
+#pragma once
+
+#include "../../mocc/mocc.hpp"
+#include <cstddef>
+#include <random>
+
+enum Light { GREEN = 0, YELLOW = 1, RED = 2 };
+const size_t HORIZON = 1000;
+static std::random_device random_device;
+static urng_t urng = urng_t(random_device());
+```
+
+```cpp
+#pragma once
+
+#include "../../mocc/system.hpp"
+#include "../../mocc/time.hpp"
+#include "parameters.hpp"
+#include <cstdlib>
+
+class TrafficLight : public Timed t1 {
+    std::uniform_int_distribution<> random_interval; t2
+    Light l = Light::RED; t3
+
+  public:
+    TrafficLight(System *system)
+        : random_interval(60, 120),
+          Timed(system, 90, TimerMode::Once) {} t4
+
+    void update(U) override { t5
+        l = (l == RED ? GREEN : (l == GREEN ? YELLOW : RED));
+        timer.set_duration(random_interval(urng)); t7
+    }
+
+    Light light() { return this->l; } t8
+};
+```
+
+```cpp
+#include <fstream>
+
+#include "parameters.hpp"
+#include "traffic_light.hpp"
+
+int main() {
+    std::ofstream file("logs");
+
+    System system; t1
+    TrafficLight traffic_light(&system); t2
+
+    for (size_t time = 0; time <= HORIZON; time++) {
+        file << time << ' ' << traffic_light.light()
+             << std::endl;
+        system.next(); t3
+    }
+
+    file.close();
+    return 0;
+}
+```
+
 === Network monitor 
 
 ==== No faults `[3200]`
@@ -1279,7 +1341,7 @@ std::cout
 == ```cpp time```
 
 ```cpp
-ALIAS_TYPE(T, real_t)
+STRONG_ALIAS(T, real_t)
 ```
 
 The ```class T``` is the type for the *time*, it's reperesented as a ```cpp real_t``` to allow working in smaller units of time (for exapmle, when the main unit of time of the simulation is the _minute_, it could still be useful to work with _seconds_). ```class T``` is a *strong alias*, meaning that if a MDP takes in input ```cpp T```, it cannot be connected to a MDP that gives in output a simple ```cpp real_t```.
@@ -1399,10 +1461,10 @@ Allows the ```cpp Alias<T>``` to be casted to ```cpp T``` (e.g. ```cpp Alias<int
 ]
 
 ```cpp
-ALIAS_TYPE(ALIAS, TYPE)
+STRONG_ALIAS(ALIAS, TYPE)
 ```
 
-The ```cpp ALIAS_TYPE``` macro is used to quickly create a strong alias. The ```cpp Alias<T>``` class is never used directly.
+The ```cpp STRONG_ALIAS``` macro is used to quickly create a strong alias. The ```cpp Alias<T>``` class is never used directly.
 
 == ```cpp observer```
 
@@ -1487,9 +1549,9 @@ Reading the input: `std::ifstream` can read (from a file) based on the type of t
 #include "../../mocc/alias.hpp" t1
 #include "../../mocc/mocc.hpp" t2
 
-ALIAS_TYPE(ProjInit, real_t) t3
-ALIAS_TYPE(TaskDone, real_t) t3
-ALIAS_TYPE(EmplCost, real_t) t3
+STRONG_ALIAS(ProjInit, real_t) t3
+STRONG_ALIAS(TaskDone, real_t) t3
+STRONG_ALIAS(EmplCost, real_t) t3
 
 static t4 real_t A, B, C, D, F, G;
 static size_t N, W, HORIZON = 100000;

@@ -1,11 +1,11 @@
-#ifndef MOCC_TIME_HPP_
-#define MOCC_TIME_HPP_
+#pragma once
 
 #include "alias.hpp"
 #include "mocc.hpp"
 #include "notifier.hpp"
+#include "system.hpp"
 
-ALIAS_TYPE(T, real_t)
+STRONG_ALIAS(T, real_t)
 
 /* docs.rs/bevy/latest/bevy/time/struct.Stopwatch.html */
 class Stopwatch : public Observer<>, public Notifier<T> {
@@ -19,11 +19,11 @@ class Stopwatch : public Observer<>, public Notifier<T> {
     void update() override;
 };
 
-/*ALIAS_TYPE(U, real_t)*/
+STRONG_ALIAS(U, real_t)
 enum class TimerMode { Once, Repeating };
 
 /* docs.rs/bevy/latest/bevy/time/struct.Timer.html */
-class Timer : public Observer<>, public Notifier<> {
+class Timer : public Observer<>, public Notifier<U> {
     real_t duration, elapsed = 0;
     bool finished = false;
     const real_t delta;
@@ -36,4 +36,15 @@ class Timer : public Observer<>, public Notifier<> {
     void update() override;
 };
 
-#endif
+class Timed : public Observer<U> {
+  protected:
+    Timer timer;
+
+  public:
+    Timed(System *system, real_t duration, TimerMode mode,
+          real_t delta = 1)
+        : timer(duration, mode, delta) {
+        system->addObserver(&timer);
+        timer.addObserver(this);
+    }
+};

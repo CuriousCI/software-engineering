@@ -1,5 +1,4 @@
-#ifndef MOCC_NOTIFIER_HPP_
-#define MOCC_NOTIFIER_HPP_
+#pragma once
 
 #include <vector>
 
@@ -19,5 +18,3 @@ template <typename... T> class Notifier {
             observer->update(args...);
     }
 };
-
-#endif

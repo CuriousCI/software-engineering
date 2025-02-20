@@ -11,7 +11,7 @@ struct Request {
     real_t t;
 };
 
-ALIAS_TYPE(CustomerId, size_t);
-ALIAS_TYPE(RequestCount, size_t);
+STRONG_ALIAS(CustomerId, size_t);
+STRONG_ALIAS(RequestCount, size_t);
 
 #endif

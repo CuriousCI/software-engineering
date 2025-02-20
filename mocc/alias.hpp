@@ -1,5 +1,4 @@
-#ifndef MOCC_ALIAS_HPP_
-#define MOCC_ALIAS_HPP_
+#pragma once
 
 template <typename T> class Alias {
     T value;
@@ -11,10 +10,8 @@ template <typename T> class Alias {
     operator T() const { return value; }
 };
 
-#define ALIAS_TYPE(ALIAS, TYPE)                               \
+#define STRONG_ALIAS(ALIAS, TYPE)                             \
     class ALIAS : public Alias<TYPE> {                        \
       public:                                                 \
         using Alias<TYPE>::Alias;                             \
     };
-
-#endif

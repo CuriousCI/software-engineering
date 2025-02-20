@@ -1,6 +1,4 @@
-#ifndef MOCC_READER_HPP_
-#define MOCC_READER_HPP_
-
+#pragma once
 #include "observer.hpp"
 
 template <typename T> class Recorder : public Observer<T> {
@@ -15,5 +13,3 @@ template <typename T> class Recorder : public Observer<T> {
 
     operator T() const { return record; }
 };
-
-#endif

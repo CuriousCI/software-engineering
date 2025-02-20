@@ -1,18 +1,13 @@
 #include <fstream>
 #include <iostream>
-#include <random>
 
 #include "../../../mocc/mocc.hpp"
 #include "../../../mocc/system.hpp"
 #include "customer.hpp"
 #include "monitor.hpp"
 #include "parameters.hpp"
-#include <random>
 
 int main() {
-    std::random_device random_device;
-    urng_t urng(random_device());
-
     real_t avg, var;
 
     {
@@ -30,7 +25,7 @@ int main() {
 
     System system;
     Stopwatch stopwatch(T);
-    Customer customer(urng, avg, var);
+    Customer customer(&system, avg, var);
     Monitor monitor;
 
     system.addObserver(&stopwatch);

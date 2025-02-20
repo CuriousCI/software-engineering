@@ -1,5 +1,4 @@
-#ifndef MOCC_STAT_HPP_
-#define MOCC_STAT_HPP_
+#pragma once
 
 #include "mocc.hpp"
 
@@ -13,5 +12,3 @@ class Stat {
     real_t mean() const;
     real_t stddev() const;
 };
-
-#endif

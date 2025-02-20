@@ -1,8 +1,8 @@
 #include <fstream>
 #include <random>
 
-using urng_t = std::default_random_engine;
-using real_t = double;
+#include "../../mocc/mocc.hpp"
+
 const size_t HORIZON = 10;
 
 int main() {
@@ -11,18 +11,18 @@ int main() {
     std::uniform_real_distribution<real_t> uniform(0, 1);
 
     std::vector<real_t> state(2, 0);
-    std::ofstream log("log");
+    std::ofstream file("logs");
 
     for (size_t time = 0; time <= HORIZON; time++) {
-        for (auto &r : state)
-            r = uniform(urng);
+        for (auto &r_i : state)
+            r_i = uniform(urng);
 
-        log << time << ' ';
-        for (auto r : state)
-            log << r << ' ';
-        log << std::endl;
+        file << time << ' ';
+        for (auto r_i : state)
+            file << r_i << ' ';
+        file << std::endl;
     }
 
-    log.close();
+    file.close();
     return 0;
 }

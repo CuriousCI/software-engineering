@@ -1,50 +1,59 @@
 #include <cstddef>
+#include <fstream>
+#include <iostream>
 #include <random>
 
-using real_t = double;
+#include "../../mocc/math.hpp"
+#include "../../mocc/mocc.hpp"
 
-class Task {
-    std::default_random_engine &random_engine;
-    std::vector<std::discrete_distribution<>>
-        transition_matrix;
-
-  public:
-    size_t phase = 0, costs = 0;
-    Task(std::default_random_engine &random_engine)
-        : random_engine(random_engine) {
-        transition_matrix = {
-            {0, 1},          {0, .3, .7},
-            {0, 0, .2, .8},  {0, .1, .1, .1, .7},
-            {0, 0, 0, 0, 1},
-        };
-    }
-
-    void next() {
-        if (phase == 1 || phase == 3)
-            costs += 20;
-        else if (phase == 2)
-            costs += 40;
-
-        phase = transition_matrix[phase](random_engine);
-    }
-};
+const size_t ITERATIONS = 10000;
 
 int main() {
     std::random_device random_device;
-    std::default_random_engine random_engine(random_device());
+    urng_t urng(random_device());
 
-    Task task(random_engine);
-    real_t average = 0, samples = 0, time = 0, step = 1;
+    // clang-format off
+    std::vector<std::discrete_distribution<>>
+        transition_matrix = {
+            {0, 1},          
+            {0, .3, .7},
+            {0, 0, .2, .8},  
+            {0, .1, .1, .1, .7},
+            {0, 0, 0, 0, 1},
+        };
+    // clang-format on
 
-    // avg = avg * (((double)i) / ((double)(i + 1))) +
-    //       y[0] / ((double)(i + 1));
+    Stat cost_stat;
+    size_t less_than_100_count = 0;
+    real_t time = 0;
 
-    // simulator output time and cost
+    std::ofstream file("logs");
 
-    while (task.phase != 4) {
-        time += step;
-        task.next();
+    for (int iter = 0; iter < ITERATIONS; iter++) {
+        size_t phase = 0, costs = 0;
+
+        while (phase != 4) {
+            time++;
+            if (phase == 1 || phase == 3)
+                costs += 20;
+            else if (phase == 2)
+                costs += 40;
+
+            phase = transition_matrix[phase](urng);
+            file << time << ' ' << phase << ' ' << costs
+                 << std::endl;
+        }
+
+        cost_stat.save(costs);
+        if (costs < 100)
+            less_than_100_count++;
     }
 
+    std::cout << cost_stat.mean() << ' ' << cost_stat.stddev()
+              << ' '
+              << (double)less_than_100_count / ITERATIONS
+              << std::endl;
+
+    file.close();
     return 0;
 }
