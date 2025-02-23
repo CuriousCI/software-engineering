@@ -1,15 +1,12 @@
 #include <fstream>
 #include <iostream>
 
-#include "../../../mocc/mocc.hpp"
 #include "../../../mocc/system.hpp"
 #include "customer.hpp"
 #include "monitor.hpp"
 #include "parameters.hpp"
 
 int main() {
-    real_t avg, var;
-
     {
         std::ifstream parameters("parameters.txt");
 
@@ -24,8 +21,8 @@ int main() {
     }
 
     System system;
-    Stopwatch stopwatch(T);
-    Customer customer(&system, avg, var);
+    Stopwatch stopwatch(delta);
+    Customer customer(&system);
     Monitor monitor;
 
     system.addObserver(&stopwatch);

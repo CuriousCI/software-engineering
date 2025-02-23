@@ -8,9 +8,7 @@
 #include "../../../mocc/time.hpp"
 #include "parameters.hpp"
 
-class Monitor : public Observer<Request>,
-                public Recorder<class T> {
-
+class Monitor : public Observer<Request>, public Recorder<T> {
     real_t last_request_time = 0;
 
   public:

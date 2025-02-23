@@ -7,14 +7,13 @@
 #include <random>
 
 class Customer : public Timed,
-                 public Recorder<class T>,
+                 public Recorder<T>,
                  public Notifier<Request> {
 
-    real_t next_request = 0;
     std::normal_distribution<> random_interval;
 
   public:
-    Customer(System *system, real_t avg, real_t var)
+    Customer(System *system)
         : random_interval(avg, var),
           Timed(system, avg, TimerMode::Once) {}
 
