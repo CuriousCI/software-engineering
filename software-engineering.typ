@@ -13,7 +13,7 @@
 #show raw: set text(font:"CaskaydiaCove NFM", lang: "en", weight: "light", size: 9pt)
 #show sym.emptyset : sym.diameter 
 
-#let reft(reft) = box(width: 8pt, place(dy: -8pt, 
+#let reft(reft) = box(width: 9pt, place(dy: -8pt, dx: -0pt,
   box(radius: 100%, width: 9pt, height: 9pt, inset: 1pt, stroke: .5pt, // fill: black,
     align(center + horizon, text(font: "CaskaydiaCove NFM", size: 7pt, repr(reft)))
   )
@@ -782,7 +782,7 @@ Then it's as easy as running `gdb ./main`
 
 - TODO: could be useful to write a script if too many args
 - TODO: just bash code to compile and run
-- TODO (just the most useful stuff, thechnically not enough):
+- TODO (just the most useful stuff, technically not enough):
   - r
   - c
   - n
@@ -813,35 +813,62 @@ The first MDP $M = (U, X, Y, p, g)$ is such that
 - $U = {epsilon}$ #footnote[See @mdp-example]
 - $X = [0,1] times [0,1]$, each state is a pair #reft(3) of *real* numbers #reft(2) 
 - $Y = [0,1] times [0,1]$
-- $p : X times X times U -> X = cal(U)(0, 1) times cal(U)(0, 1)$, the transition probability is a *uniform continuous* distribution #reft(1)
+// - $p : X times X times U -> X = cal(U)(0, 1) times cal(U)(0, 1)$, the transition probability is a *uniform continuous* distribution #reft(1)
+- $p : X times X times U -> X = (cal(U)(0, 1), cal(U)(0, 1)$) the transition probability #reft(1) //the transition probability is a *uniform continuous* distribution #reft(1)
 - $g : X -> Y : (r_0, r_1) |-> (r_0, r_1)$ outputs the current state #reft(4)
 - $x_0 = (0, 0)$ is the initial state #reft(3)
 
 #figure(caption: `software/1100/main.cpp`)[
 ```cpp
+#include <fstream>
+#include <random>
+#include "../../mocc/mocc.hpp"
+const size_t HORIZON = 10;
+
 int main() {
     std::random_device random_device;
     urng_t urng(random_device());
     std::uniform_real_distribution<real_t> uniform(0, 1); t1
-
-    std::vector<real_t t2 > state(2, 0); t3
-    std::ofstream log("log");
+    std::vector<real_t t2> state(2, 0); t3
+    std::ofstream file("logs");
 
     for (size_t time = 0; time <= HORIZON; time++) {
-        for (auto &r : state) 
-            r = uniform(urng); t1
+        for (auto &r_i : state)
+            r_i = uniform(urng); t1
 
-        log << time << ' ';
-        for (auto r : state) 
-            log << r << ' '; t t4
-        log << std::endl;
+        file << time << ' ';
+        for (auto r_i : state)
+            file << r_i << ' '; t4
+        file << std::endl;
     }
 
-    log.close();
+    file.close();
     return 0;
 }
 ```
 ]
+
+// int main() {
+//     std::random_device random_device;
+//     urng_t urng(random_device());
+//     std::uniform_real_distribution<real_t> uniform(0, 1); t1
+//
+//     std::vector<real_t t2 > state(2, 0); t3
+//     std::ofstream log("log");
+//
+//     for (size_t time = 0; time <= HORIZON; time++) {
+//         for (auto &r : state) 
+//             r = uniform(urng); t1
+//
+//         log << time << ' ';
+//         for (auto r : state) 
+//             log << r << ' '; t t4
+//         log << std::endl;
+//     }
+//
+//     log.close();
+//     return 0;
+// }
 
 === MDPs network pt.1 `[1200]` <simple-mdps-connection-1>
 
@@ -871,17 +898,23 @@ With @mdps-connection-2 the code is easier to write, but this approach works for
 
 #figure(caption: `software/1200/main.cpp`)[
 ```cpp
+/* ... */
 const size_t HORIZON = 100;
 struct MDP { real_t state[2]; };
 
 int main() {
+    /* ... */
     std::vector<MDP> mdps(2, {0, 0});
 
     for (size_t time = 0; time <= HORIZON; time++) 
         for (size_t r = 0; r < 2; r++) {
-            mdps[0].state[r] = mdps[1].state[r]*uniform(urng);
-            mdps[1].state[r] = mdps[0].state[r]+uniform(urng);
+            mdps[0].state[r] =
+                mdps[1].state[r] * uniform(urng);
+            mdps[1].state[r] =
+                mdps[0].state[r] + uniform(urng);
         }
+
+    /* ... */
 }
 ```
 ]
@@ -902,7 +935,10 @@ The implementation would be
 
 #figure(caption: `software/1300/main.cpp`)[
 ```cpp
+/* ... */
+
 int main() {
+    /* ... */
     std::vector<MDP> mdps({{1, 1}, {2, 2}});
 
     for (size_t time = 0; time <= HORIZON; time++) {
@@ -915,7 +951,11 @@ int main() {
             mdps[1].state[0] + mdps[1].state[1];
         mdps[1].state[1] =
             -mdps[1].state[0] + mdps[1].state[1];
+
+        /* ... */
     }
+
+    /* ... */
 }
 ```
 ] <mdps-connection-3>
@@ -924,11 +964,11 @@ int main() {
 
 The original model behaves exactly lik @mdps-connection-3, with a different implementation. As an exercise, the reader is encouraged to come up with a different implementation for @mdps-connection-3.
 
+#pagebreak()
+
 == Traffic light `[2000]`
 
-This example models a *traffic light*. The three original versions (`2100`, `2200` and `2300`) have the same behaviour, with a different implementation.
-
-Let $T$ be the MDP that describes the traffic light, s.t.
+This example models a *traffic light*. The three original versions (`2100`, `2200` and `2300`) have the same behaviour, with a different implementation. The one reported here has the same behaviour of that one, yet it's simpler. Let $T$ be the MDP that describes the traffic light, s.t.
 - $U = {epsilon, sigma}$ where 
   - $epsilon$ means "do nothing" 
   - $sigma$ means "switch light"
@@ -947,30 +987,23 @@ Meaning that, if the input is $epsilon$, $T$ maintains the same color with proba
 ```cpp
 #include <fstream>
 #include <random>
-
-using real_t = double;
-using urng_t = std::default_random_engine;
+#include "../../mocc/mocc.hpp"
 const size_t HORIZON = 1000;
-
 enum Light { GREEN = 0, YELLOW = 1, RED = 2 }; t1
 
 int main() {
     std::random_device random_device;
-    urng_t urng(random_device());
-    std::uniform_int_distribution<> rand_interval(60, 120); t2
-    std::ofstream log("log");
-
+    urng_t urng(rand_device());
+    std::uniform_int_distribution<>rand_interval(60, 120); t2
     Light traffic_light = Light::RED;
     size_t next_switch = rand_interval(urng);
+    std::ofstream file("logs");
 
     for (size_t time = 0; time <= HORIZON; time++) {
-        log << time << ' ' << next_switch - time << ' '
-            << traffic_light << std::endl;
-
-        if (time < next_switch)
-            continue;
-
-        traffic_light = t3
+        file << time << ' ' << next_switch - time << ' '
+             << traffic_light t3 << std::endl;
+        if (time < next_switch) continue;
+        traffic_light = t4
             (traffic_light == RED
                  ? GREEN
                  : (traffic_light == GREEN ? YELLOW : RED));
@@ -978,48 +1011,59 @@ int main() {
         next_switch = time + rand_interval(urng);
     }
 
-    log.close();
-    return 0;
+    file.close(); return 0;
 }
 ```
 ]
 
-TODO: 
-  - #reft(1) ```cpp enum``` vs ```cpp enum class```
-  - #reft(2) reference the same trick used in the uniform int distribution example
-  - #reft(3) is basically the behaviour of the formula described above
-  - how is the time rapresented?
-  - how can it be implemented with ```cpp mocc```?
+To reperesent the colors the cleanest way is to use an ```cpp enum```. C++ has two types of enums: simple ```cpp enum```s and ```cpp enum class```es. In this example a *simple* ```cpp enum``` is used #reft(1), because its constants are automatically casted to their value when mapped to string #reft(3); this doesn't happen with ```cpp enum class```es because they are stricter types, and require explicit casting.
+
+The behaviour of the formula described above is implemented with simple ternary operators #reft(4).
+
+// TODO: 
+//   - #reft(1) ```cpp enum``` vs ```cpp enum class```
+//   - #reft(2) reference the same trick used in the uniform int distribution example
+//   - #reft(3) enum is easier to use, because it just logs the integer value associated with the constant
+//   - #reft(4) is basically the behaviour of the formula described above
+//   - how is the time rapresented?
+//   - how can it be implemented with ```cpp mocc```?
 
 
 == Control center
 
-This example adds complexity to the traffic light by introducing a *remote control center*, network faults and repairs. It requries some time (it has too many variants), I'll work on it later.
+This example adds complexity to the traffic light by introducing a *remote control center*, network faults and repairs. Having many communicating components, this example requires more structure.
 
 === No network `[3100]`
 
-The first step into building a complex system is to model it's components as units that can communicate with eachother. This example takes the traffic light and adds some twists to it. The first step is to re-implement the traffic light as a component (which is very easy to do with the ```c mocc``` library).
+The first step into building a complex system is to model it's components as units that can communicate with eachother. The traffic light needs to be to re-implemented as a component (which can be easily done with the ```c mocc``` library).
 
+#figure(caption: `software/3100/parameters.hpp`)[
 ```cpp
-#pragma once
+#pragma once t1
 
 #include "../../mocc/mocc.hpp"
 #include <cstddef>
 #include <random>
 
-enum Light { GREEN = 0, YELLOW = 1, RED = 2 };
-const size_t HORIZON = 1000;
-static std::random_device random_device;
-static urng_t urng = urng_t(random_device());
+enum Light { GREEN = 0, YELLOW = 1, RED = 2 }; t2
+const size_t HORIZON = 1000; t3
+static std::random_device random_device; t4
+static urng_t urng = urng_t(random_device()); t4
 ```
+]
 
+The simulation requires some global variables and types in order to work, the simplest solution is to make a header file with all these data:
+- ```cpp #pragma once``` #reft(1) is used instead of ```cpp #ifndef xxxx #define xxxx```; it has the same behaviour (preventing multiple definitions when a file is imported multiple times)... but technically ```cpp #pragma once``` isn't part of the standard, yet all modern compilers support it
+- ```cpp enum Light``` #reft(2) has a more important job in this example: it's used to communicate values from the *controller* to the *traffic light* via the *network*; technically it could be defined in its own file, but, for the sake of the example, it's not worth to make code navigation more complex
+- there is no problem in defining global constants #reft(3), but global variables are generally discouraged #reft(4) (the alternative would be a singleton or passing the values as parameters to each component, but it would make the example more complex than necessary)  
+
+#figure(caption: `software/3100/traffic_light.hpp`)[
 ```cpp
 #pragma once
 
 #include "../../mocc/system.hpp"
 #include "../../mocc/time.hpp"
 #include "parameters.hpp"
-#include <cstdlib>
 
 class TrafficLight : public Timed t1 {
     std::uniform_int_distribution<> random_interval; t2
@@ -1035,10 +1079,17 @@ class TrafficLight : public Timed t1 {
         timer.set_duration(random_interval(urng)); t7
     }
 
-    Light light() { return this->l; } t8
+    Light light() { return l; } t8
 };
 ```
+]
 
+By using the ```cpp mocc``` library, the re-implementation of the traffic light is quite simple. A ```cpp TrafficLight``` is a ```cpp Timed``` component #reft(1), which means that it has a `timer`, and whenever the `timer` reaches 0 it #reft(5) it receives a notification (the method ```cpp update(U)``` is called, and the traffic light switches color). The `timer` needs to be attached to a ```cpp System``` for it to work #reft(4), and must be initialized. In the library there are two types of ```cpp Timer```
+- ```cpp TimerMode::Once```: when the timer ends, it doesn't automatically restart (it must be manually reset, this allows to set a different after each time the timer reaches 0, e.g. with a random variable #reft(2) #reft(7)) 
+- ```cpp TimerMode::Repeating```: the ```cpp Timer``` automatically resets with the last value set
+Like before, the state of the MDP is just the ```cpp Light``` #reft(3), which can be read #reft(8) but not modified by external code.
+
+#figure(caption: `software/3100/main.cpp`)[
 ```cpp
 #include <fstream>
 
@@ -1049,39 +1100,392 @@ int main() {
     std::ofstream file("logs");
 
     System system; t1
-    TrafficLight traffic_light(&system); t2
+    Stopwatch stopwatch; t2
+    TrafficLight traffic_light(&system); t3
+    system.addObserver(&stopwatch);
 
-    for (size_t time = 0; time <= HORIZON; time++) {
-        file << time << ' ' << traffic_light.light()
-             << std::endl;
-        system.next(); t3
+    while (stopwatch.elapsed() <= HORIZON) {
+        file << stopwatch.elapsed() << ' '
+             << traffic_light.light() << std::endl;
+        system.next(); t4
     }
 
     file.close();
     return 0;
 }
 ```
+]
+
+The last step is to put together the system and run it. A ```cpp System``` #reft(1) is a simple MDP which sends an output $epsilon$ when the ```cpp next()``` method is called. By connecting all the components to the ```cpp System``` it's enough to repeatedly call the ```cpp next()``` method to simulate the whole system.
+
+A ```cpp Stopwatch``` #reft(2) is needed to measure how much time has passed since the simulation started, and the ```cpp TrafficLight``` #reft(3) is connected to a ```cpp timer``` which itself is connected to the ```cpp System```. 
 
 === Network monitor 
 
+The next objective is to introduce a control center which sends information to the traffic light via a network. The traffic light just takes the value it receives via network and displays it.
+
 ==== No faults `[3200]`
+
+#figure(caption: `software/3200/control_center.hpp`)[
+```cpp
+/* ... */
+
+class ControlCenter 
+    : public Timed, public Notifier<Payload> t1 {
+    std::uniform_int_distribution<> random_interval;
+    Light l = Light::RED;
+
+  public:
+    ControlCenter(System *system)
+        : random_interval(60, 120),
+          Timed(system, 90, TimerMode::Once) {}
+
+    void update(U) override {
+        l = (l == RED ? GREEN : (l == GREEN ? YELLOW : RED));
+        notify(l); t1 
+        timer.set_duration(random_interval(urng));
+    }
+
+    Light light() { return l; }
+};
+```
+]
+
+The ```cpp ControlCenter``` has the same behaviour the traffic light had before, with a small difference: it notifies #reft(1) other compoments when the light switches. The type of the notification is ```cpp Payload``` (which is just a ```cpp STRONG_ALIAS``` for ```cpp Light```), this way only compoments that take a ```cpp Payload``` (i.e. the ```cpp Network``` compoment) can be connected to the ```cpp ControlCenter```.
+
+#figure(caption: `software/3200/traffic_light.hpp`)[
+```cpp
+/* ... */
+
+class TrafficLight : public Observer<Message>,
+                     public Notifier<Light> {
+    Light l = Light::RED;
+
+  public:
+    void update(Message message) override {
+        t2 notify(l = message t1);
+    }
+
+    Light light() { return l; }
+};
+```
+]
+
+At this point the traffic light is easier to implement, as it just takes in input a ```cpp Message``` from other components (i.e. the ```cpp Network```), changes its light #reft(1) and notifies other components #reft(2) of the change (```cpp Message``` is just a ```cpp STRONG_ALIAS``` for ```cpp Light```).
+
+#figure(caption: `software/3200/parameters.hpp`)[
+```cpp
+/* ... */
+#include "../../mocc/alias.hpp"
+
+/* ... */
+STRONG_ALIAS(Payload, Light);
+STRONG_ALIAS(Message, Light);
+```
+]
+
+The ```cpp STRONG_ALIAS```es are defined in the `parameters.hpp` file (it's enough to import the `mocc/alias.hpp` file from the library). Strong aliases are different from ```cpp typedef``` or ```cpp using``` aliases, as they are different is different from the type they alias (```cpp Payload``` is a different type from ```cpp Light```), but their values can be exchanged (a ```cpp Light``` value can be assigned to a ```cpp Payload``` and viceversa). Aliases enable type-safe connections among components.
+
+#figure(caption: `software/3200/network.hpp`)[
+```cpp
+/* ... */
+
+class Network : public Timed,
+                public Buffer<Payload>, t1
+                public Notifier<Message> {
+
+  public:
+    Network(System *system)
+        : Timed(system, 0, TimerMode::Once) {}
+
+    void update(Payload payload) override {
+        if (buffer.empty())
+            timer.set_duration(2);
+        Buffer<Payload>::update(payload);
+    }
+
+    void update(U) override {
+        if (!buffer.empty()) {
+            notify((Light)buffer.front());
+            buffer.pop_front();
+            if (!buffer.empty())
+                timer.set_duration(2);
+        }
+    }
+};
+```
+]
+
+The simplest form of network has an illimited ```cpp Buffer``` #reft(1) for the incoming messages, and every 2 seconds it sends the message to the destination (to simulate a delay). This model of the network has many problems: it doesn't account for faults (messages are corrupted / lost), buffer overflow, the fact that all messages take the same time to be sent etc...
+
+
+#figure(caption: `software/3200/traffic_light.hpp`)[
+```cpp
+/* ... */
+
+class Monitor : public Recorder<Payload>,
+                public Recorder<Light>,
+                public Observer<> {
+
+    int time = 0; bool messages_lost = false;
+
+  public:
+    Monitor() : Recorder<Payload>(RED), Recorder<Light>(RED) {}
+
+    void update() override {
+        if (Recorder<Payload>::record !=
+            Recorder<Light>::record)
+            time++;
+        else
+            time = 0;
+
+        if (time > 3) 
+            messages_lost = true;
+    }
+
+    bool is_valid() { return !messages_lost; }
+};
+```
+]
+
+The ```cpp Monitor``` is a compoment that takes inputs from both the ```cpp ControlCenter``` and the ```cpp TrafficLight``` and checks if messages are lost (a message is lost if it takes more then 3 seconds for the traffic light to change).
 
 ==== Faults & no repair `[3300]`
 
+#figure(caption: `software/3300/network.hpp`)[
+```cpp
+/* ... */
+
+class Network : public Timed,
+                public Buffer<Payload>,
+                public Notifier<Message> {
+    std::bernoulli_distribution random_fault; t1
+
+  public:
+    /* ... */
+
+    void update(U) override {
+        if (!buffer.empty()) {
+            if (!random_fault(urng)) t2
+                notify((Light)buffer.front());
+            buffer.pop_front();
+            if (!buffer.empty())
+                timer.set_duration(2);
+        }
+    }
+};
+```
+]
+
+The first change is to add faults to the network #reft(1), which can be done easily by using a ```cpp std::bernoulli_distribution``` with a certain fault probability (e.g. 0.01), and send the message only if there is no fault. Once the message is lost nothing can be done, the system doesn't recover.
+
+#pagebreak()
+
 === Faults & repair `[3400]`
 
+#figure(caption: `software/3400/network.hpp`)[
+```cpp
+/* ... */
+
+class Network : public Timed,
+                public Buffer<Payload>,
+                public Notifier<Message> {
+    std::bernoulli_distribution random_fault;
+    std::bernoulli_distribution random_repair; t1
+
+  public:
+    /* ... */
+
+    void update(U) override {
+        if (!buffer.empty()) {
+            if (!random_fault(urng)||random_repair(urng)) t2
+                notify((Light)buffer.front());
+            buffer.pop_front();
+            if (!buffer.empty())
+                timer.set_duration(2);
+        }
+    }
+};
+```
+]
+
+The next idea is to add repairs #reft(1) when the system fails. In this case the repairs are random for simplicity #reft(2), but there are smarter ways to handle a network fault.
+
 === Faults & repair + correct protocol `[3500]`
+
+#figure(caption: `software/3500/network.hpp`)[
+```cpp
+/* ... */
+
+class Network : public Timed,
+                public Buffer<Payload>,
+                public Notifier<Message>,
+                public Notifier<Fault> t1 {
+  public:
+    /* ... */
+
+    void update(U) override {
+        if (!buffer.empty()) {
+            if (random_fault(urng)) {
+                if (random_repair(urng))
+                    Notifier<Message>::notify(
+                        (Light)buffer.front());
+                else
+                    Notifier<Fault>::notify(true); t2
+            } else {
+                Notifier<Message>::notify(
+                    (Light)buffer.front());
+            }
+
+            buffer.pop_front();
+            if (!buffer.empty())
+                timer.set_duration(2);
+        }
+    }
+};
+```
+]
+
+In the last version, the network sends a notification #reft(2) when there is a ```cpp Fault``` #reft(1) (which is just a ```cpp STRONG_ALIAS``` for ```cpp bool```), this way the ```cpp TrafficLight``` can recover in case of errors.
+
+#figure(caption: `software/3500/traffic_light.hpp`)[
+```cpp
+/* ... */
+
+class TrafficLight : public Observer<Fault>, t1
+                     public Observer<Message>,
+                     public Notifier<Light> {
+    /* ... */
+
+    void update(Fault) override {
+        l = Light::RED;
+        notify(l);
+    }
+};
+```
+]
+
+When the ```cpp TrafficLight``` detects a ```cpp Fault``` it turns to ```cpp Light::RED``` for safety reasons.
+
+#figure(caption: [connections in `software/3500/main.cpp`])[
+```cpp
+System system;
+Monitor monitor;
+Network network(&system);
+Stopwatch stopwatch;
+TrafficLight traffic_light;
+ControlCenter control_center(&system);
+
+system.addObserver(&monitor);
+system.addObserver(&stopwatch);
+network.Notifier<Message>::addObserver(&traffic_light);
+network.Notifier<Fault>::addObserver(&traffic_light);
+traffic_light.addObserver(&monitor);
+control_center.addObserver(&network);
+control_center.addObserver(&monitor);
+```
+]
 
 == Statistics
 
 === Expected value `[4100]`
 
-In this one we just simulate a development process (phase 0, phase 1, and phase 2), and we calculate the average ...
+In this example the goal is to simulate a development process (phase 0, phase 1, and phase 2), and calculate the cost of each simulation.
 
+
+#figure(caption: `software/4100/main.cpp`)[
+```cpp
+#include <cstddef>
+#include <fstream>
+#include <random>
+
+#include "../../mocc/mocc.hpp"
+
+int main() {
+    std::random_device random_device;
+    urng_t urng(random_device());
+
+    std::vector<std::discrete_distribution<>>
+        transition_matrix = {
+            {0, 1},          
+            {0, .3, .7},
+            {0, 0, .2, .8},  
+            {0, .1, .1, .1, .7},
+            {0, 0, 0, 0, 1},
+        };
+
+    real_t time = 0;
+    size_t phase = 0, costs = 0;
+
+    std::ofstream file("logs");
+
+    while (phase != 4) {
+        time++;
+        if (phase == 1 || phase == 3)
+            costs += 20;
+        else if (phase == 2)
+            costs += 40;
+
+        phase = transition_matrix[phase](urng);
+        file << time << ' ' << phase << ' ' << costs
+             << std::endl;
+    }
+
+    file.close();
+    return 0;
+}
+```
+]
 
 === Probability `[4200]`
 
-In this one we simulate a more complex software developmen process, and we calculate the average cost (Wait, what? Do we simulate it multiple times?)
+This example behaves like the previous one, but uses the Monte Carlo method @monte-carlo-method to calculate the probability the cost is less than a certain value
+
+// In this one we simulate a more complex software developmen process, and we calculate the average cost (Wait, what? Do we simulate it multiple times?)
+
+#figure(caption: `software/4200/main.cpp`)[
+```cpp
+/* ... */
+
+const size_t ITERATIONS = 10000;
+
+int main() {
+    Stat cost_stat;
+    size_t less_than_100_count = 0;
+    real_t time = 0;
+
+    std::ofstream file("logs");
+
+    for (int iter = 0; iter < ITERATIONS; iter++) {
+        size_t phase = 0, costs = 0;
+
+        while (phase != 4) {
+            time++;
+            if (phase == 1 || phase == 3)
+                costs += 20;
+            else if (phase == 2)
+                costs += 40;
+
+            phase = transition_matrix[phase](urng);
+            file << time << ' ' << phase << ' ' << costs
+                 << std::endl;
+        }
+
+        cost_stat.save(costs);
+        if (costs < 100)
+            less_than_100_count++;
+    }
+
+    std::cout << cost_stat.mean() << ' ' << cost_stat.stddev()
+              << ' '
+              << (double)less_than_100_count / ITERATIONS
+              << std::endl;
+
+    file.close();
+    return 0;
+}
+```
+]
 
 #pagebreak()
 

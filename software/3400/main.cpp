@@ -12,10 +12,12 @@ int main() {
     System system;
     Monitor monitor;
     Network network(&system);
+    Stopwatch stopwatch;
     TrafficLight traffic_light;
     ControlCenter control_center(&system);
 
     system.addObserver(&monitor);
+    system.addObserver(&stopwatch);
     network.addObserver(&traffic_light);
     traffic_light.addObserver(&monitor);
     control_center.addObserver(&network);
@@ -23,8 +25,9 @@ int main() {
 
     std::ofstream file("logs");
 
-    for (size_t time = 0; time <= HORIZON; time++) {
-        file << time << ' ' << control_center.light() << ' '
+    while (stopwatch.elapsed() <= HORIZON) {
+        file << stopwatch.elapsed() << ' '
+             << control_center.light() << ' '
              << traffic_light.light() << ' '
              << monitor.is_valid() << std::endl;
 

@@ -5,13 +5,16 @@
 
 int main() {
     System system;
+    Stopwatch stopwatch;
     TrafficLight traffic_light(&system);
+
+    system.addObserver(&stopwatch);
 
     std::ofstream file("logs");
 
-    for (size_t time = 0; time <= HORIZON; time++) {
-        file << time << ' ' << traffic_light.light()
-             << std::endl;
+    while (stopwatch.elapsed() <= HORIZON) {
+        file << stopwatch.elapsed() << ' '
+             << traffic_light.light() << std::endl;
         system.next();
     }
 

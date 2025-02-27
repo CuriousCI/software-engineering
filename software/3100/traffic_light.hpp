@@ -3,7 +3,6 @@
 #include "../../mocc/system.hpp"
 #include "../../mocc/time.hpp"
 #include "parameters.hpp"
-#include <cstdlib>
 
 class TrafficLight : public Timed {
     std::uniform_int_distribution<> random_interval;

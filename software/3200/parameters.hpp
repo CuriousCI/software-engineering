@@ -2,7 +2,6 @@
 
 #include "../../mocc/alias.hpp"
 #include "../../mocc/mocc.hpp"
-#include <cstddef>
 #include <random>
 
 enum Light { GREEN = 0, YELLOW = 1, RED = 2 };
