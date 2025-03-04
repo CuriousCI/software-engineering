@@ -96,7 +96,7 @@ A Markov chain (or Markov process) is characterized by memorylesness (called the
 
 If a Markov chain $M$ transitions at *discrete time* steps (i.e. the time steps $t_0, t_1, t_2, ...$ are a countable) and the *state space* is countable, then it's called a DTMC (discrete-time Markov chain). There are other classifications for continuous state space and continuous-time.
 
-The Markov process is characterized by a *transition matrix* which describes the probability of certain transitions, like the on in @rainy-sunny-transition-matrix. Later in the guide it will be shown that implementing transition matrices in `C++` is really simple when using the `<random>` library.
+The Markov process is characterized by a *transition matrix* which describes the probability of certain transitions, like the one in @rainy-sunny-transition-matrix. Later in the guide it will be shown that implementing transition matrices in `C++` is really simple with the `<random>` library.
 
 === Markov decision process <mdp>
 
@@ -154,7 +154,7 @@ $
     )
   ],
   [
-    Only *1 transition matrix* is needed, as $|U| = 1$ (there's 1 input value). If $U$ had multiple input values, like ${"on", "off", "wait"}$, then 3 transition matrices would have been required, one *for each input value*.
+    Only *1 transition matrix* is needed, as $|U| = 1$ (there's 1 input value). If $U$ had multiple input values, like ${"on", "off", "wait"}$, then multiple transition matrices would have been required, one *for each input value*.
   ]
 )
 
@@ -216,7 +216,7 @@ float incr_average(std::vector<float> X) {
 ```
 ]
 
-In `examples/average.cpp` the procedure `average()` returns `Inf` and `incr_average()` successfuly computes the average.
+In `examples/average.cpp` the procedure `incr_average()` successfuly computes the average, but the simple `average()` returns `Inf`.
 
 #pagebreak()
 
@@ -228,7 +228,7 @@ $
 M_(2, n) = sum_(i=1)^n (x_i - overline(x)_n)^2 \
 M_(2, n) = M_(2, n-1) + (x_n - overline(x)_(n - 1))(x_n - overline(x)_n) #reft(2) \
 sigma^2_n = M_(2, n) / n \
-s^2_n = M_(2, n) / (n - 1)
+// s^2_n = M_(2, n) / (n - 1)
 $
 
 Given $M_2$, if $n > 0$, the standard deviation is $sqrt(M_(2, n) / n)$ #reft(3) . The average can be calculated incrementally like in @incremental-average #reft(1) .
@@ -301,17 +301,17 @@ The approximation is close, but not very precise. However, the error analysis is
 
 === Monte Carlo method
 
-"Monte Carlo methods, or Monte Carlo experiments, are a broad class of computational algorithms that rely on repeated random sampling to obtain numerical results." @monte-carlo-method
+"Monte Carlo methods, or Monte Carlo experiments, are a broad class of computational algorithms that rely on repeated random sampling to obtain numerical results.
 
-"The underlying concept is to use randomness to solve problems that might be deterministic in principle [...] Monte Carlo methods are mainly used in three distinct problem classes: optimization, numerical integration, and generating draws from a probability distribution" @monte-carlo-method
+The underlying concept is to use randomness to solve problems that might be deterministic in principle [...] Monte Carlo methods are mainly used in three distinct problem classes: optimization, numerical integration, and generating draws from a probability distribution" @monte-carlo-method
 
 #note[
-  The cost to develop a feature is described by an uniform discrete distribution $cal(U){300, 1000}$. Determine the probability that the cost is less than $550$.
+  The cost to develop a feature for a certain software is described by an uniform discrete distribution $cal(U){300, 1000}$. Determine the probability that the cost is less than $550$.
 ]
 
 The problem above can be easily solved analitically, but let's use the Monte Carlo method to approximate its value.
 
-#figure()[
+#figure(caption: `examples/montecarlo.cpp`)[
 ```cpp
 #include <iostream>
 #include <random>
@@ -328,13 +328,14 @@ int main() {
         if (rand_cost(rand_engine) < 550) t2
             below_550++; t3
 
-    std::cout << (double)below_550/ITERATIONS t4 << std::endl;
+    std::cout << (double)below_550/ITERATIONS t4 
+              << std::endl;
     return 0;
 }
 ```
 ]
 
-The first step is to simulate for a certain number of iterations #reft(1) the system (in this example, "simulating the system" means generating a random integer cost between 300 and 1000 #reft(2) ). If the the iteration respects the requested condition, then it's counted #reft(3).
+The first step is to simulate for a certain number of iterations #reft(1) the system (in this example, "simulating the system" means generating a random integer cost between 300 and 1000 #reft(2) ). If the the iteration respects the requested condition ($< 550$), then it's counted #reft(3).
 
 At the end of the simulations, the probability is calculated as #math.frac([iterations below 550], [total iterations]) #reft(4) . The bigger is the number of iterations, the more precise is the approximation. This type of calculation can be very easily distributed in a HPC (high performance computing) context.
 
@@ -355,6 +356,44 @@ At the end of the simulations, the probability is calculated as #math.frac([iter
 = How to `C++`
 
 This section covers the basics assuming the reader already knows `C`.
+
+== Prelude
+
+`C++` is a strange language, and some of its quircks need to be pointed out to have a better understanding of what the code does in later sections. 
+
+=== Operator overloading <operator-overloading>
+
+#figure(caption: `examples/random.cpp`)[
+```cpp
+#include <iostream>
+#include <random>
+
+int main() {
+    std::cout << random() t1 << std::endl;
+
+    std::random_device random_device;
+    std::cout << random_device() t2 << std::endl;
+
+    int seed = random_device();
+    std::default_random_engine random_engine(seed); t3
+    std::cout << random_engine() t4 << std::endl;
+}
+```
+] <random-example-1>
+
+In @random-example-1, to generate a random number, ```cpp random_device()``` #reft(2) and ```cpp random_engine()``` #reft(4) are used like functions, but they *aren't functions*, they're *instances* of a ```cpp class```. That's because in `C++` the behaviour a certain operator (like `+`, `+=`, `<<`, `>>`, `[]`, `()` etc..)  when used on a instance of the ```cpp class``` can be defined by the programmer. 
+It's called *operator overloading*, and it's relatively common feature: 
+- in `Python` operation overloading is done by implementing methods with special names, like ```python __add__()``` @python-operator-overloading
+- in `Rust` it's done by implementing the `Trait` associated with the operation, like ```rust std::ops::Add``` @rust-operator-overloading.
+- `Java` and `C` don't have operator overloading
+
+For example, ```cpp std::cout``` is an instance of the ```cpp std::basic_ostream class```, which overloads the method "```cpp operator<<()```" @basic-ostream; ```cpp std::cout << "Hello"``` is a valid piece of code which *doesn't do a bitwise left shift* like it would in `C`, but prints on the standard output the string ```cpp "Hello"```. // The same applies to to file streams.
+
+```cpp random()``` #reft(1) _should_ be a regular function call, but, for example, ```cpp std::default_random_engine random_engine(seed);``` #reft(3) is something else alltogether: a constructor call, where ```cpp seed``` is the parameter passed to the constructor to instantiate the ```cpp random_engine``` object.
+
+// === Instantiating objects
+
+#pagebreak()
 
 == The ```cpp random``` library <random-library>
 
@@ -393,7 +432,7 @@ From this point on, ```cpp std::default_random_engine``` will be reffered to as 
 using urng_t = std::default_random_engine; 
 
 int main() {
-    urng_t urng(190201); 
+    urng_t urng(190201); // constructor call with parameter 190201
 }
 ```
 ]
@@ -475,10 +514,10 @@ int main() {
 The ```cpp uniform_int_distribution``` has many other uses, for example, it could uniformly generate a random state in a MDP. Let ```cpp STATES_SIZE``` be the number of states
 
 ```cpp 
-uniform_int_distribution<> random_state(0, STATES_SIZE - 1 t1);
+uniform_int_distribution<> random_state(0, STATES_SIZE-1 t1);
 ``` 
 
-```cpp random_state``` generates a random state when used. Be careful! Remember to use ```cpp STATES_SIZE - 1``` #reft(1), because ```cpp uniform_int_distribution``` is inclusive. Forgettig ```cpp -1``` can lead to very sneaky bugs, like random segfaults at different instructions. It's very hard to debug unless using `gdb`. The ```cpp uniform_int_distribution``` can also generate negative integers, for example $z in { x | x in ZZ and x in [-10, 15]}$. 
+```cpp random_state``` generates a random state when used. Be careful! Remember to use ```cpp STATES_SIZE-1``` #reft(1), because ```cpp uniform_int_distribution``` is inclusive. Forgettig ```cpp -1``` can lead to very sneaky bugs, like random segfaults at different instructions. It's very hard to debug unless using `gdb`. The ```cpp uniform_int_distribution``` can also generate negative integers, for example $z in { x | x in ZZ and x in [-10, 15]}$. 
 
 ==== Uniform continuous distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution") <uniform-real>
 
@@ -559,10 +598,11 @@ It's easier to simulate the system in seconds (to have more precise measurements
 
 #figure(caption: `examples/exponential.cpp`)[
 ```cpp
+/* ... */
 int main() {
     std::random_device random_device;
     urng_t urng(random_device());
-    std::exponential_distribution<> random_interval(5. / 60.);
+    std::exponential_distribution<> random_interval(5./60.);
 
     real_t next_request_time = 0;
     std::vector<real_t> req_per_min = {0};
@@ -590,13 +630,51 @@ The code above has a counter to measure how many requests were sent each minute.
 
 ==== Poisson distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/poisson_distribution") <poisson>
 
-- TODO: The Poisson distribution is closely related to the Exponential distribution, as it generates a number of items given the rate.
+The Poisson distribution is closely related to the Exponential distribution, as it randomly generates a number of items in a time unit given the average rate.
 
+```cpp
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <random>
+
+using urng_t = std::default_random_engine;
+using real_t = float;
+const size_t HORIZON = 10000;
+
+int main() {
+    std::random_device random_device;
+    urng_t urng(random_device());
+    std::poisson_distribution<> poisson(4);
+
+    std::map<long, unsigned> histogram{};
+    for (size_t i = 0; i < 10000; i++)
+        ++histogram[(size_t)poisson(urng)];
+
+    for (const auto [k, v] : histogram)
+        if (v / 100 > 0)
+            std::cout << std::setw(2) << k << ' '
+                      << std::string(v / 100, '*') << '\n';
+}
+```
+
+```bash
+ 0 *
+ 1 *******
+ 2 **************
+ 3 *******************
+ 4 ********************
+ 5 ***************
+ 6 **********
+ 7 *****
+ 8 **
+ 9 *
+```
 ==== Geometric distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/geometric_distribution") <geometric>
 
-- TODO: A typical geometric distribution
+A typical geometric distribution, has the same API as the others.
 
-==== Discrete distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/discrete_distribution") <discrete>
+=== Discrete distribution & transition matrices #docs("https://en.cppreference.com/w/cpp/numeric/random/discrete_distribution") <discrete>
 
 #note[
   To choose the architecture for an e-commerce it's necessary to simulate realistic purchases. After interviewing 678 people it's determined that 232 of them would buy a shirt from your e-commerce, 158 would buy a hoodie and the other 288 would buy pants. 
@@ -657,7 +735,7 @@ for (auto &weights t1 : matrix)
 ```
 ]
 
-The weights are stored in a ```cpp vector``` #reft(1) , and the ```cpp discrete_distribution``` for each state is initialized by indicating the pointer at the beginning reft(2) and at the end #reft(3) of the vector. This works with dynamic arrays too.
+The weights are stored in a ```cpp vector``` #reft(1) , and the ```cpp discrete_distribution``` for each state is initialized by indicating the pointer at the beginning #reft(2) and at the end #reft(3) of the vector. This works with dynamic arrays too.
 
 == Data 
 
@@ -735,15 +813,6 @@ int main(){
 // ```
 // ]
 
-== Operator overloading <operator-overloading>
-
-In @random-example, to generate a random number, ```cpp random_device()``` #reft(3) and ```cpp random_engine()``` #reft(6) are used like functions, but they aren't functions, they're instances of a ```cpp class```. That's because in `C++` you can define how a certain operator (like `+`, `+=`, `<<`, `>>`, `[]`, `()` etc..) should behave when used on a instance of the ```cpp class```. 
-It's called *operator overloading*, a relatively common feature: 
-- in `Python` operation overloading is done by implementing methods with special names, like ```python __add__()``` @python-operator-overloading
-- in `Rust` it's done by implementing the `Trait` associated with the operation, like ```rust std::ops::Add``` @rust-operator-overloading.
-- `Java` and `C` don't have operator overloading
-
-For example, ```cpp std::cout``` is an instance of the ```cpp std::basic_ostream class```, which overloads the method "```cpp operator<<()```" @basic-ostream. The same applies to to file streams.
 
 == Code structure
 
@@ -829,7 +898,7 @@ int main() {
     std::random_device random_device;
     urng_t urng(random_device());
     std::uniform_real_distribution<real_t> uniform(0, 1); t1
-    std::vector<real_t t2> state(2, 0); t3
+    std::vector<real_t t2 > state(2, 0); t3
     std::ofstream file("logs");
 
     for (size_t time = 0; time <= HORIZON; time++) {
@@ -842,33 +911,10 @@ int main() {
         file << std::endl;
     }
 
-    file.close();
-    return 0;
+    file.close(); return 0;
 }
 ```
 ]
-
-// int main() {
-//     std::random_device random_device;
-//     urng_t urng(random_device());
-//     std::uniform_real_distribution<real_t> uniform(0, 1); t1
-//
-//     std::vector<real_t t2 > state(2, 0); t3
-//     std::ofstream log("log");
-//
-//     for (size_t time = 0; time <= HORIZON; time++) {
-//         for (auto &r : state) 
-//             r = uniform(urng); t1
-//
-//         log << time << ' ';
-//         for (auto r : state) 
-//             log << r << ' '; t t4
-//         log << std::endl;
-//     }
-//
-//     log.close();
-//     return 0;
-// }
 
 === MDPs network pt.1 `[1200]` <simple-mdps-connection-1>
 
@@ -968,7 +1014,7 @@ The original model behaves exactly lik @mdps-connection-3, with a different impl
 
 == Traffic light `[2000]`
 
-This example models a *traffic light*. The three original versions (`2100`, `2200` and `2300`) have the same behaviour, with a different implementation. The one reported here has the same behaviour of that one, yet it's simpler. Let $T$ be the MDP that describes the traffic light, s.t.
+This example models a *traffic light*. The three original versions (`2100`, `2200` and `2300`) have the same behaviour, with a different implementation. The one reported here behaves like the original versions, with a simpler implementation. Let $T$ be the MDP that describes the traffic light, s.t.
 - $U = {epsilon, sigma}$ where 
   - $epsilon$ means "do nothing" 
   - $sigma$ means "switch light"
@@ -981,7 +1027,7 @@ This example models a *traffic light*. The three original versions (`2100`, `220
   0 & "otherwise"
 )$
 
-Meaning that, if the input is $epsilon$, $T$ maintains the same color with probability 1. Otherwise, if the input is $sigma$, $T$ changes color with probability 1, iif the transition is valid (green $->$ yellow, yellow $->$ red, red $->$ green)
+Meaning that, if the input is $epsilon$, $T$ maintains the same color with probability 1. Otherwise, if the input is $sigma$, $T$ changes color with probability 1, iif the transition is valid (green $->$ yellow, yellow $->$ red, red $->$ green).
 
 #figure(caption: `software/2000/main.cpp`)[
 ```cpp
@@ -1010,15 +1056,14 @@ int main() {
 
         next_switch = time + rand_interval(urng);
     }
-
     file.close(); return 0;
 }
 ```
 ]
 
-To reperesent the colors the cleanest way is to use an ```cpp enum```. C++ has two types of enums: simple ```cpp enum```s and ```cpp enum class```es. In this example a *simple* ```cpp enum``` is used #reft(1), because its constants are automatically casted to their value when mapped to string #reft(3); this doesn't happen with ```cpp enum class```es because they are stricter types, and require explicit casting.
+To reperesent the colors the cleanest way is to use an ```cpp enum```. C++ has two types of enums: simple ```cpp enum```s and ```cpp enum class```es. In this example a *simple* ```cpp enum``` is good enough #reft(1), because its constants are automatically casted to their value when mapped to string #reft(3); this doesn't happen with ```cpp enum class```es because they are stricter types, and require explicit casting.
 
-The behaviour of the formula described above is implemented with simple ternary operators #reft(4).
+The behaviour of the formula described above is implemented with a couple ternary operators #reft(4).
 
 // TODO: 
 //   - #reft(1) ```cpp enum``` vs ```cpp enum class```
@@ -1053,7 +1098,7 @@ static urng_t urng = urng_t(random_device()); t4
 ]
 
 The simulation requires some global variables and types in order to work, the simplest solution is to make a header file with all these data:
-- ```cpp #pragma once``` #reft(1) is used instead of ```cpp #ifndef xxxx #define xxxx```; it has the same behaviour (preventing multiple definitions when a file is imported multiple times)... but technically ```cpp #pragma once``` isn't part of the standard, yet all modern compilers support it
+- ```cpp #pragma once``` #reft(1) is used instead of ```cpp #ifndef xxxx #define xxxx```; it has the same behaviour (preventing multiple definitions when a file is imported multiple times)... technically ```cpp #pragma once``` isn't part of the standard, yet all modern compilers support it
 - ```cpp enum Light``` #reft(2) has a more important job in this example: it's used to communicate values from the *controller* to the *traffic light* via the *network*; technically it could be defined in its own file, but, for the sake of the example, it's not worth to make code navigation more complex
 - there is no problem in defining global constants #reft(3), but global variables are generally discouraged #reft(4) (the alternative would be a singleton or passing the values as parameters to each component, but it would make the example more complex than necessary)  
 
@@ -1151,7 +1196,7 @@ class ControlCenter
 ```
 ]
 
-The ```cpp ControlCenter``` has the same behaviour the traffic light had before, with a small difference: it notifies #reft(1) other compoments when the light switches. The type of the notification is ```cpp Payload``` (which is just a ```cpp STRONG_ALIAS``` for ```cpp Light```), this way only compoments that take a ```cpp Payload``` (i.e. the ```cpp Network``` compoment) can be connected to the ```cpp ControlCenter```.
+The ```cpp ControlCenter``` has the same behaviour the traffic light had before, with a small difference: it notifies #reft(1) other components when the light switches. The type of the notification is ```cpp Payload``` (which is just a ```cpp STRONG_ALIAS``` for ```cpp Light```), this way only components that take a ```cpp Payload``` (i.e. the ```cpp Network``` component) can be connected to the ```cpp ControlCenter```.
 
 #figure(caption: `software/3200/traffic_light.hpp`)[
 ```cpp
@@ -1184,7 +1229,7 @@ STRONG_ALIAS(Message, Light);
 ```
 ]
 
-The ```cpp STRONG_ALIAS```es are defined in the `parameters.hpp` file (it's enough to import the `mocc/alias.hpp` file from the library). Strong aliases are different from ```cpp typedef``` or ```cpp using``` aliases, as they are different is different from the type they alias (```cpp Payload``` is a different type from ```cpp Light```), but their values can be exchanged (a ```cpp Light``` value can be assigned to a ```cpp Payload``` and viceversa). Aliases enable type-safe connections among components.
+The ```cpp STRONG_ALIAS```es are defined in the `parameters.hpp` file (it's enough to import the `mocc/alias.hpp` file from the library). Strong aliases are different from ```cpp typedef``` or ```cpp using``` aliases, as the new type is different from the type it aliases (```cpp Payload``` is a different type from ```cpp Light```), but their values can be exchanged (a ```cpp Light``` value can be assigned to a ```cpp Payload``` and viceversa). Aliases enable type-safe connections among components.
 
 #figure(caption: `software/3200/network.hpp`)[
 ```cpp
@@ -1248,7 +1293,7 @@ class Monitor : public Recorder<Payload>,
 ```
 ]
 
-The ```cpp Monitor``` is a compoment that takes inputs from both the ```cpp ControlCenter``` and the ```cpp TrafficLight``` and checks if messages are lost (a message is lost if it takes more then 3 seconds for the traffic light to change).
+The ```cpp Monitor``` is a component that takes inputs from both the ```cpp ControlCenter``` and the ```cpp TrafficLight``` and checks if messages are lost (a message is lost if it takes more then 3 seconds for the traffic light to change).
 
 ==== Faults & no repair `[3300]`
 
@@ -1784,7 +1829,7 @@ Stopwatch s1, s2(2.5);
 size_t iteration = 0;
 system.addObserver(&s1);
 
-while (s1.elapse() < 10000) {
+while (s1.elapsed() < 10000) {
     if (iteration == 1000) system.addObserver(&s2);
     system.next(); iteration++;
 }
