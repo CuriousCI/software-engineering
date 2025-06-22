@@ -1,7 +1,6 @@
-#ifndef WORKER_HPP_
-#define WORKER_HPP_
+#pragma once
 
-#include "../../mocc/buffer.hpp"
+#include "../../../mocc/buffer.hpp"
 #include "parameters.hpp"
 
 #define IDLE 0
@@ -15,5 +14,3 @@ class Worker : public Buffer<Task>, public Observer<> {
 
     void update() {}
 };
-
-#endif

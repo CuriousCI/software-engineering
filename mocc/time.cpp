@@ -1,36 +1,36 @@
 #include "time.hpp"
 
-Stopwatch::Stopwatch(real_t delta) : delta(delta) {}
+Stopwatch::Stopwatch(real_t time_step) : time_step(time_step) {}
 
 void Stopwatch::update() {
-    elapsed_ += delta;
-    notify(elapsed_);
+    elapsed_time += time_step;
+    notify(elapsed_time);
 }
 
-real_t Stopwatch::elapsed() { return elapsed_; }
+real_t Stopwatch::elapsedTime() { return elapsed_time; }
 
 Timer::Timer(real_t duration, TimerMode mode, real_t delta)
-    : duration(duration), mode(mode), delta(delta) {}
+    : duration(duration), mode(mode), time_step(delta) {}
 
-void Timer::set_duration(real_t duration) {
+void Timer::resetWithDuration(real_t duration) {
     this->duration = duration;
-    this->elapsed = 0;
-    this->finished = false;
+    this->elapsed_time = 0;
+    this->is_finished = false;
 }
 
 void Timer::update() {
-    if (elapsed < duration)
-        elapsed += delta;
-    else if (!finished) {
+    if (elapsed_time < duration)
+        elapsed_time += time_step;
+    else if (!is_finished) {
         switch (mode) {
         case TimerMode::Repeating:
-            elapsed = 0;
+            elapsed_time = 0;
             break;
         case TimerMode::Once:
-            finished = true;
+            is_finished = true;
             break;
         }
 
-        notify(elapsed);
+        notify(elapsed_time);
     }
 }

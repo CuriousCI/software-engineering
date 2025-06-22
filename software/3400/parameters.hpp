@@ -10,5 +10,5 @@ const size_t HORIZON = 1000;
 static std::random_device random_device;
 static urng_t urng = urng_t(random_device());
 
-STRONG_ALIAS(Payload, Light);
-STRONG_ALIAS(Message, Light);
+STRONG_ALIAS(NetworkPayloadLight, Light);
+STRONG_ALIAS(LightUpdateMessage, Light);

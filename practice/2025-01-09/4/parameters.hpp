@@ -1,17 +1,18 @@
-#ifndef TYPE_HPP_
-#define TYPE_HPP_
+#pragma once
 
 #include "../../../mocc/alias.hpp"
 #include "../../../mocc/mocc.hpp"
 #include <cstddef>
 
+static std::random_device random_device;
+static urng_t urng(random_device());
+static real_t AVG, VAR;
+static size_t N;
 const size_t T = 1, HORIZON = 1000000;
 
-struct Request {
+struct PurchaseRequest {
     real_t t;
 };
 
 STRONG_ALIAS(CustomerId, size_t);
-STRONG_ALIAS(RequestCount, size_t);
-
-#endif
+STRONG_ALIAS(RequestsCount, size_t);

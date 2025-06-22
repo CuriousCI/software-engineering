@@ -1,5 +1,4 @@
-#ifndef DISPATCHER_HPP_
-#define DISPATCHER_HPP_
+#pragma once
 
 #include "../../../mocc/notifier.hpp"
 #include "../../../mocc/observer.hpp"
@@ -7,11 +6,11 @@
 #include <deque>
 
 class Dispatcher : public Observer<>,
-                   public Observer<CustomerId, Request>,
-                   public Notifier<CustomerId, RequestCount>,
-                   public Notifier<Request> {
+                   public Observer<CustomerId, PurchaseRequest>,
+                   public Notifier<CustomerId, RequestsCount>,
+                   public Notifier<PurchaseRequest> {
 
-    std::deque<Request> requests;
+    std::deque<PurchaseRequest> requests;
 
   public:
     std::vector<size_t> requests_count;
@@ -22,16 +21,13 @@ class Dispatcher : public Observer<>,
         if (requests.empty())
             return;
 
-        Notifier<Request>::notify(requests.front());
+        Notifier<PurchaseRequest>::notify(requests.front());
         requests.pop_front();
     }
 
-    void update(CustomerId i, Request r) override {
-        requests_count[i - 1]++;
-        requests.push_back(r);
-        Notifier<CustomerId, RequestCount>::notify(
-            i, requests_count[i - 1]);
+    void update(CustomerId id, PurchaseRequest request) override {
+        requests_count[id - 1]++;
+        requests.push_back(request);
+        Notifier<CustomerId, RequestsCount>::notify(id, requests_count[id - 1]);
     }
 };
-
-#endif

@@ -1,9 +1,8 @@
-#ifndef DISPATCHER_HPP_
-#define DISPATCHER_HPP_
+#pragma once
 
-#include "../../mocc/buffer.hpp"
-#include "../../mocc/system.hpp"
-#include "../../mocc/time.hpp"
+#include "../../../mocc/buffer.hpp"
+#include "../../../mocc/system.hpp"
+#include "../../../mocc/time.hpp"
 #include "parameters.hpp"
 #include <random>
 
@@ -16,10 +15,10 @@ class Dispatcher : public Observer<>,
 
   public:
     Dispatcher(urng_t &urng, System *system)
-        : Buffer(B), urng(urng),
-          timer(D, TimerMode::Repeating), random_worker(W) {
+        : Buffer(B), urng(urng), timer(D, TimerMode::Repeating),
+          random_worker(W) {
         system->addObserver(&timer);
-        timer.addObserver(this);
+        // timer.addObserver(this);
     }
 
     void update() override {
@@ -29,9 +28,5 @@ class Dispatcher : public Observer<>,
         }
     }
 
-    void notify(Task t) override {
-        observers[random_worker(urng)]->update(t);
-    }
+    void notify(Task t) override { observers[random_worker(urng)]->update(t); }
 };
-
-#endif

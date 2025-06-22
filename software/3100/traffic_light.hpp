@@ -4,18 +4,18 @@
 #include "../../mocc/time.hpp"
 #include "parameters.hpp"
 
-class TrafficLight : public Timed {
+class TrafficLight : public TimerBasedEntity {
     std::uniform_int_distribution<> random_interval;
     Light l = Light::RED;
 
   public:
-    TrafficLight(System *system)
+    TrafficLight(System &system)
         : random_interval(60, 120),
-          Timed(system, 90, TimerMode::Once) {}
+          TimerBasedEntity(system, 90, TimerMode::Once) {}
 
-    void update(U) override {
+    void update(TimerEnded) override {
         l = (l == RED ? GREEN : (l == GREEN ? YELLOW : RED));
-        timer.set_duration(random_interval(urng));
+        timer.resetWithDuration(random_interval(urng));
     }
 
     Light light() { return l; }

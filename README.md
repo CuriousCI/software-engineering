@@ -2,6 +2,9 @@
 
 Software Engineering course @ Sapienza Università di Roma
 
+> [!CAUTION]
+> The pdf isn't currently synchronized with the code
+
 ## Content
 
 The guide has 7 sections:

@@ -1,17 +1,17 @@
 #include "math.hpp"
-#include <cmath>
 
-void Stat::save(real_t data_point) {
-    real_t mean_n_1 =
-        mean_ * ((real_t)n / (n + 1)) + data_point / (n + 1);
+void Data::insertDataPoint(real_t data_point) {
+    real_t mean_prev_size =
+        mean_ * ((real_t)dataset_size / (dataset_size + 1)) +
+        data_point / (dataset_size + 1);
 
-    m_2__ += (data_point - mean_) * (data_point - mean_n_1);
-    mean_ = mean_n_1;
-    n++;
+    m_2__ += (data_point - mean_) * (data_point - mean_prev_size);
+    mean_ = mean_prev_size;
+    dataset_size++;
 }
 
-real_t Stat::mean() const { return mean_; }
+real_t Data::mean() const { return mean_; }
 
-real_t Stat::stddev() const {
-    return n > 0 ? sqrt(m_2__ / n) : 0;
+real_t Data::stddev() const {
+    return dataset_size > 0 ? sqrt(m_2__ / dataset_size) : 0;
 }

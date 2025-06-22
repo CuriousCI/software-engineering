@@ -1,22 +1,14 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <random>
 
-#include "../../../mocc/mocc.hpp"
 #include "../../../mocc/system.hpp"
 #include "customer.hpp"
 #include "dispatcher.hpp"
 #include "monitor.hpp"
 #include "parameters.hpp"
-#include <random>
 
 int main() {
-    std::random_device random_device;
-    urng_t urng(random_device());
-
-    size_t N;
-    real_t avg, var;
 
     {
         std::ifstream parameters("parameters.txt");
@@ -25,9 +17,9 @@ int main() {
             if (type == "N")
                 parameters >> N;
             else if (type == "Avg")
-                parameters >> avg;
+                parameters >> AVG;
             else if (type == "StdDev")
-                parameters >> var;
+                parameters >> VAR;
         parameters.close();
     }
 
@@ -37,29 +29,28 @@ int main() {
     Monitor monitor;
     std::vector<Customer *> customers;
 
-    for (size_t i = 1; i <= N; i++) {
-        Customer *c = new Customer(urng, avg, var, i);
+    for (size_t id = 1; id <= N; id++) {
+        Customer *customer = new Customer(system, id);
 
-        stopwatch.addObserver(c);
-        c->addObserver(&dispatcher);
+        stopwatch.addObserver(customer);
+        customer->addObserver(&dispatcher);
 
-        customers.push_back(c);
+        customers.push_back(customer);
     }
 
     system.addObserver(&stopwatch);
     system.addObserver(&dispatcher);
-    dispatcher.Notifier<Request>::addObserver(&monitor);
+    dispatcher.Notifier<PurchaseRequest>::addObserver(&monitor);
 
-    while (stopwatch.elapsed() <= HORIZON)
+    while (stopwatch.elapsedTime() <= HORIZON)
         system.next();
 
     {
         std::ofstream output("results.txt");
         output << "2025-01-09" << std::endl;
-        for (auto c : customers)
-            output << c->i << " "
-                   << dispatcher.requests_count[c->i - 1]
-                   << std::endl;
+        for (auto customer : customers)
+            output << customer->id << " "
+                   << dispatcher.requests_count[customer->id - 1] << std::endl;
         output << "M2 " << (monitor.preserves_order ? 0 : 1);
         output.close();
     }

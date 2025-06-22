@@ -3,7 +3,7 @@
 #include "../../mocc/recorder.hpp"
 #include "parameters.hpp"
 
-class Monitor : public Recorder<Payload>,
+class Monitor : public Recorder<NetworkPayloadLight>,
                 public Recorder<Light>,
                 public Observer<> {
 
@@ -11,11 +11,10 @@ class Monitor : public Recorder<Payload>,
     bool messages_lost = false;
 
   public:
-    Monitor() : Recorder<Payload>(RED), Recorder<Light>(RED) {}
+    Monitor() : Recorder<NetworkPayloadLight>(RED), Recorder<Light>(RED) {}
 
     void update() override {
-        if (Recorder<Payload>::record !=
-            Recorder<Light>::record)
+        if (Recorder<NetworkPayloadLight>::record != Recorder<Light>::record)
             time++;
         else
             time = 0;

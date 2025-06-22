@@ -13,16 +13,16 @@ int main() {
         std::string type;
         while (parameters >> type)
             if (type == "Avg")
-                parameters >> avg;
+                parameters >> AVG;
             else if (type == "StdDev")
-                parameters >> var;
+                parameters >> VAR;
 
         parameters.close();
     }
 
     System system;
-    Stopwatch stopwatch(delta);
-    Customer customer(&system);
+    Stopwatch stopwatch(T);
+    Customer customer(system);
     Monitor monitor;
 
     system.addObserver(&stopwatch);
@@ -30,13 +30,13 @@ int main() {
     stopwatch.addObserver(&monitor);
     customer.addObserver(&monitor);
 
-    while (stopwatch.elapsed() <= HORIZON)
+    while (stopwatch.elapsedTime() <= HORIZON)
         system.next();
 
     std::ofstream("results.txt")
         << "2025-01-09" << std::endl
-        << "Avg " << monitor.interval_stat.mean() << std::endl
-        << "StdDev " << monitor.interval_stat.stddev();
+        << "Avg " << monitor.intervals_data.mean() << std::endl
+        << "StdDev " << monitor.intervals_data.stddev();
 
     return 0;
 }

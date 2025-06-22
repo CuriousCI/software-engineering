@@ -10,12 +10,10 @@ int main() {
     std::random_device random_device;
     urng_t urng(random_device());
 
-    auto random_state =
-        std::uniform_int_distribution<>(0, STATES_SIZE - 1);
+    auto random_state = std::uniform_int_distribution<>(0, STATES_SIZE - 1);
     std::uniform_real_distribution<> uniform(0, 1);
 
-    std::vector<std::discrete_distribution<>>
-        transition_matrix(STATES_SIZE);
+    std::vector<std::discrete_distribution<>> transition_matrix(STATES_SIZE);
 
     for (size_t state = 0; state < STATES_SIZE; state++) {
         std::vector<real_t> weights(STATES_SIZE);
@@ -23,8 +21,7 @@ int main() {
             weight = uniform(urng);
 
         transition_matrix[state] =
-            std::discrete_distribution<>(weights.begin(),
-                                         weights.end());
+            std::discrete_distribution<>(weights.begin(), weights.end());
     }
 
     std::ofstream file("logs");

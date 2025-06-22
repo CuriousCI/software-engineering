@@ -11,10 +11,10 @@
 int main() {
     System system;
     Monitor monitor;
-    Network network(&system);
     Stopwatch stopwatch;
+    Network network(system);
     TrafficLight traffic_light;
-    ControlCenter control_center(&system);
+    ControlCenter control_center(system);
 
     system.addObserver(&monitor);
     system.addObserver(&stopwatch);
@@ -25,11 +25,9 @@ int main() {
 
     std::ofstream file("logs");
 
-    while (stopwatch.elapsed() <= HORIZON) {
-        file << stopwatch.elapsed() << ' '
-             << control_center.light() << ' '
-             << traffic_light.light() << ' '
-             << monitor.is_valid() << std::endl;
+    while (stopwatch.elapsedTime() <= HORIZON) {
+        file << stopwatch.elapsedTime() << ' ' << control_center.light() << ' '
+             << traffic_light.light() << ' ' << monitor.isValid() << std::endl;
 
         system.next();
     }

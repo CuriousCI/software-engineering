@@ -1,26 +1,23 @@
-#ifndef MONITOR_HPP_
-#define MONITOR_HPP_
+#pragma once
 
 #include "../../../mocc/observer.hpp"
 #include "../../../mocc/recorder.hpp"
 #include "../../../mocc/time.hpp"
 #include "parameters.hpp"
 
-class Monitor : public Observer<CustomerId, RequestCount>,
-                public Recorder<class T> {
+class Monitor : public Observer<CustomerId, RequestsCount>,
+                public Recorder<StopwatchElapsedTime> {
 
     std::vector<size_t> counts;
 
   public:
-    Monitor(size_t N) : counts(N) {}
-
     size_t total_requests = 0;
 
-    void update(CustomerId i, RequestCount c) override {
-        total_requests -= counts[i - 1];
-        counts[i - 1] = c;
-        total_requests += counts[i - 1];
+    Monitor(size_t N) : counts(N) {}
+
+    void update(CustomerId id, RequestsCount count) override {
+        total_requests -= counts[id - 1];
+        counts[id - 1] = count;
+        total_requests += counts[id - 1];
     }
 };
-
-#endif

@@ -23,7 +23,7 @@ int main() {
         };
     // clang-format on
 
-    Stat cost_stat;
+    Data costs_data;
     size_t less_than_100_count = 0;
     real_t time = 0;
 
@@ -40,19 +40,16 @@ int main() {
                 costs += 40;
 
             phase = transition_matrix[phase](urng);
-            file << time << ' ' << phase << ' ' << costs
-                 << std::endl;
+            file << time << ' ' << phase << ' ' << costs << std::endl;
         }
 
-        cost_stat.save(costs);
+        costs_data.insertDataPoint(costs);
         if (costs < 100)
             less_than_100_count++;
     }
 
-    std::cout << cost_stat.mean() << ' ' << cost_stat.stddev()
-              << ' '
-              << (double)less_than_100_count / ITERATIONS
-              << std::endl;
+    std::cout << costs_data.mean() << ' ' << costs_data.stddev() << ' '
+              << (double)less_than_100_count / ITERATIONS << std::endl;
 
     file.close();
     return 0;

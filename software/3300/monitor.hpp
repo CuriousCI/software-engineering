@@ -3,26 +3,25 @@
 #include "../../mocc/recorder.hpp"
 #include "parameters.hpp"
 
-class Monitor : public Recorder<Payload>,
+class Monitor : public Recorder<NetworkPayloadLight>,
                 public Recorder<Light>,
                 public Observer<> {
 
-    int time = 0;
+    int time_value_is_invalid = 0;
     bool messages_lost = false;
 
   public:
-    Monitor() : Recorder<Payload>(RED), Recorder<Light>(RED) {}
+    Monitor() : Recorder<NetworkPayloadLight>(RED), Recorder<Light>(RED) {}
 
     void update() override {
-        if (Recorder<Payload>::record !=
-            Recorder<Light>::record)
-            time++;
+        if (Recorder<NetworkPayloadLight>::record != Recorder<Light>::record)
+            time_value_is_invalid++;
         else
-            time = 0;
+            time_value_is_invalid = 0;
 
-        if (time > 3)
+        if (time_value_is_invalid > 3)
             messages_lost = true;
     }
 
-    bool is_valid() { return !messages_lost; }
+    bool isValid() { return !messages_lost; }
 };

@@ -10,12 +10,9 @@ typedef double real_t;
 #define PHASES_SIZE 3
 #define ITERATIONS 1000
 
-/* se in una fase viene introddotto in errore, potrebbe essere rilevato o meno */
-enum Outcome {
-    NO_ERROR = 0,
-    NO_ERROR_DETECTED = 1,
-    ERROR_DETECTED = 2
-};
+/* Se in una fase viene introddotto in errore, potrebbe essere non essere
+ * rilevato. */
+enum Outcome { NO_ERROR = 0, NO_ERROR_DETECTED = 1, ERROR_DETECTED = 2 };
 
 int main() {
     std::random_device random_device;
@@ -28,12 +25,14 @@ int main() {
         std::ifstream probabilities("probabilities.csv");
         real_t probability_error_introduced, probability_error_not_detected;
 
-        while (probabilities >> probability_error_introduced >> probability_error_not_detected)
+        while (probabilities >> probability_error_introduced >>
+               probability_error_not_detected)
             /* vedere l'enum `Error` per capire il ragionamento */
             phases_error_distribution.push_back(std::discrete_distribution<>({
                 1 - probability_error_introduced,
                 probability_error_introduced * probability_error_not_detected,
-                probability_error_introduced * (1 - probability_error_not_detected),
+                probability_error_introduced *
+                    (1 - probability_error_not_detected),
             }));
 
         probabilities.close();
@@ -41,7 +40,9 @@ int main() {
     }
 
     std::ofstream log("log.csv");
-    log << "time phase progress-0 progress-1 progress-2 outcome-0 outcome-1 outcome-2 assess-0 assess-1 assess-2" << std::endl;
+    log << "time phase progress-0 progress-1 progress-2 outcome-0 outcome-1 "
+           "outcome-2 assess-0 assess-1 assess-2"
+        << std::endl;
     /* se viene rilevato un errore è molto probabile dover ripetere la fase */
     real_t probability_repeat_phase = 0.8;
 
@@ -55,16 +56,17 @@ int main() {
         /* una fase dura 4 giorni esatti */
         if (progress[phase] == 4) {
             /* al termine della fase si rientra in uno dei possibili casi */
-            outcomes[phase] = static_cast<Outcome>(phases_error_distribution[phase](urng));
+            outcomes[phase] =
+                static_cast<Outcome>(phases_error_distribution[phase](urng));
             switch (outcomes[phase]) {
-                case NO_ERROR:
-                case NO_ERROR_DETECTED:
-                    phase++;
-                    break;
-                case ERROR_DETECTED:
-                    if (phase > 0 && uniform_0_1(urng) > probability_repeat_phase)
-                        phase = std::uniform_int_distribution<>(0, phase - 1)(urng);
-                    break;
+            case NO_ERROR:
+            case NO_ERROR_DETECTED:
+                phase++;
+                break;
+            case ERROR_DETECTED:
+                if (phase > 0 && uniform_0_1(urng) > probability_repeat_phase)
+                    phase = std::uniform_int_distribution<>(0, phase - 1)(urng);
+                break;
             }
 
             if (phase == PHASES_SIZE)

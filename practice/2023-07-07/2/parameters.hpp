@@ -1,7 +1,7 @@
-#ifndef PARAMETERS_HPP_
-#define PARAMETERS_HPP_
+#pragma once
 
-#include "../../mocc/alias.hpp"
+#include "../../../mocc/alias.hpp"
+#include "../../../mocc/mocc.hpp"
 #include <cstddef>
 
 struct Task {
@@ -11,6 +11,6 @@ struct Task {
 STRONG_ALIAS(Job, size_t);
 STRONG_ALIAS(TaskDone, Task);
 
+static std::random_device random_device;
+static urng_t urng(random_device());
 static size_t W, N, B, L, D, HORIZON = 100000;
-
-#endif

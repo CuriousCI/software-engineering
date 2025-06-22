@@ -2,7 +2,7 @@ CC := g++
 CFLAGS := -lm -O3 
 DEBUG_FLAGS := -lm -std=c++11 -ggdb -g3 -Wall -Wextra -pedantic
 
-MOCC_SRC := $(wildcard ../../mocc/*.cpp) 
+MOCC_SRC := $(wildcard ../../../mocc/*.cpp) 
 MOCC := $(MOCC_SRC:.cpp=.o) 
 
 LOCAL_SRC := $(wildcard *.cpp) 

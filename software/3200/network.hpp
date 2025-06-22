@@ -6,26 +6,25 @@
 #include "parameters.hpp"
 #include <cstdlib>
 
-class Network : public Timed,
-                public Buffer<Payload>,
-                public Notifier<Message> {
+class Network : public TimerBasedEntity,
+                public Buffer<NetworkPayloadLight>,
+                public Notifier<LightUpdateMessage> {
 
   public:
-    Network(System *system)
-        : Timed(system, 0, TimerMode::Once) {}
+    Network(System &system) : TimerBasedEntity(system, 0, TimerMode::Once) {}
 
-    void update(Payload payload) override {
+    void update(NetworkPayloadLight payload) override {
         if (buffer.empty())
-            timer.set_duration(2);
-        Buffer<Payload>::update(payload);
+            timer.resetWithDuration(2);
+        Buffer<NetworkPayloadLight>::update(payload);
     }
 
-    void update(U) override {
+    void update(TimerEnded) override {
         if (!buffer.empty()) {
             notify((Light)buffer.front());
             buffer.pop_front();
             if (!buffer.empty())
-                timer.set_duration(2);
+                timer.resetWithDuration(2);
         }
     }
 };
