@@ -2,12 +2,14 @@
 
 Stopwatch::Stopwatch(real_t time_step) : time_step(time_step) {}
 
+real_t Stopwatch::elapsedTime() { return elapsed_time; }
+
+void Stopwatch::reset() { this->elapsed_time = 0; }
+
 void Stopwatch::update() {
     elapsed_time += time_step;
     notify(elapsed_time);
 }
-
-real_t Stopwatch::elapsedTime() { return elapsed_time; }
 
 Timer::Timer(real_t duration, TimerMode mode, real_t delta)
     : duration(duration), mode(mode), time_step(delta) {}

@@ -12,12 +12,12 @@ template <typename... T> class Notifier {
     std::vector<Observer<T...> *> observers;
 
   public:
-    /* Adds an Observer to the Notifier. */
+    /* Adds an observer to the notifier. */
     void addObserver(Observer<T...> *observer) {
         observers.push_back(observer);
     }
 
-    /* Notifies all the Observer of the Notifier. */
+    /* Notifies all the observer of the notifier. */
     virtual void notify(T... args) {
         for (auto observer : observers)
             observer->update(args...);

@@ -17,6 +17,8 @@ template <typename T> class Buffer : public Observer<T> {
     /* A buffer with limit 0 is 'unlimited' (it can have infinite items). */
     Buffer(size_t limit = 0) { this->limit = limit; };
 
+    /* It is easier to use a Buffer<T> instead of a std::deque<T> because it
+     * already implements update().  */
     void update(T item) override {
         if (limit > 0 && buffer.size() > limit)
             throw buffer_full();

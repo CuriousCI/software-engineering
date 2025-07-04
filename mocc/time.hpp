@@ -20,6 +20,10 @@ class Stopwatch : public SystemObserver, public Notifier<StopwatchElapsedTime> {
 
     /* Elapsed time since the Stopwatch was connected to the system. */
     real_t elapsedTime();
+
+    /* Reset elapsed time to 0. */
+    void reset();
+
     /* Synchronize to the system. */
     void update() override;
 };
@@ -28,6 +32,7 @@ STRONG_ALIAS(TimerEnded, real_t)
 enum class TimerMode {
     /* If the timer ends, the timer stops. */
     Once,
+
     /* If the timer ends, the timer automatically resets and restarts. */
     Repeating
 };
@@ -48,6 +53,7 @@ class Timer : public SystemObserver, public Notifier<TimerEnded> {
 
     /* Resets the timer with a new duration. */
     void resetWithDuration(real_t duration);
+
     /* Synchronize to the system. */
     void update() override;
 };
@@ -62,8 +68,8 @@ class TimerBasedEntity : public Observer<TimerEnded> {
 
   public:
     TimerBasedEntity(System &system, real_t duration, TimerMode mode,
-                     real_t delta = 1)
-        : timer(duration, mode, delta) {
+                     real_t time_step = 1)
+        : timer(duration, mode, time_step) {
         system.addObserver(&timer);
         timer.addObserver(this);
     }
