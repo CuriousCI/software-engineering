@@ -22,4 +22,4 @@ debug: $(MOCC_SRC) $(LOCAL_SRC)
 .PHONY: clean
 
 clean:
-	rm -f main debug outputs.txt *.o ../../mocc/*.o **/*.o
+	rm -f main debug outputs.txt *.o ../../../mocc/*.o **/*.o
