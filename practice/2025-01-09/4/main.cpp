@@ -13,13 +13,13 @@ int main() {
     {
         std::ifstream parameters("parameters.txt");
 
-        std::string type;
-        while (parameters >> type)
-            if (type == "N")
+        std::string line_type;
+        while (parameters >> line_type)
+            if (line_type == "N")
                 parameters >> N;
-            else if (type == "Avg")
+            else if (line_type == "Avg")
                 parameters >> AVG;
-            else if (type == "StdDev")
+            else if (line_type == "StdDev")
                 parameters >> VAR;
 
         parameters.close();
@@ -53,7 +53,7 @@ int main() {
         for (auto customer : customers)
             output << customer->id << " "
                    << dispatcher.requests_count[customer->id - 1] << std::endl;
-        output << "M1 " << monitor.total_requests;
+        output << "M1 " << monitor.total_requests_received;
         output.close();
     }
 

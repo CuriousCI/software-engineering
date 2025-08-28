@@ -1,10 +1,19 @@
 #pragma once
 
+/* STRONG_ALIAS(WeightKg, float)
+ *
+ * WeightKg person_weight = 5.5;
+ * float weight = person_weight;
+ *
+ * WeightKg and "float" are different types (in the type system), but their
+ * values can be used interchangeably.
+ * */
 template <typename T> class Alias {
     T value;
 
   public:
     Alias() {}
+
     /* A value of type T can be assigned to the alias. */
     Alias(T value) : value(value) {}
 

@@ -8,19 +8,19 @@
 
 class Customer : public TimerBasedEntity,
                  public Recorder<StopwatchElapsedTime>,
-                 public Notifier<CustomerId, PurchaseRequest> {
+                 public Notifier<CustomerId, CustomerPurchaseRequest> {
 
-    std::normal_distribution<> random_interval;
+    std::normal_distribution<> random_time_interval;
 
   public:
     const size_t id;
 
     Customer(System &system, size_t id)
-        : random_interval(AVG, VAR),
+        : random_time_interval(AVG, VAR),
           TimerBasedEntity(system, AVG, TimerMode::Once), id(id) {}
 
     void update(TimerEnded) override {
-        notify(id, PurchaseRequest{record});
-        timer.resetWithDuration(random_interval(urng));
+        notify(id, CustomerPurchaseRequest{.time = record});
+        timer.resetWithDuration(random_time_interval(urng));
     }
 };

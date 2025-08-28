@@ -4,9 +4,10 @@
 
 #include "observer.hpp"
 
-/* https://refactoring.guru/design-patterns/observer */
-/* A notifier is an entity that sends notifications of type T. */
-/* It can support multiple types (e.g. Notifier<int, double>). */
+/* https://refactoring.guru/design-patterns/observer
+ * A notifier is an entity that sends notifications of type T... .
+ * It can support multiple types (e.g. Notifier<int, double>).
+ * */
 template <typename... T> class Notifier {
   protected:
     std::vector<Observer<T...> *> observers;

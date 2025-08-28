@@ -14,8 +14,7 @@ float average(std::vector<float> X) {
 float incr_average(std::vector<float> X) {
     float average = 0;
     for (size_t n = 0; n < X.size(); n++)
-        average =
-            average * ((float)n / (n + 1)) + X[n] / (n + 1);
+        average = average * ((float)n / (n + 1)) + X[n] / (n + 1);
 
     return average;
 }
@@ -30,8 +29,7 @@ int main() {
     for (size_t _ = 0; _ < 10e3; _++)
         X.push_back(x_i(urng));
 
-    std::cout << average(X) << std::endl
-              << incr_average(X) << std::endl;
+    std::cout << average(X) << std::endl << incr_average(X) << std::endl;
 
     return 0;
 }

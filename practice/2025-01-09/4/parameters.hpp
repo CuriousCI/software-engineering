@@ -10,8 +10,8 @@ static real_t AVG, VAR;
 static size_t N;
 const size_t T = 1, HORIZON = 1000000;
 
-struct PurchaseRequest {
-    real_t t;
+struct CustomerPurchaseRequest {
+    real_t time;
 };
 
 STRONG_ALIAS(CustomerId, size_t);

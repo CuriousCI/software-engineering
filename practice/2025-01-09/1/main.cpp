@@ -19,12 +19,12 @@ int main() {
     {
         std::ifstream parameters("parameters.txt");
 
-        char A;
+        char line_type;
         std::vector<std::pair<size_t, size_t>> arrows;
         std::vector<std::pair<real_t, real_t>> labels;
 
-        while (parameters >> A)
-            switch (A) {
+        while (parameters >> line_type)
+            switch (line_type) {
             case 'N':
                 parameters >> N;
                 break;
@@ -50,24 +50,26 @@ int main() {
 
         for (auto &state : matrix)
             transition_matrix.push_back(
-                std::discrete_distribution<>(state.begin(), state.end()));
+                std::discrete_distribution<>(state.begin(), state.end())
+            );
     }
 
-    Data proj_cost_data;
+    OnlineDataAnalysis project_cost_analysis;
     for (size_t _ = 0; _ < ITERATIONS; _++) {
-        size_t curr_state = 0;
-        real_t proj_cost = 0;
+        size_t current_state = 0;
+        real_t project_cost = 0;
 
-        while (curr_state != N - 1) {
-            size_t next_state = transition_matrix[curr_state](urng);
-            proj_cost += cost[curr_state][next_state];
-            curr_state = next_state;
+        while (current_state != N - 1) {
+            size_t next_state = transition_matrix[current_state](urng);
+            project_cost += cost[current_state][next_state];
+            current_state = next_state;
         }
 
-        proj_cost_data.insertDataPoint(proj_cost);
+        project_cost_analysis.insertDataPoint(project_cost);
     }
 
-    std::ofstream("results.txt") << "2025-01-09\nC " << proj_cost_data.mean();
+    std::ofstream("results.txt")
+        << "2025-01-09\nC " << project_cost_analysis.mean();
 
     return 0;
 }

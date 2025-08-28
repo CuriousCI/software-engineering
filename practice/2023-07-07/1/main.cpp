@@ -10,11 +10,11 @@
 int main() {
     {
         std::ifstream parameters("parameters.txt");
-        char c;
+        char line_type;
 
         // clang-format off
-        while (parameters >> c)
-            switch (c) {
+        while (parameters >> line_type)
+            switch (line_type) {
                 case 'A': parameters >> A; break;
                 case 'B': parameters >> B; break;
                 case 'C': parameters >> C; break;
@@ -51,8 +51,8 @@ int main() {
     while (stopwatch.elapsedTime() < HORIZON) {
         bool terminate = stopwatch.elapsedTime() > 1000;
         for (auto employee : employees)
-            if (employee->comp_time_data.stddev() >
-                0.01 * employee->comp_time_data.mean()) {
+            if (employee->completion_time_analysis.stddev() >
+                0.01 * employee->completion_time_analysis.mean()) {
                 terminate = false;
                 break;
             }
@@ -64,20 +64,18 @@ int main() {
     }
 
     {
-        // clang-format off
-        std::ofstream ("output.txt") 
-            << "AvgTime " << director.time_data.mean() << std::endl
-            << "AvgCost " << director.cost_data.mean() << std::endl;
+        std::ofstream("results.txt")
+            << "AvgTime " << director.project_time_analysis.mean() << std::endl
+            << "AvgCost " << director.project_cost_analysis.mean() << std::endl;
 
         for (auto employee : employees)
-            std::ofstream("output.txt", std::ios_base::app)
-                << employee->id << ' ' 
-                << employee->comp_time_data.mean() << ' ' 
-                << employee->comp_time_data.mean() * employee->cost << ' ' 
-                << employee->comp_time_data.stddev() << ' '
-                << employee->comp_time_data.stddev() * employee->cost
+            std::ofstream("results.txt", std::ios_base::app)
+                << employee->id << ' '
+                << employee->completion_time_analysis.mean() << ' '
+                << employee->completion_time_analysis.mean() * employee->cost
+                << ' ' << employee->completion_time_analysis.stddev() << ' '
+                << employee->completion_time_analysis.stddev() * employee->cost
                 << std::endl;
-        // clang-format on
     }
 
     return 0;

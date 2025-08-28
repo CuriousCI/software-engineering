@@ -12,14 +12,16 @@ int main() {
 
     {
         std::ifstream parameters("parameters.txt");
-        std::string type;
-        while (parameters >> type)
-            if (type == "N")
+
+        std::string line_type;
+        while (parameters >> line_type)
+            if (line_type == "N")
                 parameters >> N;
-            else if (type == "Avg")
+            else if (line_type == "Avg")
                 parameters >> AVG;
-            else if (type == "StdDev")
+            else if (line_type == "StdDev")
                 parameters >> VAR;
+
         parameters.close();
     }
 
@@ -40,18 +42,20 @@ int main() {
 
     system.addObserver(&stopwatch);
     system.addObserver(&dispatcher);
-    dispatcher.Notifier<PurchaseRequest>::addObserver(&monitor);
+    dispatcher.Notifier<CustomerPurchaseRequest>::addObserver(&monitor);
 
     while (stopwatch.elapsedTime() <= HORIZON)
         system.next();
 
     {
         std::ofstream output("results.txt");
+
         output << "2025-01-09" << std::endl;
         for (auto customer : customers)
             output << customer->id << " "
                    << dispatcher.requests_count[customer->id - 1] << std::endl;
         output << "M2 " << (monitor.preserves_order ? 0 : 1);
+
         output.close();
     }
 

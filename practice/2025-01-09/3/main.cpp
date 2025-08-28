@@ -10,11 +10,11 @@ int main() {
     {
         std::ifstream parameters("parameters.txt");
 
-        std::string type;
-        while (parameters >> type)
-            if (type == "Avg")
+        std::string line_type;
+        while (parameters >> line_type)
+            if (line_type == "Avg")
                 parameters >> AVG;
-            else if (type == "StdDev")
+            else if (line_type == "StdDev")
                 parameters >> VAR;
 
         parameters.close();
@@ -26,7 +26,6 @@ int main() {
     Monitor monitor;
 
     system.addObserver(&stopwatch);
-    stopwatch.addObserver(&customer);
     stopwatch.addObserver(&monitor);
     customer.addObserver(&monitor);
 
@@ -35,8 +34,8 @@ int main() {
 
     std::ofstream("results.txt")
         << "2025-01-09" << std::endl
-        << "Avg " << monitor.intervals_data.mean() << std::endl
-        << "StdDev " << monitor.intervals_data.stddev();
+        << "Avg " << monitor.requests_interval_analysis.mean() << std::endl
+        << "StdDev " << monitor.requests_interval_analysis.stddev();
 
     return 0;
 }

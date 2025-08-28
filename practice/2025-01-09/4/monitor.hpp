@@ -11,13 +11,13 @@ class Monitor : public Observer<CustomerId, RequestsCount>,
     std::vector<size_t> counts;
 
   public:
-    size_t total_requests = 0;
+    size_t total_requests_received = 0;
 
     Monitor(size_t N) : counts(N) {}
 
-    void update(CustomerId id, RequestsCount count) override {
-        total_requests -= counts[id - 1];
-        counts[id - 1] = count;
-        total_requests += counts[id - 1];
+    void update(CustomerId customer_id, RequestsCount requests_count) override {
+        total_requests_received -= counts[customer_id - 1];
+        counts[customer_id - 1] = requests_count;
+        total_requests_received += counts[customer_id - 1];
     }
 };

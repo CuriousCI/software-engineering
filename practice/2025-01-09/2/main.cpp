@@ -6,7 +6,6 @@
 #include <random>
 
 int main() {
-    std::ifstream parameters("parameters.txt");
     std::random_device random_device;
     urng_t urng(random_device());
 
@@ -19,12 +18,12 @@ int main() {
     {
         std::ifstream parameters("parameters.txt");
 
-        char A;
+        char line_type;
         std::vector<std::pair<size_t, size_t>> arrows;
         std::vector<std::pair<real_t, real_t>> labels;
 
-        while (parameters >> A)
-            switch (A) {
+        while (parameters >> line_type)
+            switch (line_type) {
             case 'C':
                 parameters >> C;
                 break;
@@ -53,26 +52,28 @@ int main() {
 
         for (auto &state : matrix)
             transition_matrix.push_back(
-                std::discrete_distribution<>(state.begin(), state.end()));
+                std::discrete_distribution<>(state.begin(), state.end())
+            );
     }
 
-    size_t valid_iterations = 0;
+    size_t cheap_iterations_number = 0;
     for (size_t _ = 0; _ < ITERATIONS; _++) {
-        size_t curr_state = 0;
-        real_t proj_cost = 0;
+        size_t current_state = 0;
+        real_t project_cost = 0;
 
-        while (curr_state != N - 1) {
-            size_t next_state = transition_matrix[curr_state](urng);
-            proj_cost += cost[curr_state][next_state];
-            curr_state = next_state;
+        while (current_state != N - 1) {
+            size_t next_state = transition_matrix[current_state](urng);
+            project_cost += cost[current_state][next_state];
+            current_state = next_state;
         }
 
-        if (proj_cost <= C)
-            valid_iterations++;
+        if (project_cost <= C)
+            cheap_iterations_number++;
     }
 
     std::ofstream("results.txt")
-        << "2025-01-09\nP " << (real_t)valid_iterations / (real_t)ITERATIONS;
+        << "2025-01-09\nP "
+        << (real_t)cheap_iterations_number / (real_t)ITERATIONS;
 
     return 0;
 }

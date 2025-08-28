@@ -5,12 +5,14 @@
 #include "parameters.hpp"
 #include <deque>
 
-class Dispatcher : public Observer<>,
-                   public Observer<CustomerId, PurchaseRequest>,
-                   public Notifier<CustomerId, RequestsCount>,
-                   public Notifier<PurchaseRequest> {
+using NotifierCustomerRequests = Notifier<CustomerId, RequestsCount>;
 
-    std::deque<PurchaseRequest> requests;
+class Dispatcher : public Observer<>,
+                   public Observer<CustomerId, CustomerPurchaseRequest>,
+                   public NotifierCustomerRequests,
+                   public Notifier<CustomerPurchaseRequest> {
+
+    std::deque<CustomerPurchaseRequest> requests;
 
   public:
     std::vector<size_t> requests_count;
@@ -21,13 +23,16 @@ class Dispatcher : public Observer<>,
         if (requests.empty())
             return;
 
-        Notifier<PurchaseRequest>::notify(requests.front());
+        Notifier<CustomerPurchaseRequest>::notify(requests.front());
         requests.pop_front();
     }
 
-    void update(CustomerId id, PurchaseRequest request) override {
-        requests_count[id - 1]++;
+    void
+    update(CustomerId customer_id, CustomerPurchaseRequest request) override {
+        requests_count[customer_id - 1]++;
         requests.push_back(request);
-        Notifier<CustomerId, RequestsCount>::notify(id, requests_count[id - 1]);
+        NotifierCustomerRequests::notify(
+            customer_id, requests_count[customer_id - 1]
+        );
     }
 };

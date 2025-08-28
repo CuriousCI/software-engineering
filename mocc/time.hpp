@@ -7,9 +7,19 @@
 
 STRONG_ALIAS(StopwatchElapsedTime, real_t)
 
-/* docs.rs/bevy/latest/bevy/time/struct.Stopwatch.html */
-/* A stopwatch is synchronized to a system. */
-/* It updates the elapsed time as the system is simulated.  */
+/* docs.rs/bevy/latest/bevy/time/struct.Stopwatch.html
+ * An object that measures time. It is a SystemObserver, so it must be attached
+ * to a System for it to measure the time elapsed in the systme.
+ *
+ * System system.
+ * Stopwatch stopwatch.
+ *
+ * system.addObserver(&stopwatch);
+ * system.next();
+ * system.next();
+ *
+ * stopwatch.elapsedTime(); // 2
+ * */
 class Stopwatch : public SystemObserver, public Notifier<StopwatchElapsedTime> {
   private:
     real_t elapsed_time = 0;
@@ -18,29 +28,33 @@ class Stopwatch : public SystemObserver, public Notifier<StopwatchElapsedTime> {
   public:
     Stopwatch(real_t time_step = 1);
 
-    /* Elapsed time since the Stopwatch was connected to the system. */
+    /* Returns the "elapsed time" since the Stopwatch was connected to the
+     * system or was reset.
+     */
     real_t elapsedTime();
 
-    /* Reset elapsed time to 0. */
+    /* Resets the "elapsed time" to 0. */
     void reset();
 
-    /* Synchronize to the system. */
+    /* Synchronizes to a system. */
     void update() override;
 };
 
 STRONG_ALIAS(TimerEnded, real_t)
+
 enum class TimerMode {
-    /* If the timer ends, the timer stops. */
+    /* When the timer ends it doesn't restart. */
     Once,
 
-    /* If the timer ends, the timer automatically resets and restarts. */
+    /* When the timer ends it automatically restarts. */
     Repeating
 };
 
 /* docs.rs/bevy/latest/bevy/time/struct.Timer.html */
-/* A timer is synchronized to a system. */
-/* It updates the elapsed time as the system is simulated, until the duration of
- * the timer is over. */
+/* A timer is synchronized to a system.
+ * It updates the elapsed time as the system is simulated, until the duration of
+ * the timer is over.
+ * */
 class Timer : public SystemObserver, public Notifier<TimerEnded> {
   private:
     real_t duration, elapsed_time = 0;
@@ -51,24 +65,31 @@ class Timer : public SystemObserver, public Notifier<TimerEnded> {
   public:
     Timer(real_t duration, TimerMode mode, real_t time_step = 1);
 
-    /* Resets the timer with a new duration. */
+    /* Resets the timer with a new initial duration. */
     void resetWithDuration(real_t duration);
 
-    /* Synchronize to the system. */
+    /* Synchronizes to a system. */
     void update() override;
 };
 
-/* Many entities are synchronized to a timer which is slower than the system. */
-/* This is a boilerplate class which proved to be useful quite often. */
+/* Many entities are slower than the system's simulation speed. These entities
+ * need to be connected to a timer.
+ *
+ * This is a boilerplate class which proves to be useful quite often.
+ * */
 class TimerBasedEntity : public Observer<TimerEnded> {
   protected:
-    /* An entity which timer based has access to the timer it follows. */
-    /* It can call resetWithDuration() if the timer is not repeating. */
+    /* An timer based entity has access to the timer it is connected to.
+     * It can call resetWithDuration() if the timer is not repeating.
+     * */
     Timer timer;
 
   public:
-    TimerBasedEntity(System &system, real_t duration, TimerMode mode,
-                     real_t time_step = 1)
+    TimerBasedEntity(
+        System &system,
+        real_t duration,
+        TimerMode mode,
+        real_t time_step = 1)
         : timer(duration, mode, time_step) {
         system.addObserver(&timer);
         timer.addObserver(this);

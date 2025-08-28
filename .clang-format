@@ -1,3 +1,10 @@
 BasedOnStyle: LLVM
 IndentWidth: 4
 # ColumnLimit: 63
+AlignAfterOpenBracket: BlockIndent
+AllowAllParametersOfDeclarationOnNextLine: false
+BinPackArguments: false
+BinPackParameters: false
+# AlignAfterOpenBracket: BlockIndent
+# BinPackArguments: false
+# BinPackParameters: false

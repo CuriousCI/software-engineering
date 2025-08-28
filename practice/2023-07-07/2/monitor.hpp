@@ -14,7 +14,7 @@ class Monitor : public Recorder<StopwatchElapsedTime>,
     std::unordered_map<size_t, real_t> jobs_start_time;
 
   public:
-    Data comp_time_data;
+    OnlineDataAnalysis comp_time_data;
 
     void update(Job j) { jobs_start_time[j] = record; }
 

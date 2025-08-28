@@ -12,12 +12,12 @@ class Employee : public Observer<StopwatchElapsedTime>,
 
     std::vector<std::discrete_distribution<>> transition_matrix;
     size_t phase = 0;
-    real_t proj_init_time = 0;
+    real_t project_init_time = 0;
 
   public:
     const size_t id;
     const real_t cost;
-    Data comp_time_data;
+    OnlineDataAnalysis completion_time_analysis;
 
     Employee(urng_t &urng, size_t k)
         : id(k), cost(1000.0 - 500.0 * (real_t)(k - 1) / (W - 1)) {
@@ -43,18 +43,20 @@ class Employee : public Observer<StopwatchElapsedTime>,
         transition_matrix[N - 1] = std::discrete_distribution<>{1};
     }
 
-    void update(StopwatchElapsedTime time) override {
+    void update(StopwatchElapsedTime elapsed_time) override {
         if (phase < N - 1) {
             phase = transition_matrix[phase](urng);
             if (phase == N - 1) {
-                comp_time_data.insertDataPoint(time - proj_init_time);
-                notify((real_t)time, cost);
+                completion_time_analysis.insertDataPoint(
+                    elapsed_time - project_init_time
+                );
+                notify((real_t)elapsed_time, cost);
             }
         }
     };
 
-    void update(ProjInitTime proj_init_time) override {
-        this->proj_init_time = proj_init_time;
+    void update(ProjInitTime project_init_time) override {
+        this->project_init_time = project_init_time;
         phase = 0;
     };
 };

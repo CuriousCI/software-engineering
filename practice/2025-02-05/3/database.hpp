@@ -28,6 +28,7 @@ class PostgreSQL
         }
 
         host->update(
-            {.item = request.item, .item_supply = items_supply[request.item]});
+            {.item = request.item, .item_supply = items_supply[request.item]}
+        );
     }
 };

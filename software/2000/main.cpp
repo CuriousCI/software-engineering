@@ -17,16 +17,15 @@ int main() {
     std::ofstream file("logs");
 
     for (size_t time = 0; time <= HORIZON; time++) {
-        file << time << ' ' << next_switch - time << ' '
-             << traffic_light << std::endl;
+        file << time << ' ' << next_switch - time << ' ' << traffic_light
+             << std::endl;
 
         if (time < next_switch)
             continue;
 
         traffic_light =
-            (traffic_light == RED
-                 ? GREEN
-                 : (traffic_light == GREEN ? YELLOW : RED));
+            (traffic_light == RED ? GREEN
+                                  : (traffic_light == GREEN ? YELLOW : RED));
 
         next_switch = time + random_interval(urng);
     }
