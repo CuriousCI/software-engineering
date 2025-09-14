@@ -1,25 +1,29 @@
 CC := g++
-CFLAGS := -lm -O3 
+CFLAGS := -lm -std=c++11 -O3 
 DEBUG_FLAGS := -lm -std=c++11 -ggdb -g3 -Wall -Wextra -pedantic
 
-MOCC_SRC := $(wildcard ../../../mocc/*.cpp) 
-MOCC := $(MOCC_SRC:.cpp=.o) 
+MOCC_LIB := ../../../mocc
+MOCC_CPP := $(wildcard $(MOCC_LIB)/*.cpp)
+MOCC_OBJ := $(MOCC_CPP:.cpp=.o)
 
-LOCAL_SRC := $(wildcard *.cpp) 
-LOCAL := $(LOCAL_SRC:.cpp=.o)
+LOCAL_HPP := $(wildcard *.hpp)
+LOCAL_CPP := $(wildcard *.cpp)
+LOCAL_OBJ := $(LOCAL_CPP:.cpp=.o)
 
-VERSION := 1.0 
 
-main: $(MOCC) $(LOCAL)
+main: $(MOCC_OBJ) $(LOCAL_OBJ)
 	$(CC) $(CFLAGS) $^ -o $@
 
-debug: $(MOCC_SRC) $(LOCAL_SRC)
+debug: $(MOCC_CPP) $(LOCAL_CPP)
 	$(CC) $(DEBUG_FLAGS) $^ -o $@
 
-%.o: %.cpp
+main.o: main.cpp $(LOCAL_HPP)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+%.o: %.cpp 
 	$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: clean
 
 clean:
-	rm -f main debug *.o ../../../mocc/*.o **/*.o
+	rm -f main debug *.o $(MOCC_LIB)/*.o **/*.o
