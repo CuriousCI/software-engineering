@@ -15,3 +15,8 @@ The guide has 7 sections:
 - a typical exam solution
 - a library designed for the lab exam
 - extras (interesting software engineering tools)
+
+## TODO
+
+- reference files for code in listings from 3100 onwards
+- reintroduce raw code references

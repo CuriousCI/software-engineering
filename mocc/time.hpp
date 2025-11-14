@@ -63,7 +63,7 @@ class Timer : public SystemObserver, public Notifier<TimerEnded> {
     TimerMode mode;
 
   public:
-    Timer(real_t duration, TimerMode mode, real_t time_step = 1);
+    Timer(real_t duration, TimerMode mode, real_t time_step);
 
     /* Resets the timer with a new initial duration. */
     void resetWithDuration(real_t duration);
@@ -89,7 +89,8 @@ class TimerBasedEntity : public Observer<TimerEnded> {
         System &system,
         real_t duration,
         TimerMode mode,
-        real_t time_step = 1)
+        real_t time_step
+    )
         : timer(duration, mode, time_step) {
         system.addObserver(&timer);
         timer.addObserver(this);

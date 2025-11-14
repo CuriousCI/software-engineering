@@ -1,0 +1,3 @@
+N 4
+Avg 500
+StdDev 100

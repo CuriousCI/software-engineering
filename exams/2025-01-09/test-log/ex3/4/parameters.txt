@@ -1,0 +1,2 @@
+Avg 10
+StdDev 5

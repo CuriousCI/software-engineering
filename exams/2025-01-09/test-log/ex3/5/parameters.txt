@@ -1,0 +1,2 @@
+Avg 100
+StdDev 5

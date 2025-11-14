@@ -1,0 +1,309 @@
+Log for exercise 3
+Begin run  student 2025-06-12-XXX-2068261, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -Wall -O2 main.cpp -o main
+End run student 2025-06-12-XXX-2068261, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2085561, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'results.txt': No such file or directory
+g++ -c -o customer.o customer.cpp -std=c++11 -I.  -lm 
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -c -o math.o math.cpp -std=c++11 -I.  -lm 
+g++ -o main customer.o main.o math.o -std=c++11 -I.  -lm 
+End run student 2025-06-12-XXX-2085561, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2014598, exercise 3, test 5. Output file is: results.txt
+g++ -O2 -std=c++17 -c main.cpp -o main.o
+g++ -O2 -std=c++17 -c library.cpp -o library.o
+library.cpp: In member function ‘std::vector<std::vector<std::__cxx11::basic_string<char> > > Utils::read_params_and_split(const std::string&, const std::string&, bool)’:
+library.cpp:72:10: error: ‘reverse’ is not a member of ‘std’
+   72 |     std::reverse(std::begin(split_lines), std::end(split_lines));
+      |          ^~~~~~~
+make: *** [Makefile:13: library.o] Error 1
+mv: cannot stat 'results.txt': No such file or directory
+End run student 2025-06-12-XXX-2014598, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-1810132, exercise 3, test 5. Output file is: results.txt
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+End run student 2025-06-12-XXX-1810132, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2083321, exercise 3, test 5. Output file is: results.txt
+g++ main.cpp -o main
+End run student 2025-06-12-XXX-2083321, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2056284, exercise 3, test 5. Output file is: results.txt
+g++ main.cpp -o main
+End run student 2025-06-12-XXX-2056284, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-1933763, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -std=c++11 -Wall -O2 -o main main.cpp
+End run student 2025-06-12-XXX-1933763, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2066344, exercise 3, test 5. Output file is: results.txt
+g++ -std=c++11 -O2 -o main main.cpp
+End run student 2025-06-12-XXX-2066344, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2076586, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -Wall -Wextra -std=c++17 -g -c main.cpp -o main.o
+g++ -Wall -Wextra -std=c++17 -g -o main main.o
+End run student 2025-06-12-XXX-2076586, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2049029, exercise 3, test 5. Output file is: results.txt
+g++  -c -o main.o main.cpp -std=c++11 -I. -lm
+g++  -o main main.o -std=c++11 -I. -lm
+End run student 2025-06-12-XXX-2049029, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2059802, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -lm -O3  -c ../mocc/stat.cpp -o ../mocc/stat.o
+g++ -lm -O3  -c ../mocc/time.cpp -o ../mocc/time.o
+g++ -lm -O3  -c main.cpp -o main.o
+g++ -lm -O3  ../mocc/stat.o ../mocc/time.o main.o -o main
+End run student 2025-06-12-XXX-2059802, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2007103, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -std=c++11 -Wall -O2 -o main main.cpp
+End run student 2025-06-12-XXX-2007103, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2085129, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm -g
+g++ -o main main.o -std=c++11 -I.  -lm -g
+End run student 2025-06-12-XXX-2085129, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-1943337, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -std=c++11 -Wall -O2 -o main main.cpp
+End run student 2025-06-12-XXX-1943337, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2047402, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -o main main.o -std=c++11 -I.  -lm 
+End run student 2025-06-12-XXX-2047402, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-1996623, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -lm -O3 -std=c++11 -c ../mocc/math.cpp -o ../mocc/math.o
+g++ -lm -O3 -std=c++11 -c ../mocc/time.cpp -o ../mocc/time.o
+g++ -lm -O3 -std=c++11 -c main.cpp -o main.o
+g++ -lm -O3 -std=c++11 ../mocc/math.o ../mocc/time.o main.o -o main
+End run student 2025-06-12-XXX-1996623, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-1938972, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -lm -O3 -o customer_sim main.cpp
+mv: cannot stat 'results.txt': No such file or directory
+End run student 2025-06-12-XXX-1938972, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2072224, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+rm: cannot remove 'results.txt': No such file or directory
+g++ -std=c++11 -Wall -Wextra -pedantic main.cpp -o main
+main.cpp: In function ‘int main()’:
+main.cpp:88:30: warning: comparison of integer expressions of different signedness: ‘int’ and ‘std::vector<double>::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+   88 |         if (next_request_idx < request_times.size()) {
+      |             ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~
+End run student 2025-06-12-XXX-2072224, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2067545, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -c -o customer.o customer.cpp -std=c++11 -I.  -lm -g
+g++ -c -o global.o global.cpp -std=c++11 -I.  -lm -g
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm -g
+g++ -c -o simulator.o simulator.cpp -std=c++11 -I.  -lm -g
+g++ -o main customer.o global.o main.o simulator.o -std=c++11 -I.  -lm -g
+End run student 2025-06-12-XXX-2067545, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2084918, exercise 3, test 5. Output file is: results.txt
+cp: cannot stat '/home/enrico/edata/tronci@di.uniroma1.it/enrico/teaching/EXAMS/software-engineering/cpp-grader/submissions/2025-06-12-XXX-2084918': No such file or directory
+cp: cannot create regular file '/home/enrico/edata/tronci@di.uniroma1.it/enrico/teaching/EXAMS/software-engineering/cpp-grader/testdir/2025-06-12-XXX-2084918/3': No such file or directory
+./grade1stud1ex1test.sh: line 39: cd: /home/enrico/edata/tronci@di.uniroma1.it/enrico/teaching/EXAMS/software-engineering/cpp-grader/testdir/2025-06-12-XXX-2084918/3: No such file or directory
+rm: cannot remove 'main': No such file or directory
+rm: cannot remove 'results.txt': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+End run student 2025-06-12-XXX-2084918, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2086939, exercise 3, test 5. Output file is: results.txt
+g++ -Wall costumer.cpp main.cpp -o main
+End run student 2025-06-12-XXX-2086939, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2053287, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+End run student 2025-06-12-XXX-2053287, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-270317, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -Wall -Wextra -std=c++17 -g -c main.cpp -o main.o
+g++ -Wall -Wextra -std=c++17 -g -o main main.o
+End run student 2025-06-12-XXX-270317, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2046738, exercise 3, test 5. Output file is: results.txt
+g++  -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++  -o main main.o -std=c++11 -I.  -lm 
+End run student 2025-06-12-XXX-2046738, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2084581, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -c -o Client.o Client.cpp -O2 -Werror -Wextra -Wpedantic -std=c++11 -I. -I.. -lm
+g++ -c -o main.o main.cpp -O2 -Werror -Wextra -Wpedantic -std=c++11 -I. -I.. -lm
+g++ -c -o Server.o Server.cpp -O2 -Werror -Wextra -Wpedantic -std=c++11 -I. -I.. -lm
+g++ -c -o System.o System.cpp -O2 -Werror -Wextra -Wpedantic -std=c++11 -I. -I.. -lm
+g++ -o main Client.o main.o Server.o System.o -O2 -Werror -Wextra -Wpedantic -std=c++11 -I. -I.. -lm
+End run student 2025-06-12-XXX-2084581, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2054772, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+rm: cannot remove 'results.txt': No such file or directory
+g++ -c main.cpp -o main.o
+g++ main.o -o main
+End run student 2025-06-12-XXX-2054772, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2043415, exercise 3, test 5. Output file is: results.txt
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm -static
+g++ -c -o randgen.o randgen.cpp -std=c++11 -I.  -lm -static
+g++ -o main main.o randgen.o -std=c++11 -I.  -lm -static; rm *.o;
+End run student 2025-06-12-XXX-2043415, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2043364, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+rm: cannot remove 'results.txt': No such file or directory
+g++ -lm -O3  -c main.cpp -o main.o
+g++ -lm -O3  -c math.cpp -o math.o
+g++ -lm -O3  main.o math.o -o main
+End run student 2025-06-12-XXX-2043364, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-1894979, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -o main main.o -std=c++11 -I.  -lm 
+End run student 2025-06-12-XXX-1894979, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-1938314, exercise 3, test 5. Output file is: results.txt
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+End run student 2025-06-12-XXX-1938314, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2080998, exercise 3, test 5. Output file is: results.txt
+g++ -c -o customer.o customer.cpp -std=c++11 -I.  -lm -g
+g++ -c -o global.o global.cpp -std=c++11 -I.  -lm -g
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm -g
+g++ -c -o simulator.o simulator.cpp -std=c++11 -I.  -lm -g
+simulator.cpp: In member function ‘void Simulator::run(double)’:
+simulator.cpp:30:24: warning: format ‘%ld’ expects argument of type ‘long int’, but argument 2 has type ‘double’ [-Wformat=]
+   30 |     printf("Horizon: %ld\n", Horizon);
+      |                      ~~^     ~~~~~~~
+      |                        |     |
+      |                        |     double
+      |                        long int
+      |                      %f
+g++ -o main customer.o global.o main.o simulator.o -std=c++11 -I.  -lm -g
+End run student 2025-06-12-XXX-2080998, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-1994583, exercise 3, test 5. Output file is: results.txt
+g++ -std=c++11 -O2 -Wall -c main.cpp -o main.o
+g++ -std=c++11 -O2 -Wall main.o -lm -o main
+End run student 2025-06-12-XXX-1994583, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2025557, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -std=c++11 -Wall -O2 -o main main.cpp
+End run student 2025-06-12-XXX-2025557, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2082332, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -o main main.o -std=c++11 -I.  -lm 
+End run student 2025-06-12-XXX-2082332, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-1987495, exercise 3, test 5. Output file is: results.txt
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -o main main.o -std=c++11 -I.  -lm 
+End run student 2025-06-12-XXX-1987495, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2009650, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -std=c++11 -Wall -O2 -o main ex3.cpp
+End run student 2025-06-12-XXX-2009650, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2050553, exercise 3, test 5. Output file is: results.txt
+cp: cannot stat '/home/enrico/edata/tronci@di.uniroma1.it/enrico/teaching/EXAMS/software-engineering/cpp-grader/submissions/2025-06-12-XXX-2050553': No such file or directory
+cp: cannot create regular file '/home/enrico/edata/tronci@di.uniroma1.it/enrico/teaching/EXAMS/software-engineering/cpp-grader/testdir/2025-06-12-XXX-2050553/3': No such file or directory
+./grade1stud1ex1test.sh: line 39: cd: /home/enrico/edata/tronci@di.uniroma1.it/enrico/teaching/EXAMS/software-engineering/cpp-grader/testdir/2025-06-12-XXX-2050553/3: No such file or directory
+rm: cannot remove 'main': No such file or directory
+rm: cannot remove 'results.txt': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+End run student 2025-06-12-XXX-2050553, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-1984794, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+rm: cannot remove 'results.txt': No such file or directory
+g++ -Wall -Wextra -std=c++17 -O2 -o main main.cpp
+End run student 2025-06-12-XXX-1984794, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2087359, exercise 3, test 5. Output file is: results.txt
+g++ -lm -O3 main.cpp Customers.hpp -o main
+End run student 2025-06-12-XXX-2087359, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2068434, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++  -c -o main.o main.cpp -std=c++11 -I. -lm
+g++  -o main main.o -std=c++11 -I. -lm
+End run student 2025-06-12-XXX-2068434, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-1992615, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -o main main.o -std=c++11 -I.  -lm 
+End run student 2025-06-12-XXX-1992615, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2054343, exercise 3, test 5. Output file is: results.txt
+g++  -c -o main.o main.cpp -std=c++11 -I. -lm
+g++  -o main main.o -std=c++11 -I. -lm
+End run student 2025-06-12-XXX-2054343, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2014782, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -o main main.o -std=c++11 -I.  -lm 
+End run student 2025-06-12-XXX-2014782, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2034930, exercise 3, test 5. Output file is: results.txt
+g++ -lm -O3 -std=c++11 main.cpp -o main
+End run student 2025-06-12-XXX-2034930, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2021689, exercise 3, test 5. Output file is: results.txt
+g++ -c -o customer.o customer.cpp -std=c++11 -I.  -lm 
+g++ -c -o global.o global.cpp -std=c++11 -I.  -lm 
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -c -o simulator.o simulator.cpp -std=c++11 -I.  -lm 
+g++ -o main customer.o global.o main.o simulator.o -std=c++11 -I.  -lm 
+End run student 2025-06-12-XXX-2021689, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-1960045, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++  -c -o main.o main.cpp -std=c++11 -I. -lm
+g++  -o main main.o -std=c++11 -I. -lm
+End run student 2025-06-12-XXX-1960045, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2046790, exercise 3, test 5. Output file is: results.txt
+./grade1stud1ex1test.sh: line 39: cd: /home/enrico/edata/tronci@di.uniroma1.it/enrico/teaching/EXAMS/software-engineering/cpp-grader/testdir/2025-06-12-XXX-2046790/3: Not a directory
+rm: cannot remove 'main': No such file or directory
+rm: cannot remove 'results.txt': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+End run student 2025-06-12-XXX-2046790, exercise 3, test 5
+
+Begin run  student 2025-06-12-XXX-2064472, exercise 3, test 5. Output file is: results.txt
+rm: cannot remove 'main': No such file or directory
+g++ main.cpp -o main
+End run student 2025-06-12-XXX-2064472, exercise 3, test 5
+

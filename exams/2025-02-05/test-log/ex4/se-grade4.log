@@ -1,0 +1,901 @@
+processing student 2025-01-09-XXX-2083154 ex 4 test 1
+Running student 2025-01-09-XXX-2083154, exercise 4, test 1
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2084379 ex 4 test 1
+Running student 2025-01-09-XXX-2084379, exercise 4, test 1
+g++ -c -o monitor.o monitor.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o betterFiFo.o betterFiFo.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o mdp.o mdp.cpp -std=c++11 -g -I.  -lm 
+mdp.cpp: In member function ‘void Customer::ReadParameters()’:
+mdp.cpp:40:26: warning: format ‘%d’ expects argument of type ‘int*’, but argument 3 has type ‘double*’ [-Wformat=]
+   40 |     if (fscanf(fp, "Avg %d\n", &this->avg) != 1)
+      |                         ~^     ~~~~~~~~~~
+      |                          |     |
+      |                          int*  double*
+      |                         %le
+mdp.cpp:46:29: warning: format ‘%d’ expects argument of type ‘int*’, but argument 3 has type ‘double*’ [-Wformat=]
+   46 |     if (fscanf(fp, "StdDev %d\n", &this->stdDev) != 1)
+      |                            ~^     ~~~~~~~~~~~~~
+      |                             |     |
+      |                             int*  double*
+      |                            %le
+g++ -c -o betterdtmc.o betterdtmc.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o message.o message.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o randgen.o randgen.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o globals.o globals.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o dispatcher.o dispatcher.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o main.o main.cpp -std=c++11 -g -I.  -lm 
+main.cpp: In function ‘int main()’:
+main.cpp:97:23: warning: format ‘%d’ expects argument of type ‘int’, but argument 4 has type ‘std::vector<Message*>::size_type’ {aka ‘long unsigned int’} [-Wformat=]
+   97 |     fprintf(fp2, "%d %d\n", i + 1, dispatcher.messages[i].size());
+      |                      ~^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                       |                                       |
+      |                       int                                     std::vector<Message*>::size_type {aka long unsigned int}
+      |                      %ld
+g++ -o main monitor.o betterFiFo.o mdp.o betterdtmc.o message.o randgen.o globals.o dispatcher.o main.o -std=c++11 -g -I.  -lm  -g
+processing student 2025-01-09-XXX-2050059 ex 4 test 1
+Running student 2025-01-09-XXX-2050059, exercise 4, test 1
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2066523 ex 4 test 1
+Running student 2025-01-09-XXX-2066523, exercise 4, test 1
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2059337 ex 4 test 1
+Running student 2025-01-09-XXX-2059337, exercise 4, test 1
+g++ -c -o monitor.o monitor.cpp -std=c++11 -I.  -lm 
+g++ -c -o customer.o customer.cpp -std=c++11 -I.  -lm 
+g++ -c -o dispatcher.o dispatcher.cpp -std=c++11 -I.  -lm 
+g++ -c -o parameters.o parameters.cpp -std=c++11 -I.  -lm 
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -o main monitor.o customer.o dispatcher.o parameters.o main.o -std=c++11 -I.  -lm 
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2066788 ex 4 test 1
+Running student 2025-01-09-XXX-2066788, exercise 4, test 1
+g++ -I./inc -Wall -std=c++17 -c src/monitor.cpp -o obj/monitor.o
+g++ -I./inc -Wall -std=c++17 -c src/customer.cpp -o obj/customer.o
+g++ -I./inc -Wall -std=c++17 -c src/dispatcher.cpp -o obj/dispatcher.o
+src/dispatcher.cpp: In member function ‘void Dispatcher::process_messages()’:
+src/dispatcher.cpp:14:14: warning: variable ‘message’ set but not used [-Wunused-but-set-variable]
+   14 |         auto message = message_queue.front();
+      |              ^~~~~~~
+g++ -I./inc -Wall -std=c++17 -c src/main.cpp -o obj/main.o
+src/main.cpp: In function ‘void print_results(const std::string&, size_t, Dispatcher, int)’:
+src/main.cpp:34:23: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+   34 |     for (int i = 0; i < size; ++i) {
+      |                     ~~^~~~~~
+src/main.cpp: In function ‘int main()’:
+src/main.cpp:51:23: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+   51 |     for (int i = 0; i < size; ++i) {
+      |                     ~~^~~~~~
+src/main.cpp:61:27: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+   61 |         for (int i = 0; i < size; ++i) {
+      |                         ~~^~~~~~
+g++  obj/monitor.o obj/customer.o obj/dispatcher.o obj/main.o  -o ./main
+processing student 2025-01-09-XXX-2045067 ex 4 test 1
+Running student 2025-01-09-XXX-2045067, exercise 4, test 1
+ CXX    clk.cpp
+clk.cpp: In function ‘void freeclk()’:
+clk.cpp:11:5: warning: deleting object of polymorphic class type ‘lib::Clock’ which has non-virtual destructor might cause undefined behavior [-Wdelete-non-virtual-dtor]
+   11 |     delete c;
+      |     ^~~~~~~~
+In file included from clk.cpp:4:
+defs.hpp: At global scope:
+defs.hpp:9:15: warning: ‘HORIZON’ defined but not used [-Wunused-variable]
+    9 | static double HORIZON = 1e6;
+      |               ^~~~~~~
+ CXX    main.cpp
+In file included from /usr/include/c++/13/cassert:44,
+                 from dispatcher.hpp:4,
+                 from system.hpp:9,
+                 from main.cpp:6:
+dispatcher.hpp: In member function ‘void Dispatcher::next()’:
+dispatcher.hpp:21:22: warning: comparison of integer expressions of different signedness: ‘std::vector<lib::Fifo<Messaggio> >::size_type’ {aka ‘long unsigned int’} and ‘int’ [-Wsign-compare]
+   21 |     assert(in.size() == N);
+      |            ~~~~~~~~~~^~~~
+In file included from lib/lib.hpp:17,
+                 from clk.hpp:3,
+                 from glb.hpp:3,
+                 from main.cpp:5:
+lib/metaprogramming.hpp: In instantiation of ‘void next_call(Args&& ...) [with Args = {lib::Clock&, std::vector<lib::Fifo<Messaggio>, std::allocator<lib::Fifo<Messaggio> > >&, lib::Fifo<Messaggio>&, Dispatcher&, std::vector<Customer, std::allocator<Customer> >&}]’:
+system.hpp:59:26:   required from here
+lib/metaprogramming.hpp:65:9: warning: unused variable ‘a’ [-Wunused-variable]
+   65 |     int a[] = {(method_name##_single(std::forward<Args>(args)), 0)...};                            \
+      |         ^
+lib/metaprogramming.hpp:71:1: note: in expansion of macro ‘DEFINE_COLLECTIVE_CALL’
+   71 | DEFINE_COLLECTIVE_CALL(next)
+      | ^~~~~~~~~~~~~~~~~~~~~~
+ CXX    lib/alarm.cpp
+ CXX    lib/averager.cpp
+ CXX    lib/clock.cpp
+ CXX    lib/csv_loggable.cpp
+ CXX    lib/DTMC.cpp
+ CXX    lib/FIFO.cpp
+ CXX    lib/global.cpp
+ CXX    lib/printing.cpp
+ CXX    lib/range.cpp
+ CXX    lib/simulator.cpp
+ CXX    lib/stopwatch.cpp
+g++ -o main clk.o main.o lib/alarm.o lib/averager.o lib/clock.o lib/csv_loggable.o lib/DTMC.o lib/FIFO.o lib/global.o lib/printing.o lib/range.o lib/simulator.o lib/stopwatch.o
+processing student 2025-01-09-XXX-2057291 ex 4 test 1
+Running student 2025-01-09-XXX-2057291, exercise 4, test 1
+rm: cannot remove 'main': No such file or directory
+g++ -Wall -Wextra -std=c++11 -o main main.cpp  
+processing student 2025-01-09-XXX-2048752 ex 4 test 1
+Running student 2025-01-09-XXX-2048752, exercise 4, test 1
+rm: cannot remove 'main': No such file or directory
+g++ -lm -O3  -c mocc/stat.cpp -o mocc/stat.o
+g++ -lm -O3  -c mocc/time.cpp -o mocc/time.o
+g++ -lm -O3  -c main.cpp -o main.o
+g++ -lm -O3  mocc/stat.o mocc/time.o main.o -o main
+processing student 2025-01-09-XXX-2049518 ex 4 test 1
+Running student 2025-01-09-XXX-2049518, exercise 4, test 1
+rm: cannot remove 'main': No such file or directory
+g++ -Wall -Wextra -std=c++11 -o main main.cpp
+processing student 2025-01-09-XXX-2061752 ex 4 test 1
+Running student 2025-01-09-XXX-2061752, exercise 4, test 1
+rm -f main
+g++ -std=c++11 -o main main.cpp
+processing student 2025-01-09-XXX-2050030 ex 4 test 1
+Running student 2025-01-09-XXX-2050030, exercise 4, test 1
+mkdir -p build
+g++ -O3 -Wall -Wextra -pedantic -I ./include/ -std=c++17 -lm main.cpp -o ./main
+processing student 2025-01-09-XXX-1994583 ex 4 test 1
+Running student 2025-01-09-XXX-1994583, exercise 4, test 1
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+processing student 2025-01-09-XXX-1884161 ex 4 test 1
+Running student 2025-01-09-XXX-1884161, exercise 4, test 1
+rm: cannot remove 'main': No such file or directory
+g++ -std=c++11 -Wall main.cpp -o main
+processing student 2025-01-09-XXX-2046991 ex 4 test 1
+Running student 2025-01-09-XXX-2046991, exercise 4, test 1
+g++ -c -o global.o global.cpp -std=c++11 -I.  -lm 
+g++ -c -o class.o class.cpp -std=c++11 -I.  -lm 
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -o main global.o class.o main.o -std=c++11 -I.  -lm 
+processing student 2025-01-09-XXX-2042904 ex 4 test 1
+Running student 2025-01-09-XXX-2042904, exercise 4, test 1
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2052530 ex 4 test 1
+Running student 2025-01-09-XXX-2052530, exercise 4, test 1
+mkdir -p build
+g++ -c -o build/monitor.o monitor.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/stats.o stats.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/customer.o customer.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/dispatcher.o dispatcher.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/main.o main.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/selib_monitor.o selib_monitor.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -o main build/monitor.o build/dispatcher.o build/main.o build/stats.o build/customer.o build/selib_monitor.o -lm -g -O3 -std=c++11 -I../../
+processing student 2025-XXX-2046234 ex 4 test 1
+Running student 2025-XXX-2046234, exercise 4, test 1
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2083154 ex 4 test 2
+Running student 2025-01-09-XXX-2083154, exercise 4, test 2
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2084379 ex 4 test 2
+Running student 2025-01-09-XXX-2084379, exercise 4, test 2
+g++ -c -o monitor.o monitor.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o betterFiFo.o betterFiFo.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o mdp.o mdp.cpp -std=c++11 -g -I.  -lm 
+mdp.cpp: In member function ‘void Customer::ReadParameters()’:
+mdp.cpp:40:26: warning: format ‘%d’ expects argument of type ‘int*’, but argument 3 has type ‘double*’ [-Wformat=]
+   40 |     if (fscanf(fp, "Avg %d\n", &this->avg) != 1)
+      |                         ~^     ~~~~~~~~~~
+      |                          |     |
+      |                          int*  double*
+      |                         %le
+mdp.cpp:46:29: warning: format ‘%d’ expects argument of type ‘int*’, but argument 3 has type ‘double*’ [-Wformat=]
+   46 |     if (fscanf(fp, "StdDev %d\n", &this->stdDev) != 1)
+      |                            ~^     ~~~~~~~~~~~~~
+      |                             |     |
+      |                             int*  double*
+      |                            %le
+g++ -c -o betterdtmc.o betterdtmc.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o message.o message.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o randgen.o randgen.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o globals.o globals.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o dispatcher.o dispatcher.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o main.o main.cpp -std=c++11 -g -I.  -lm 
+main.cpp: In function ‘int main()’:
+main.cpp:97:23: warning: format ‘%d’ expects argument of type ‘int’, but argument 4 has type ‘std::vector<Message*>::size_type’ {aka ‘long unsigned int’} [-Wformat=]
+   97 |     fprintf(fp2, "%d %d\n", i + 1, dispatcher.messages[i].size());
+      |                      ~^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                       |                                       |
+      |                       int                                     std::vector<Message*>::size_type {aka long unsigned int}
+      |                      %ld
+g++ -o main monitor.o betterFiFo.o mdp.o betterdtmc.o message.o randgen.o globals.o dispatcher.o main.o -std=c++11 -g -I.  -lm  -g
+processing student 2025-01-09-XXX-2050059 ex 4 test 2
+Running student 2025-01-09-XXX-2050059, exercise 4, test 2
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2066523 ex 4 test 2
+Running student 2025-01-09-XXX-2066523, exercise 4, test 2
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2059337 ex 4 test 2
+Running student 2025-01-09-XXX-2059337, exercise 4, test 2
+g++ -c -o monitor.o monitor.cpp -std=c++11 -I.  -lm 
+g++ -c -o customer.o customer.cpp -std=c++11 -I.  -lm 
+g++ -c -o dispatcher.o dispatcher.cpp -std=c++11 -I.  -lm 
+g++ -c -o parameters.o parameters.cpp -std=c++11 -I.  -lm 
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -o main monitor.o customer.o dispatcher.o parameters.o main.o -std=c++11 -I.  -lm 
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2066788 ex 4 test 2
+Running student 2025-01-09-XXX-2066788, exercise 4, test 2
+g++ -I./inc -Wall -std=c++17 -c src/monitor.cpp -o obj/monitor.o
+g++ -I./inc -Wall -std=c++17 -c src/customer.cpp -o obj/customer.o
+g++ -I./inc -Wall -std=c++17 -c src/dispatcher.cpp -o obj/dispatcher.o
+src/dispatcher.cpp: In member function ‘void Dispatcher::process_messages()’:
+src/dispatcher.cpp:14:14: warning: variable ‘message’ set but not used [-Wunused-but-set-variable]
+   14 |         auto message = message_queue.front();
+      |              ^~~~~~~
+g++ -I./inc -Wall -std=c++17 -c src/main.cpp -o obj/main.o
+src/main.cpp: In function ‘void print_results(const std::string&, size_t, Dispatcher, int)’:
+src/main.cpp:34:23: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+   34 |     for (int i = 0; i < size; ++i) {
+      |                     ~~^~~~~~
+src/main.cpp: In function ‘int main()’:
+src/main.cpp:51:23: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+   51 |     for (int i = 0; i < size; ++i) {
+      |                     ~~^~~~~~
+src/main.cpp:61:27: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+   61 |         for (int i = 0; i < size; ++i) {
+      |                         ~~^~~~~~
+g++  obj/monitor.o obj/customer.o obj/dispatcher.o obj/main.o  -o ./main
+processing student 2025-01-09-XXX-2045067 ex 4 test 2
+Running student 2025-01-09-XXX-2045067, exercise 4, test 2
+ CXX    clk.cpp
+clk.cpp: In function ‘void freeclk()’:
+clk.cpp:11:5: warning: deleting object of polymorphic class type ‘lib::Clock’ which has non-virtual destructor might cause undefined behavior [-Wdelete-non-virtual-dtor]
+   11 |     delete c;
+      |     ^~~~~~~~
+In file included from clk.cpp:4:
+defs.hpp: At global scope:
+defs.hpp:9:15: warning: ‘HORIZON’ defined but not used [-Wunused-variable]
+    9 | static double HORIZON = 1e6;
+      |               ^~~~~~~
+ CXX    main.cpp
+In file included from /usr/include/c++/13/cassert:44,
+                 from dispatcher.hpp:4,
+                 from system.hpp:9,
+                 from main.cpp:6:
+dispatcher.hpp: In member function ‘void Dispatcher::next()’:
+dispatcher.hpp:21:22: warning: comparison of integer expressions of different signedness: ‘std::vector<lib::Fifo<Messaggio> >::size_type’ {aka ‘long unsigned int’} and ‘int’ [-Wsign-compare]
+   21 |     assert(in.size() == N);
+      |            ~~~~~~~~~~^~~~
+In file included from lib/lib.hpp:17,
+                 from clk.hpp:3,
+                 from glb.hpp:3,
+                 from main.cpp:5:
+lib/metaprogramming.hpp: In instantiation of ‘void next_call(Args&& ...) [with Args = {lib::Clock&, std::vector<lib::Fifo<Messaggio>, std::allocator<lib::Fifo<Messaggio> > >&, lib::Fifo<Messaggio>&, Dispatcher&, std::vector<Customer, std::allocator<Customer> >&}]’:
+system.hpp:59:26:   required from here
+lib/metaprogramming.hpp:65:9: warning: unused variable ‘a’ [-Wunused-variable]
+   65 |     int a[] = {(method_name##_single(std::forward<Args>(args)), 0)...};                            \
+      |         ^
+lib/metaprogramming.hpp:71:1: note: in expansion of macro ‘DEFINE_COLLECTIVE_CALL’
+   71 | DEFINE_COLLECTIVE_CALL(next)
+      | ^~~~~~~~~~~~~~~~~~~~~~
+ CXX    lib/alarm.cpp
+ CXX    lib/averager.cpp
+ CXX    lib/clock.cpp
+ CXX    lib/csv_loggable.cpp
+ CXX    lib/DTMC.cpp
+ CXX    lib/FIFO.cpp
+ CXX    lib/global.cpp
+ CXX    lib/printing.cpp
+ CXX    lib/range.cpp
+ CXX    lib/simulator.cpp
+ CXX    lib/stopwatch.cpp
+g++ -o main clk.o main.o lib/alarm.o lib/averager.o lib/clock.o lib/csv_loggable.o lib/DTMC.o lib/FIFO.o lib/global.o lib/printing.o lib/range.o lib/simulator.o lib/stopwatch.o
+processing student 2025-01-09-XXX-2057291 ex 4 test 2
+Running student 2025-01-09-XXX-2057291, exercise 4, test 2
+rm: cannot remove 'main': No such file or directory
+g++ -Wall -Wextra -std=c++11 -o main main.cpp  
+processing student 2025-01-09-XXX-2048752 ex 4 test 2
+Running student 2025-01-09-XXX-2048752, exercise 4, test 2
+rm: cannot remove 'main': No such file or directory
+g++ -lm -O3  -c mocc/stat.cpp -o mocc/stat.o
+g++ -lm -O3  -c mocc/time.cpp -o mocc/time.o
+g++ -lm -O3  -c main.cpp -o main.o
+g++ -lm -O3  mocc/stat.o mocc/time.o main.o -o main
+processing student 2025-01-09-XXX-2049518 ex 4 test 2
+Running student 2025-01-09-XXX-2049518, exercise 4, test 2
+rm: cannot remove 'main': No such file or directory
+g++ -Wall -Wextra -std=c++11 -o main main.cpp
+processing student 2025-01-09-XXX-2061752 ex 4 test 2
+Running student 2025-01-09-XXX-2061752, exercise 4, test 2
+rm -f main
+g++ -std=c++11 -o main main.cpp
+processing student 2025-01-09-XXX-2050030 ex 4 test 2
+Running student 2025-01-09-XXX-2050030, exercise 4, test 2
+mkdir -p build
+g++ -O3 -Wall -Wextra -pedantic -I ./include/ -std=c++17 -lm main.cpp -o ./main
+processing student 2025-01-09-XXX-1994583 ex 4 test 2
+Running student 2025-01-09-XXX-1994583, exercise 4, test 2
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+processing student 2025-01-09-XXX-1884161 ex 4 test 2
+Running student 2025-01-09-XXX-1884161, exercise 4, test 2
+rm: cannot remove 'main': No such file or directory
+g++ -std=c++11 -Wall main.cpp -o main
+processing student 2025-01-09-XXX-2046991 ex 4 test 2
+Running student 2025-01-09-XXX-2046991, exercise 4, test 2
+g++ -c -o global.o global.cpp -std=c++11 -I.  -lm 
+g++ -c -o class.o class.cpp -std=c++11 -I.  -lm 
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -o main global.o class.o main.o -std=c++11 -I.  -lm 
+processing student 2025-01-09-XXX-2042904 ex 4 test 2
+Running student 2025-01-09-XXX-2042904, exercise 4, test 2
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2052530 ex 4 test 2
+Running student 2025-01-09-XXX-2052530, exercise 4, test 2
+mkdir -p build
+g++ -c -o build/monitor.o monitor.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/stats.o stats.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/customer.o customer.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/dispatcher.o dispatcher.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/main.o main.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/selib_monitor.o selib_monitor.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -o main build/monitor.o build/dispatcher.o build/main.o build/stats.o build/customer.o build/selib_monitor.o -lm -g -O3 -std=c++11 -I../../
+processing student 2025-XXX-2046234 ex 4 test 2
+Running student 2025-XXX-2046234, exercise 4, test 2
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2083154 ex 4 test 3
+Running student 2025-01-09-XXX-2083154, exercise 4, test 3
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2084379 ex 4 test 3
+Running student 2025-01-09-XXX-2084379, exercise 4, test 3
+g++ -c -o monitor.o monitor.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o betterFiFo.o betterFiFo.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o mdp.o mdp.cpp -std=c++11 -g -I.  -lm 
+mdp.cpp: In member function ‘void Customer::ReadParameters()’:
+mdp.cpp:40:26: warning: format ‘%d’ expects argument of type ‘int*’, but argument 3 has type ‘double*’ [-Wformat=]
+   40 |     if (fscanf(fp, "Avg %d\n", &this->avg) != 1)
+      |                         ~^     ~~~~~~~~~~
+      |                          |     |
+      |                          int*  double*
+      |                         %le
+mdp.cpp:46:29: warning: format ‘%d’ expects argument of type ‘int*’, but argument 3 has type ‘double*’ [-Wformat=]
+   46 |     if (fscanf(fp, "StdDev %d\n", &this->stdDev) != 1)
+      |                            ~^     ~~~~~~~~~~~~~
+      |                             |     |
+      |                             int*  double*
+      |                            %le
+g++ -c -o betterdtmc.o betterdtmc.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o message.o message.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o randgen.o randgen.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o globals.o globals.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o dispatcher.o dispatcher.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o main.o main.cpp -std=c++11 -g -I.  -lm 
+main.cpp: In function ‘int main()’:
+main.cpp:97:23: warning: format ‘%d’ expects argument of type ‘int’, but argument 4 has type ‘std::vector<Message*>::size_type’ {aka ‘long unsigned int’} [-Wformat=]
+   97 |     fprintf(fp2, "%d %d\n", i + 1, dispatcher.messages[i].size());
+      |                      ~^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                       |                                       |
+      |                       int                                     std::vector<Message*>::size_type {aka long unsigned int}
+      |                      %ld
+g++ -o main monitor.o betterFiFo.o mdp.o betterdtmc.o message.o randgen.o globals.o dispatcher.o main.o -std=c++11 -g -I.  -lm  -g
+processing student 2025-01-09-XXX-2050059 ex 4 test 3
+Running student 2025-01-09-XXX-2050059, exercise 4, test 3
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2066523 ex 4 test 3
+Running student 2025-01-09-XXX-2066523, exercise 4, test 3
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2059337 ex 4 test 3
+Running student 2025-01-09-XXX-2059337, exercise 4, test 3
+g++ -c -o monitor.o monitor.cpp -std=c++11 -I.  -lm 
+g++ -c -o customer.o customer.cpp -std=c++11 -I.  -lm 
+g++ -c -o dispatcher.o dispatcher.cpp -std=c++11 -I.  -lm 
+g++ -c -o parameters.o parameters.cpp -std=c++11 -I.  -lm 
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -o main monitor.o customer.o dispatcher.o parameters.o main.o -std=c++11 -I.  -lm 
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2066788 ex 4 test 3
+Running student 2025-01-09-XXX-2066788, exercise 4, test 3
+g++ -I./inc -Wall -std=c++17 -c src/monitor.cpp -o obj/monitor.o
+g++ -I./inc -Wall -std=c++17 -c src/customer.cpp -o obj/customer.o
+g++ -I./inc -Wall -std=c++17 -c src/dispatcher.cpp -o obj/dispatcher.o
+src/dispatcher.cpp: In member function ‘void Dispatcher::process_messages()’:
+src/dispatcher.cpp:14:14: warning: variable ‘message’ set but not used [-Wunused-but-set-variable]
+   14 |         auto message = message_queue.front();
+      |              ^~~~~~~
+g++ -I./inc -Wall -std=c++17 -c src/main.cpp -o obj/main.o
+src/main.cpp: In function ‘void print_results(const std::string&, size_t, Dispatcher, int)’:
+src/main.cpp:34:23: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+   34 |     for (int i = 0; i < size; ++i) {
+      |                     ~~^~~~~~
+src/main.cpp: In function ‘int main()’:
+src/main.cpp:51:23: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+   51 |     for (int i = 0; i < size; ++i) {
+      |                     ~~^~~~~~
+src/main.cpp:61:27: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+   61 |         for (int i = 0; i < size; ++i) {
+      |                         ~~^~~~~~
+g++  obj/monitor.o obj/customer.o obj/dispatcher.o obj/main.o  -o ./main
+processing student 2025-01-09-XXX-2045067 ex 4 test 3
+Running student 2025-01-09-XXX-2045067, exercise 4, test 3
+ CXX    clk.cpp
+clk.cpp: In function ‘void freeclk()’:
+clk.cpp:11:5: warning: deleting object of polymorphic class type ‘lib::Clock’ which has non-virtual destructor might cause undefined behavior [-Wdelete-non-virtual-dtor]
+   11 |     delete c;
+      |     ^~~~~~~~
+In file included from clk.cpp:4:
+defs.hpp: At global scope:
+defs.hpp:9:15: warning: ‘HORIZON’ defined but not used [-Wunused-variable]
+    9 | static double HORIZON = 1e6;
+      |               ^~~~~~~
+ CXX    main.cpp
+In file included from /usr/include/c++/13/cassert:44,
+                 from dispatcher.hpp:4,
+                 from system.hpp:9,
+                 from main.cpp:6:
+dispatcher.hpp: In member function ‘void Dispatcher::next()’:
+dispatcher.hpp:21:22: warning: comparison of integer expressions of different signedness: ‘std::vector<lib::Fifo<Messaggio> >::size_type’ {aka ‘long unsigned int’} and ‘int’ [-Wsign-compare]
+   21 |     assert(in.size() == N);
+      |            ~~~~~~~~~~^~~~
+In file included from lib/lib.hpp:17,
+                 from clk.hpp:3,
+                 from glb.hpp:3,
+                 from main.cpp:5:
+lib/metaprogramming.hpp: In instantiation of ‘void next_call(Args&& ...) [with Args = {lib::Clock&, std::vector<lib::Fifo<Messaggio>, std::allocator<lib::Fifo<Messaggio> > >&, lib::Fifo<Messaggio>&, Dispatcher&, std::vector<Customer, std::allocator<Customer> >&}]’:
+system.hpp:59:26:   required from here
+lib/metaprogramming.hpp:65:9: warning: unused variable ‘a’ [-Wunused-variable]
+   65 |     int a[] = {(method_name##_single(std::forward<Args>(args)), 0)...};                            \
+      |         ^
+lib/metaprogramming.hpp:71:1: note: in expansion of macro ‘DEFINE_COLLECTIVE_CALL’
+   71 | DEFINE_COLLECTIVE_CALL(next)
+      | ^~~~~~~~~~~~~~~~~~~~~~
+ CXX    lib/alarm.cpp
+ CXX    lib/averager.cpp
+ CXX    lib/clock.cpp
+ CXX    lib/csv_loggable.cpp
+ CXX    lib/DTMC.cpp
+ CXX    lib/FIFO.cpp
+ CXX    lib/global.cpp
+ CXX    lib/printing.cpp
+ CXX    lib/range.cpp
+ CXX    lib/simulator.cpp
+ CXX    lib/stopwatch.cpp
+g++ -o main clk.o main.o lib/alarm.o lib/averager.o lib/clock.o lib/csv_loggable.o lib/DTMC.o lib/FIFO.o lib/global.o lib/printing.o lib/range.o lib/simulator.o lib/stopwatch.o
+processing student 2025-01-09-XXX-2057291 ex 4 test 3
+Running student 2025-01-09-XXX-2057291, exercise 4, test 3
+rm: cannot remove 'main': No such file or directory
+g++ -Wall -Wextra -std=c++11 -o main main.cpp  
+processing student 2025-01-09-XXX-2048752 ex 4 test 3
+Running student 2025-01-09-XXX-2048752, exercise 4, test 3
+rm: cannot remove 'main': No such file or directory
+g++ -lm -O3  -c mocc/stat.cpp -o mocc/stat.o
+g++ -lm -O3  -c mocc/time.cpp -o mocc/time.o
+g++ -lm -O3  -c main.cpp -o main.o
+g++ -lm -O3  mocc/stat.o mocc/time.o main.o -o main
+processing student 2025-01-09-XXX-2049518 ex 4 test 3
+Running student 2025-01-09-XXX-2049518, exercise 4, test 3
+rm: cannot remove 'main': No such file or directory
+g++ -Wall -Wextra -std=c++11 -o main main.cpp
+processing student 2025-01-09-XXX-2061752 ex 4 test 3
+Running student 2025-01-09-XXX-2061752, exercise 4, test 3
+rm -f main
+g++ -std=c++11 -o main main.cpp
+processing student 2025-01-09-XXX-2050030 ex 4 test 3
+Running student 2025-01-09-XXX-2050030, exercise 4, test 3
+mkdir -p build
+g++ -O3 -Wall -Wextra -pedantic -I ./include/ -std=c++17 -lm main.cpp -o ./main
+processing student 2025-01-09-XXX-1994583 ex 4 test 3
+Running student 2025-01-09-XXX-1994583, exercise 4, test 3
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+processing student 2025-01-09-XXX-1884161 ex 4 test 3
+Running student 2025-01-09-XXX-1884161, exercise 4, test 3
+rm: cannot remove 'main': No such file or directory
+g++ -std=c++11 -Wall main.cpp -o main
+processing student 2025-01-09-XXX-2046991 ex 4 test 3
+Running student 2025-01-09-XXX-2046991, exercise 4, test 3
+g++ -c -o global.o global.cpp -std=c++11 -I.  -lm 
+g++ -c -o class.o class.cpp -std=c++11 -I.  -lm 
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -o main global.o class.o main.o -std=c++11 -I.  -lm 
+processing student 2025-01-09-XXX-2042904 ex 4 test 3
+Running student 2025-01-09-XXX-2042904, exercise 4, test 3
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2052530 ex 4 test 3
+Running student 2025-01-09-XXX-2052530, exercise 4, test 3
+mkdir -p build
+g++ -c -o build/monitor.o monitor.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/stats.o stats.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/customer.o customer.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/dispatcher.o dispatcher.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/main.o main.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/selib_monitor.o selib_monitor.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -o main build/monitor.o build/dispatcher.o build/main.o build/stats.o build/customer.o build/selib_monitor.o -lm -g -O3 -std=c++11 -I../../
+processing student 2025-XXX-2046234 ex 4 test 3
+Running student 2025-XXX-2046234, exercise 4, test 3
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2083154 ex 4 test 4
+Running student 2025-01-09-XXX-2083154, exercise 4, test 4
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2084379 ex 4 test 4
+Running student 2025-01-09-XXX-2084379, exercise 4, test 4
+g++ -c -o monitor.o monitor.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o betterFiFo.o betterFiFo.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o mdp.o mdp.cpp -std=c++11 -g -I.  -lm 
+mdp.cpp: In member function ‘void Customer::ReadParameters()’:
+mdp.cpp:40:26: warning: format ‘%d’ expects argument of type ‘int*’, but argument 3 has type ‘double*’ [-Wformat=]
+   40 |     if (fscanf(fp, "Avg %d\n", &this->avg) != 1)
+      |                         ~^     ~~~~~~~~~~
+      |                          |     |
+      |                          int*  double*
+      |                         %le
+mdp.cpp:46:29: warning: format ‘%d’ expects argument of type ‘int*’, but argument 3 has type ‘double*’ [-Wformat=]
+   46 |     if (fscanf(fp, "StdDev %d\n", &this->stdDev) != 1)
+      |                            ~^     ~~~~~~~~~~~~~
+      |                             |     |
+      |                             int*  double*
+      |                            %le
+g++ -c -o betterdtmc.o betterdtmc.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o message.o message.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o randgen.o randgen.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o globals.o globals.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o dispatcher.o dispatcher.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o main.o main.cpp -std=c++11 -g -I.  -lm 
+main.cpp: In function ‘int main()’:
+main.cpp:97:23: warning: format ‘%d’ expects argument of type ‘int’, but argument 4 has type ‘std::vector<Message*>::size_type’ {aka ‘long unsigned int’} [-Wformat=]
+   97 |     fprintf(fp2, "%d %d\n", i + 1, dispatcher.messages[i].size());
+      |                      ~^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                       |                                       |
+      |                       int                                     std::vector<Message*>::size_type {aka long unsigned int}
+      |                      %ld
+g++ -o main monitor.o betterFiFo.o mdp.o betterdtmc.o message.o randgen.o globals.o dispatcher.o main.o -std=c++11 -g -I.  -lm  -g
+processing student 2025-01-09-XXX-2050059 ex 4 test 4
+Running student 2025-01-09-XXX-2050059, exercise 4, test 4
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2066523 ex 4 test 4
+Running student 2025-01-09-XXX-2066523, exercise 4, test 4
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2059337 ex 4 test 4
+Running student 2025-01-09-XXX-2059337, exercise 4, test 4
+g++ -c -o monitor.o monitor.cpp -std=c++11 -I.  -lm 
+g++ -c -o customer.o customer.cpp -std=c++11 -I.  -lm 
+g++ -c -o dispatcher.o dispatcher.cpp -std=c++11 -I.  -lm 
+g++ -c -o parameters.o parameters.cpp -std=c++11 -I.  -lm 
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -o main monitor.o customer.o dispatcher.o parameters.o main.o -std=c++11 -I.  -lm 
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2066788 ex 4 test 4
+Running student 2025-01-09-XXX-2066788, exercise 4, test 4
+g++ -I./inc -Wall -std=c++17 -c src/monitor.cpp -o obj/monitor.o
+g++ -I./inc -Wall -std=c++17 -c src/customer.cpp -o obj/customer.o
+g++ -I./inc -Wall -std=c++17 -c src/dispatcher.cpp -o obj/dispatcher.o
+src/dispatcher.cpp: In member function ‘void Dispatcher::process_messages()’:
+src/dispatcher.cpp:14:14: warning: variable ‘message’ set but not used [-Wunused-but-set-variable]
+   14 |         auto message = message_queue.front();
+      |              ^~~~~~~
+g++ -I./inc -Wall -std=c++17 -c src/main.cpp -o obj/main.o
+src/main.cpp: In function ‘void print_results(const std::string&, size_t, Dispatcher, int)’:
+src/main.cpp:34:23: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+   34 |     for (int i = 0; i < size; ++i) {
+      |                     ~~^~~~~~
+src/main.cpp: In function ‘int main()’:
+src/main.cpp:51:23: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+   51 |     for (int i = 0; i < size; ++i) {
+      |                     ~~^~~~~~
+src/main.cpp:61:27: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+   61 |         for (int i = 0; i < size; ++i) {
+      |                         ~~^~~~~~
+g++  obj/monitor.o obj/customer.o obj/dispatcher.o obj/main.o  -o ./main
+processing student 2025-01-09-XXX-2045067 ex 4 test 4
+Running student 2025-01-09-XXX-2045067, exercise 4, test 4
+ CXX    clk.cpp
+clk.cpp: In function ‘void freeclk()’:
+clk.cpp:11:5: warning: deleting object of polymorphic class type ‘lib::Clock’ which has non-virtual destructor might cause undefined behavior [-Wdelete-non-virtual-dtor]
+   11 |     delete c;
+      |     ^~~~~~~~
+In file included from clk.cpp:4:
+defs.hpp: At global scope:
+defs.hpp:9:15: warning: ‘HORIZON’ defined but not used [-Wunused-variable]
+    9 | static double HORIZON = 1e6;
+      |               ^~~~~~~
+ CXX    main.cpp
+In file included from /usr/include/c++/13/cassert:44,
+                 from dispatcher.hpp:4,
+                 from system.hpp:9,
+                 from main.cpp:6:
+dispatcher.hpp: In member function ‘void Dispatcher::next()’:
+dispatcher.hpp:21:22: warning: comparison of integer expressions of different signedness: ‘std::vector<lib::Fifo<Messaggio> >::size_type’ {aka ‘long unsigned int’} and ‘int’ [-Wsign-compare]
+   21 |     assert(in.size() == N);
+      |            ~~~~~~~~~~^~~~
+In file included from lib/lib.hpp:17,
+                 from clk.hpp:3,
+                 from glb.hpp:3,
+                 from main.cpp:5:
+lib/metaprogramming.hpp: In instantiation of ‘void next_call(Args&& ...) [with Args = {lib::Clock&, std::vector<lib::Fifo<Messaggio>, std::allocator<lib::Fifo<Messaggio> > >&, lib::Fifo<Messaggio>&, Dispatcher&, std::vector<Customer, std::allocator<Customer> >&}]’:
+system.hpp:59:26:   required from here
+lib/metaprogramming.hpp:65:9: warning: unused variable ‘a’ [-Wunused-variable]
+   65 |     int a[] = {(method_name##_single(std::forward<Args>(args)), 0)...};                            \
+      |         ^
+lib/metaprogramming.hpp:71:1: note: in expansion of macro ‘DEFINE_COLLECTIVE_CALL’
+   71 | DEFINE_COLLECTIVE_CALL(next)
+      | ^~~~~~~~~~~~~~~~~~~~~~
+ CXX    lib/alarm.cpp
+ CXX    lib/averager.cpp
+ CXX    lib/clock.cpp
+ CXX    lib/csv_loggable.cpp
+ CXX    lib/DTMC.cpp
+ CXX    lib/FIFO.cpp
+ CXX    lib/global.cpp
+ CXX    lib/printing.cpp
+ CXX    lib/range.cpp
+ CXX    lib/simulator.cpp
+ CXX    lib/stopwatch.cpp
+g++ -o main clk.o main.o lib/alarm.o lib/averager.o lib/clock.o lib/csv_loggable.o lib/DTMC.o lib/FIFO.o lib/global.o lib/printing.o lib/range.o lib/simulator.o lib/stopwatch.o
+processing student 2025-01-09-XXX-2057291 ex 4 test 4
+Running student 2025-01-09-XXX-2057291, exercise 4, test 4
+rm: cannot remove 'main': No such file or directory
+g++ -Wall -Wextra -std=c++11 -o main main.cpp  
+processing student 2025-01-09-XXX-2048752 ex 4 test 4
+Running student 2025-01-09-XXX-2048752, exercise 4, test 4
+rm: cannot remove 'main': No such file or directory
+g++ -lm -O3  -c mocc/stat.cpp -o mocc/stat.o
+g++ -lm -O3  -c mocc/time.cpp -o mocc/time.o
+g++ -lm -O3  -c main.cpp -o main.o
+g++ -lm -O3  mocc/stat.o mocc/time.o main.o -o main
+processing student 2025-01-09-XXX-2049518 ex 4 test 4
+Running student 2025-01-09-XXX-2049518, exercise 4, test 4
+rm: cannot remove 'main': No such file or directory
+g++ -Wall -Wextra -std=c++11 -o main main.cpp
+processing student 2025-01-09-XXX-2061752 ex 4 test 4
+Running student 2025-01-09-XXX-2061752, exercise 4, test 4
+rm -f main
+g++ -std=c++11 -o main main.cpp
+processing student 2025-01-09-XXX-2050030 ex 4 test 4
+Running student 2025-01-09-XXX-2050030, exercise 4, test 4
+mkdir -p build
+g++ -O3 -Wall -Wextra -pedantic -I ./include/ -std=c++17 -lm main.cpp -o ./main
+processing student 2025-01-09-XXX-1994583 ex 4 test 4
+Running student 2025-01-09-XXX-1994583, exercise 4, test 4
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+processing student 2025-01-09-XXX-1884161 ex 4 test 4
+Running student 2025-01-09-XXX-1884161, exercise 4, test 4
+rm: cannot remove 'main': No such file or directory
+g++ -std=c++11 -Wall main.cpp -o main
+processing student 2025-01-09-XXX-2046991 ex 4 test 4
+Running student 2025-01-09-XXX-2046991, exercise 4, test 4
+g++ -c -o global.o global.cpp -std=c++11 -I.  -lm 
+g++ -c -o class.o class.cpp -std=c++11 -I.  -lm 
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -o main global.o class.o main.o -std=c++11 -I.  -lm 
+processing student 2025-01-09-XXX-2042904 ex 4 test 4
+Running student 2025-01-09-XXX-2042904, exercise 4, test 4
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2052530 ex 4 test 4
+Running student 2025-01-09-XXX-2052530, exercise 4, test 4
+mkdir -p build
+g++ -c -o build/monitor.o monitor.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/stats.o stats.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/customer.o customer.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/dispatcher.o dispatcher.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/main.o main.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/selib_monitor.o selib_monitor.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -o main build/monitor.o build/dispatcher.o build/main.o build/stats.o build/customer.o build/selib_monitor.o -lm -g -O3 -std=c++11 -I../../
+processing student 2025-XXX-2046234 ex 4 test 4
+Running student 2025-XXX-2046234, exercise 4, test 4
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2083154 ex 4 test 5
+Running student 2025-01-09-XXX-2083154, exercise 4, test 5
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2084379 ex 4 test 5
+Running student 2025-01-09-XXX-2084379, exercise 4, test 5
+g++ -c -o monitor.o monitor.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o betterFiFo.o betterFiFo.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o mdp.o mdp.cpp -std=c++11 -g -I.  -lm 
+mdp.cpp: In member function ‘void Customer::ReadParameters()’:
+mdp.cpp:40:26: warning: format ‘%d’ expects argument of type ‘int*’, but argument 3 has type ‘double*’ [-Wformat=]
+   40 |     if (fscanf(fp, "Avg %d\n", &this->avg) != 1)
+      |                         ~^     ~~~~~~~~~~
+      |                          |     |
+      |                          int*  double*
+      |                         %le
+mdp.cpp:46:29: warning: format ‘%d’ expects argument of type ‘int*’, but argument 3 has type ‘double*’ [-Wformat=]
+   46 |     if (fscanf(fp, "StdDev %d\n", &this->stdDev) != 1)
+      |                            ~^     ~~~~~~~~~~~~~
+      |                             |     |
+      |                             int*  double*
+      |                            %le
+g++ -c -o betterdtmc.o betterdtmc.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o message.o message.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o randgen.o randgen.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o globals.o globals.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o dispatcher.o dispatcher.cpp -std=c++11 -g -I.  -lm 
+g++ -c -o main.o main.cpp -std=c++11 -g -I.  -lm 
+main.cpp: In function ‘int main()’:
+main.cpp:97:23: warning: format ‘%d’ expects argument of type ‘int’, but argument 4 has type ‘std::vector<Message*>::size_type’ {aka ‘long unsigned int’} [-Wformat=]
+   97 |     fprintf(fp2, "%d %d\n", i + 1, dispatcher.messages[i].size());
+      |                      ~^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                       |                                       |
+      |                       int                                     std::vector<Message*>::size_type {aka long unsigned int}
+      |                      %ld
+g++ -o main monitor.o betterFiFo.o mdp.o betterdtmc.o message.o randgen.o globals.o dispatcher.o main.o -std=c++11 -g -I.  -lm  -g
+processing student 2025-01-09-XXX-2050059 ex 4 test 5
+Running student 2025-01-09-XXX-2050059, exercise 4, test 5
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2066523 ex 4 test 5
+Running student 2025-01-09-XXX-2066523, exercise 4, test 5
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2059337 ex 4 test 5
+Running student 2025-01-09-XXX-2059337, exercise 4, test 5
+g++ -c -o monitor.o monitor.cpp -std=c++11 -I.  -lm 
+g++ -c -o customer.o customer.cpp -std=c++11 -I.  -lm 
+g++ -c -o dispatcher.o dispatcher.cpp -std=c++11 -I.  -lm 
+g++ -c -o parameters.o parameters.cpp -std=c++11 -I.  -lm 
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -o main monitor.o customer.o dispatcher.o parameters.o main.o -std=c++11 -I.  -lm 
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2066788 ex 4 test 5
+Running student 2025-01-09-XXX-2066788, exercise 4, test 5
+g++ -I./inc -Wall -std=c++17 -c src/monitor.cpp -o obj/monitor.o
+g++ -I./inc -Wall -std=c++17 -c src/customer.cpp -o obj/customer.o
+g++ -I./inc -Wall -std=c++17 -c src/dispatcher.cpp -o obj/dispatcher.o
+src/dispatcher.cpp: In member function ‘void Dispatcher::process_messages()’:
+src/dispatcher.cpp:14:14: warning: variable ‘message’ set but not used [-Wunused-but-set-variable]
+   14 |         auto message = message_queue.front();
+      |              ^~~~~~~
+g++ -I./inc -Wall -std=c++17 -c src/main.cpp -o obj/main.o
+src/main.cpp: In function ‘void print_results(const std::string&, size_t, Dispatcher, int)’:
+src/main.cpp:34:23: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+   34 |     for (int i = 0; i < size; ++i) {
+      |                     ~~^~~~~~
+src/main.cpp: In function ‘int main()’:
+src/main.cpp:51:23: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+   51 |     for (int i = 0; i < size; ++i) {
+      |                     ~~^~~~~~
+src/main.cpp:61:27: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+   61 |         for (int i = 0; i < size; ++i) {
+      |                         ~~^~~~~~
+g++  obj/monitor.o obj/customer.o obj/dispatcher.o obj/main.o  -o ./main
+processing student 2025-01-09-XXX-2045067 ex 4 test 5
+Running student 2025-01-09-XXX-2045067, exercise 4, test 5
+ CXX    clk.cpp
+clk.cpp: In function ‘void freeclk()’:
+clk.cpp:11:5: warning: deleting object of polymorphic class type ‘lib::Clock’ which has non-virtual destructor might cause undefined behavior [-Wdelete-non-virtual-dtor]
+   11 |     delete c;
+      |     ^~~~~~~~
+In file included from clk.cpp:4:
+defs.hpp: At global scope:
+defs.hpp:9:15: warning: ‘HORIZON’ defined but not used [-Wunused-variable]
+    9 | static double HORIZON = 1e6;
+      |               ^~~~~~~
+ CXX    main.cpp
+In file included from /usr/include/c++/13/cassert:44,
+                 from dispatcher.hpp:4,
+                 from system.hpp:9,
+                 from main.cpp:6:
+dispatcher.hpp: In member function ‘void Dispatcher::next()’:
+dispatcher.hpp:21:22: warning: comparison of integer expressions of different signedness: ‘std::vector<lib::Fifo<Messaggio> >::size_type’ {aka ‘long unsigned int’} and ‘int’ [-Wsign-compare]
+   21 |     assert(in.size() == N);
+      |            ~~~~~~~~~~^~~~
+In file included from lib/lib.hpp:17,
+                 from clk.hpp:3,
+                 from glb.hpp:3,
+                 from main.cpp:5:
+lib/metaprogramming.hpp: In instantiation of ‘void next_call(Args&& ...) [with Args = {lib::Clock&, std::vector<lib::Fifo<Messaggio>, std::allocator<lib::Fifo<Messaggio> > >&, lib::Fifo<Messaggio>&, Dispatcher&, std::vector<Customer, std::allocator<Customer> >&}]’:
+system.hpp:59:26:   required from here
+lib/metaprogramming.hpp:65:9: warning: unused variable ‘a’ [-Wunused-variable]
+   65 |     int a[] = {(method_name##_single(std::forward<Args>(args)), 0)...};                            \
+      |         ^
+lib/metaprogramming.hpp:71:1: note: in expansion of macro ‘DEFINE_COLLECTIVE_CALL’
+   71 | DEFINE_COLLECTIVE_CALL(next)
+      | ^~~~~~~~~~~~~~~~~~~~~~
+ CXX    lib/alarm.cpp
+ CXX    lib/averager.cpp
+ CXX    lib/clock.cpp
+ CXX    lib/csv_loggable.cpp
+ CXX    lib/DTMC.cpp
+ CXX    lib/FIFO.cpp
+ CXX    lib/global.cpp
+ CXX    lib/printing.cpp
+ CXX    lib/range.cpp
+ CXX    lib/simulator.cpp
+ CXX    lib/stopwatch.cpp
+g++ -o main clk.o main.o lib/alarm.o lib/averager.o lib/clock.o lib/csv_loggable.o lib/DTMC.o lib/FIFO.o lib/global.o lib/printing.o lib/range.o lib/simulator.o lib/stopwatch.o
+processing student 2025-01-09-XXX-2057291 ex 4 test 5
+Running student 2025-01-09-XXX-2057291, exercise 4, test 5
+rm: cannot remove 'main': No such file or directory
+g++ -Wall -Wextra -std=c++11 -o main main.cpp  
+processing student 2025-01-09-XXX-2048752 ex 4 test 5
+Running student 2025-01-09-XXX-2048752, exercise 4, test 5
+rm: cannot remove 'main': No such file or directory
+g++ -lm -O3  -c mocc/stat.cpp -o mocc/stat.o
+g++ -lm -O3  -c mocc/time.cpp -o mocc/time.o
+g++ -lm -O3  -c main.cpp -o main.o
+g++ -lm -O3  mocc/stat.o mocc/time.o main.o -o main
+processing student 2025-01-09-XXX-2049518 ex 4 test 5
+Running student 2025-01-09-XXX-2049518, exercise 4, test 5
+rm: cannot remove 'main': No such file or directory
+g++ -Wall -Wextra -std=c++11 -o main main.cpp
+processing student 2025-01-09-XXX-2061752 ex 4 test 5
+Running student 2025-01-09-XXX-2061752, exercise 4, test 5
+rm -f main
+g++ -std=c++11 -o main main.cpp
+processing student 2025-01-09-XXX-2050030 ex 4 test 5
+Running student 2025-01-09-XXX-2050030, exercise 4, test 5
+mkdir -p build
+g++ -O3 -Wall -Wextra -pedantic -I ./include/ -std=c++17 -lm main.cpp -o ./main
+processing student 2025-01-09-XXX-1994583 ex 4 test 5
+Running student 2025-01-09-XXX-1994583, exercise 4, test 5
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+processing student 2025-01-09-XXX-1884161 ex 4 test 5
+Running student 2025-01-09-XXX-1884161, exercise 4, test 5
+rm: cannot remove 'main': No such file or directory
+g++ -std=c++11 -Wall main.cpp -o main
+processing student 2025-01-09-XXX-2046991 ex 4 test 5
+Running student 2025-01-09-XXX-2046991, exercise 4, test 5
+g++ -c -o global.o global.cpp -std=c++11 -I.  -lm 
+g++ -c -o class.o class.cpp -std=c++11 -I.  -lm 
+g++ -c -o main.o main.cpp -std=c++11 -I.  -lm 
+g++ -o main global.o class.o main.o -std=c++11 -I.  -lm 
+processing student 2025-01-09-XXX-2042904 ex 4 test 5
+Running student 2025-01-09-XXX-2042904, exercise 4, test 5
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+processing student 2025-01-09-XXX-2052530 ex 4 test 5
+Running student 2025-01-09-XXX-2052530, exercise 4, test 5
+mkdir -p build
+g++ -c -o build/monitor.o monitor.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/stats.o stats.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/customer.o customer.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/dispatcher.o dispatcher.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/main.o main.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -c -o build/selib_monitor.o selib_monitor.cpp -lm -g -O3 -std=c++11 -I../../
+g++ -o main build/monitor.o build/dispatcher.o build/main.o build/stats.o build/customer.o build/selib_monitor.o -lm -g -O3 -std=c++11 -I../../
+processing student 2025-XXX-2046234 ex 4 test 5
+Running student 2025-XXX-2046234, exercise 4, test 5
+rm: cannot remove 'main': No such file or directory
+make: *** No targets specified and no makefile found.  Stop.
+mv: cannot stat 'results.txt': No such file or directory
+**** GRADING COMPLETED ****

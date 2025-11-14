@@ -11,8 +11,8 @@ void Stopwatch::update() {
     notify(elapsed_time);
 }
 
-Timer::Timer(real_t duration, TimerMode mode, real_t delta)
-    : duration(duration), mode(mode), time_step(delta) {}
+Timer::Timer(real_t duration, TimerMode mode, real_t time_step)
+    : duration(duration), mode(mode), time_step(time_step) {}
 
 void Timer::resetWithDuration(real_t duration) {
     this->duration = duration;
@@ -21,9 +21,11 @@ void Timer::resetWithDuration(real_t duration) {
 }
 
 void Timer::update() {
-    if (elapsed_time < duration)
+    if (elapsed_time < duration) {
         elapsed_time += time_step;
-    else if (!is_finished) {
+    }
+
+    if (elapsed_time + time_step >= duration && !is_finished) {
         switch (mode) {
         case TimerMode::Repeating:
             elapsed_time = 0;

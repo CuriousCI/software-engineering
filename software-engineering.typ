@@ -1,41 +1,74 @@
 #set text(font: "New Computer Modern", lang: "en", weight: "light", size: 11pt)
 #set page(margin: 1.75in)
-#set par(
-    leading: 0.55em,
-    spacing: 0.85em,
-    first-line-indent: 1.8em,
-    justify: true,
-)
+#set par(leading: 0.55em, spacing: 0.85em, justify: true)
 #set heading(numbering: "1.1")
 #set math.equation(numbering: "(1)")
+#set raw(lang: "cpp")
+#set list(marker: [--])
 
+#show sym.emptyset: sym.diameter
 #show figure: set block(breakable: true)
-#show figure.caption: set align(center)
 #show heading: set block(above: 1.4em, below: 1em)
-#show outline.entry.where(level: 1): it => {
-    show repeat: none
-    v(1.1em, weak: true)
-    text(size: 1em, strong(it))
-}
-#show raw.where(block: true): block.with(
-    inset: 1em,
-    width: 100%,
-    fill: luma(254),
-    stroke: (left: 5pt + luma(245), rest: 1pt + luma(245)),
-)
-#show figure.where(kind: raw): it => {
-    set align(left)
+
+#show heading.where(level: 2).or(heading.where(level: 1)): it => {
+    show raw: set text(size: 1.45em)
+
     it
 }
-#show raw: set text(
-    font: "CaskaydiaCove NFM",
-    lang: "en",
-    weight: "light",
-    size: 9pt,
-)
-#show sym.emptyset: sym.diameter
 
-#let reft(reft) = box(
+#show raw: it => {
+    set text(font: "CaskaydiaCove NFM", weight: "light", size: 8.5pt)
+    set block(width: 100%, inset: 1em, fill: luma(250), stroke: .75pt + silver)
+
+    it
+}
+
+#show outline.entry.where(level: 1): it => {
+    show repeat: none
+    v(1em, weak: true)
+    text(size: 1em, strong(it))
+}
+
+
+#let load-listing-from-file(filename, start: none, end: none) = {
+    assert(end == none or start != none)
+    assert(start == none or end == none or start < end)
+
+    figure(
+        caption: raw(filename, lang: "typ"),
+        raw(
+            {
+                let file = read(filename)
+                if (start != none) {
+                    file = file.split("\n").slice(start, end).join("\n")
+                }
+                file
+            },
+            block: true,
+        ),
+    )
+}
+
+
+#let listing(kind, caption, body) = {
+    strong({
+        upper(kind.first()) + kind.slice(1)
+        sym.space
+        context counter(kind).step()
+        context counter(kind).display()
+        sym.space
+    })
+    [(#caption)*.*]
+    sym.space
+
+    body
+}
+
+#let listing-def(caption, body) = listing("definition", caption, body)
+#let listing-problem(caption, body) = listing("problem", caption, body)
+#let listing-example(caption, body) = listing("example", caption, body)
+
+#let raw-ref(id) = box(
     width: 9pt,
     place(
         dy: -8pt,
@@ -49,45 +82,39 @@
             align(center + horizon, text(
                 font: "CaskaydiaCove NFM",
                 size: 7pt,
-                repr(reft),
+                repr(id),
             )),
         ),
     ),
 )
 
-#show raw: r => {
-    show regex("t(\d)"): it => { reft(int(repr(it).slice(2, -1))) }
-    r
+#show raw: it => {
+    show regex("/\* \d \*/"): it => {
+        set text(red)
+        show regex("(\*|/| )"): ""
+        show regex("\d"): it => {
+            raw-ref(int(it.text))
+        }
+
+        underline(strong(it))
+    }
+
+    it
 }
 
-// #let note(body) = block(width: 100%, inset: 1em, stroke: (paint: silver, dash: "dashed"), body)
-#let note(body) = box(
-    width: 100%,
-    inset: 1em,
-    fill: luma(254),
-    stroke: (paint: silver, dash: "dashed"),
-    body,
-)
-// #let note(body) = block(inset: 1em, fill: luma(254), stroke: (thickness: 1pt, paint: luma(245)), body)
-
-#let docs(dest) = link(
+#let cppreference(dest) = link(
     "https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution",
     [`(`#underline(offset: 2pt, `docs`)`)`],
 )
 
-#page(
-    align(
-        center + horizon,
-        {
-            heading(outlined: false, numbering: none, text(size: 1.5em)[Software
-                Engineering])
-            text(size: 1.3em)[
-                Ionuț Cicio \
-            ]
-            align(bottom, datetime.today().display("[day]/[month]/[year]"))
-        },
-    ),
-)
+#page(align(
+    center + horizon,
+    {
+        title[Software Engineering]
+        text(size: 1.3em)[ Ionuț Cicio \ ]
+        align(bottom, datetime.today().display("[day]/[month]/[year]"))
+    },
+))
 
 #page[The latest version of the `.pdf` and the referenced material can be found
     at the following link: #underline(link(
@@ -113,13 +140,13 @@ minimal? Would you use a distributed architecture or a monolith application?
 More often than not, monolith applications are considered more costly and less
 scalable than the counterpart, due to an inefficient usage of resources. But, in
 a recent article, a Senior SDE at Prime Video describes how they _"*reduced the
-        cost* of the audio/video monitoring infrastructure by *90%*"_ @prime by
-using a monolith architecture.
+cost* of the audio/video monitoring infrastructure by *90%*"_ @prime by using a
+monolith architecture.
 
 There isn't a definitive way to answer these type of questions, but one way to
 go about it is building a model of the system to compare the solutions. In the
 case of Prime Video, _"the audio/video monitoring service consists of three
-    major components:"_ @prime
+major components:"_ @prime
 - the _media converter_ converts input audio/video streams
 - the _defect detectors_ analyze frames and audio buffers in real-time
 - the _orchestrator_ controls the flow in the service
@@ -139,180 +166,164 @@ components as *Markov decision processes*.
 
 == Models <traffic>
 
-=== Markov chains <markov-chain>
+=== Markov chain <markov-chain>
 
-In simple terms, a Markov chain $M = (S, p)$ is described by a set of *states*
-$S$ and the *transition probability* $p : S times S -> [0, 1]$ such that
-$p(s'|s)$ is the probability to transition to $s'$ from $s$. The transition
-probability $p$ is constrained by @markov-chain-constrain.
+#listing-def[Markov chain][
+    A Markov chain $M$ is a pair $(S, p)$ where
+    - $S$ is the set of states
+    - $p : S times S -> [0, 1]$ is the transition probability
+
+    The function $p$ is such that $p(s'|s)$ is the probability to transition
+    from state $s$ to state $s'$. For it to be a probability it must follow
+    @markov-chain-constrain
+]
 
 $ forall s in S space.en sum_(s' in S) p(s'|s) = 1 $ <markov-chain-constrain>
 
-A Markov chain (or Markov process) is characterized by memorylesness (called the
-Markov property), meaning that predictions can be made solely on its present
-state and aren't influenced by its history.
+A Markov chain (or Markov process) is characterized by _memorylesness_ (also
+called the Markov property), meaning that predictions on future states can be
+made solely on the present state of the Markov chain and predictions are not
+influenced by the history of transitions that led up to the present state.
 
-#figure(caption: [Example Markov chain with $S = {"rainy", "sunny"}$])[
-    #{
-        set text(font: "CaskaydiaCove NF", weight: "light", lang: "en")
-        block(
-            width: 100%,
-            inset: 1em,
-            fill: luma(254),
-            stroke: 1pt + luma(245),
-            image("public/weather-system.svg", width: 70%),
-        )
-    }
-] <rainy-sunny>
+#figure(
+    image("public/weather-system.svg", width: 75%),
+    caption: [example Markov chain with $S = {#[`rainy`], #[`sunny`]}$],
+) <rainy-sunny>
 
-#figure(caption: [Transition probability of @rainy-sunny])[
-    #table(
-        columns: (auto, auto, auto),
-        stroke: .1pt,
-        table.header([], [sunny], [rainy]),
-        [sunny], [0.8], [0.2],
-        [rainy], [0.5], [0.5],
-    )
-] <rainy-sunny-transition-matrix>
+#v(5pt)
 
-If a Markov chain $M$ transitions at *discrete time* steps (i.e. the time steps
-$t_0, t_1, t_2, ...$ are a countable) and the *state space* is countable, then
+If a given Markov chain $M$ transitions at *discrete timesteps* (i.e. the time
+steps $t_1, t_2, ...$ are a countable) and the *state space* is countable, then
 it's called a DTMC (discrete-time Markov chain). There are other classifications
 for continuous state space and continuous-time.
 
-The Markov process is characterized by a *transition matrix* which describes the
-probability of certain transitions, like the one in
-@rainy-sunny-transition-matrix. Later in the guide it will be shown that
-implementing transition matrices in `C++` is really simple with the `<random>`
-library.
+#figure(caption: [transition matrix of @rainy-sunny])[
+    #table(
+        columns: (auto, auto, auto),
+        stroke: luma(75) + .1pt,
+        table.header($p$, [sunny], [rainy]),
+        [sunny], $0.8$, $0.2$,
+        [rainy], $0.5$, $0.5$,
+    )
+] <rainy-sunny-transition-matrix>
 
-=== Markov decision processes <mdp>
+#v(5pt)
+
+A Markov chain $M$ can be written as a *transition matrix*, like the one in
+@rainy-sunny-transition-matrix. Later in the guide it will be shown that
+implementing transition matrices , thus Markov chains, is really simple with the
+`<random>` library in `C++`.
+
+=== Markov decision process <mdp>
 
 A Markov decision process (MDP), despite sharing the name, is *different* from a
-Markov chain, because it interacts with an *external environment*. A MDP $M$ is
-a tuple $(I, O, S, p, g)$ s.t.
-- $I$ is the set of *input values*
-- $O$ is the set of *output values*
-- $S$ is the set of *states*
-- $p : S times S times I -> [0, 1]$ is such that $p(s'|s, i)$ is the probability
-    to *transition* to state $s'$ from state $s$ when the *input value* is $i$
-- $g : S -> O$ is the *output function*
-- $s_0 in S$ is the *initial state*
+Markov chain, because it interacts with an *external environment*.
+
+#listing-def("Markov decision process")[A Markov decision process $M$ is,
+    conventionally, a tuple $(U, Y, X, p, g)$ where
+    - $U$ is the set of input values
+    - $Y$ is the set of output values
+    - $X$ is the set of states
+    - $p : X times X times U -> [0, 1]$ is the transition probability
+    - $g : X -> Y$ is the output function
+]
 
 The same constrain in @markov-chain-constrain holds for MDPs, with an important
 difference: *for each input value*, the sum of the transition probabilities for
-*that input value* must be 1.
-
-$ forall s in S space.en forall i in I space.en sum_(s' in S) p(s'|s, i) = 1 $
-
-==== MDP example <mdp-example>
-
-The development process of a company can be modeled as a MDP \
-$M = (I, O, S, p, g)$ s.t.
-- $I = {epsilon}$ #footnote[If $I$ is empty $M$ can't transition, at least 1
-        input is required, i.e. $epsilon$],
-    $O = "Cost" times "Duration", S = {0, 1, 2, 3, 4}, s_0 = 0$
+that input value must be 1.
 
 $
-    g(s) = cases(
-            (0, 0) & quad s in {0, 4} \
-        (20000, 2) & quad s in {1, 3} \
-        (40000, 4) & quad s = 2
-    )
+    forall x in X, u in U space.en sum_(x' in X) p(x'|x, u) = 1
 $
 
-#v(1em)
+#listing-example[Software development process][
+    The development process of a company can be modeled as a MDP \
+    $M = (U, Y, X, p, g)$ where
+    - $U = {epsilon}$ #footnote[If $U$ is empty $M$ can't transition, at least 1
+            input is required, i.e. $epsilon$]
+    - $Y = "euro" times "duration"$
+    - $X = {x_0, x_1, x_2, x_3, x_4}$
+]
 
 #align(center)[
     #figure(
-        {
-            set text(font: "CaskaydiaCove NF", weight: "light", lang: "en")
-            block(
-                inset: 1em,
-                fill: luma(254),
-                stroke: 1pt + luma(245),
-                image("public/development-process-markov-chain.svg"),
-            )
-        },
+        image("public/development-process-markov-chain.svg"),
         caption: "the model of a team's development process",
     ) <development-process>
 ]
 
-#v(1em)
+#v(5pt)
 
-#grid(
-    columns: (auto, auto),
-    gutter: 1em,
-    [
-        #table(
-            columns: (auto, auto, auto, auto, auto, auto),
-            stroke: .1pt,
-            align: center + horizon,
-            table.header([$epsilon$], [*0*], [*1*], [*2*], [*3*], [*4*]),
-            [*0*], [0], [1], [0], [0], [0],
-            [*1*], [0], [.3], [.7], [0], [0],
-            [*2*], [0], [.1], [.2], [.7], [0],
-            [*3*], [0], [.1], [.1], [.1], [.7],
-            [*4*], [0], [0], [0], [0], [1],
-        )
-    ],
-    [
-        Only *1 transition matrix* is needed, as $|I| = 1$ (there's 1 input
-        value). If $I$ had multiple input values, like ${"on", "off", "wait"}$,
-        then multiple transition matrices would have been required, one *for
-            each input value*.
-    ],
-)
+#columns({
+    math.equation(
+        block: true,
+        numbering: none,
+        $
+            g(x) = cases(
+                (0, 0) & quad x in {x_0, x_4},
+                (20000, 2) & quad x in {x_1, x_3},
+                (40000, 4) & quad x in { x_2 }
+            )
+        $,
+    )
+    colbreak()
+    table(
+        columns: (auto, auto, auto, auto, auto, auto),
+        stroke: luma(75) + .1pt,
+        align: center + horizon,
+        table.header($epsilon$, $x_0$, $x_1$, $x_2$, $x_3$, $x_4$),
+        $x_0$, $0$, $1$, $0$, $0$, $0$,
+        $x_1$, $0$, $.3$, $.7$, $0$, $0$,
+        $x_2$, $0$, $.1$, $.2$, $.7$, $0$,
+        $x_3$, $0$, $.1$, $.1$, $.1$, $.7$,
+        $x_4$, $0$, $0$, $0$, $0$, $1$,
+    )
+})
 
-=== Networks of MDPs
 
-TODO: multiple MDPs can be connected into a network, and the network is itself a
-MDP that maintains the MDP properties (the intuition is there, but it's too much
+#v(5pt)
+
+Only one transition matrix is needed, as $|U| = 1$ (there is only one input
+value). If $U$ had multiple input values, like ${"start", "stop", "wait"}$, then
+multiple transition matrices would have been required, one for each input value.
+
+=== Network of Markov decision processes
+
+Multiple MDPs can be connected into a network, and the network is itself a MDP
+that maintains the MDP properties (the intuition is there, but it's too much
 syntax for me to be bothered to write it).
 
-// Let $M_1, M_2$ be two MDPs s.t.
-// - $M_1 = (U_1, X_1, Y_1, p_1, g_1)$
-// - $M_2 = (U_2, X_2, Y_2, p_2, g_2)$
-//
-// Then $M = (U_1, X_1 times X_2, Y_2, p, g)$ s.t.
-// - $p((x_1', x_2') | (x_1, x_2), u_1) = (p(x_1'|x_1, u_1), p(x_2'|x_2, g_1(x_1)))$
-// - $g((x_1, x_2)) = g_2(x_2)$
-//
-// - TODO the connection can also be partial
+#listing-def("Network of MDPs")[
+    Given two Markov decision processes $M_1 = (U_1, X_1, Y_1, p_1, g_1)$ and
+    $M_2 = (U_2, X_2, Y_2, p_2, g_2)$, let $M = (U, X, Y, p, g)$ be the network
+    of $M_1, M_2$ where
+    - TODO
+]
 
 #pagebreak()
 
-== Other formal methods
+== Other tricks and tips
 
-=== Incremental average <incremental-average>
+=== Incremental mean <incremental-average>
 
-Given a set of values $X = {x_1, ..., x_n} subset RR$ the average value
-$overline(x)_n = (sum_(i = 0)^n x_i) / n$ can be computed with the procedure in
-@average.
+Given a set of values $X = {x_1, ..., x_n} subset RR$ the mean value is defined
+as
+$ overline(x)_n = (sum_(i = 1)^n x_i) / n $
+$overline(x)_n$ can be computed with the procedure in @mean.
 
-#figure(caption: `examples/average.cpp`)[
-    ```cpp
-    float average(std::vector<float> X) {
-        float sum = 0;
-        for (auto x_i : X)
-            sum += x_i;
-
-        return sum / X.size();
-    }
-    ```
-] <average>
+#load-listing-from-file("listings/mean.cpp", start: 4, end: 10) <mean>
 
 The problem with this procedure is that, by adding up all the values before the
-division, the *numerator* could *overflow*, even if the value of $overline(x)_n$
+division, the numerator could *overflow*, even if the value of $overline(x)_n$
 fits within the IEEE-754 limits. Nonetheless, $overline(x)_n$ can be calculated
 incrementally.
 
 $
-    overline(x)_(n + 1) = (sum_(i = 0)^(n + 1) x_i) / (n + 1) =
-    ((sum_(i = 0)^n x_i) + x_(n + 1)) / (n + 1) =
-    (sum_(i = 0)^n x_i) / (n + 1) + x_(n + 1) / (n + 1) = \
-    ((sum_(i = 0)^n x_i) n) / ((n + 1) n) + x_(n + 1) / (n + 1) =
-    (sum_(i = 0)^n x_i) / n dot.c n / (n + 1) + x_(n + 1) / (n + 1) = \
+    overline(x)_(n + 1) = (sum_(i = 1)^(n + 1) x_i) / (n + 1) =
+    ((sum_(i = 1)^n x_i) + x_(n + 1)) / (n + 1) =
+    (sum_(i = 1)^n x_i) / (n + 1) + x_(n + 1) / (n + 1) = \
+    ((sum_(i = 1)^n x_i) n) / ((n + 1) n) + x_(n + 1) / (n + 1) =
+    (sum_(i = 1)^n x_i) / n dot.c n / (n + 1) + x_(n + 1) / (n + 1) = \
     overline(x)_n dot n / (n + 1) + x_(n + 1) / (n + 1)
 $
 
@@ -320,59 +331,41 @@ With this formula the numbers added up are smaller: $overline(x)_n$ is
 multiplied by $n / (n + 1) tilde 1$, and, if $x_(n + 1)$ fits in IEEE-754, then
 $x_(n + 1) / (n + 1)$ can also be encoded.
 
-#figure(caption: `examples/average.cpp`)[
-    ```cpp
-    float incr_average(std::vector<float> X) {
-        float average = 0;
-        for (size_t n = 0; n < X.size(); n++)
-            average =
-                average * ((float)n / (n + 1)) + X[n] / (n + 1);
+#load-listing-from-file(
+    "listings/mean.cpp",
+    start: 11,
+    end: 17,
+)
 
-        return average;
-    }
-    ```
-]
-
-In `examples/average.cpp` the procedure `incr_average()` successfuly computes
-the average, but the simple `average()` returns `Inf`.
+The example in ```typ listings/mean.cpp``` shows how the incremental computation
+of the mean gives a result, wherease the traditional procedure return `Inf`. The
+other advantage of the incremental procedure (or _online_ procedure) is that it
+does not require for the data to be stored in a vector, thus saving the memory
+needed to memorize the values.
 
 #pagebreak()
 
 === Welford's online algorithm <welford>
 
 In a similar fashion it could be faster and require less memory to calculate the
-*standard deviation* incrementally. Welford's online algorithm can be used for
+standard deviation incrementally. Welford's online algorithm can be used for
 this purpose @welford-online.
 
 $
     M_(2, n) = sum_(i=1)^n (x_i - overline(x)_n)^2 \
-    M_(2, n) = M_(2, n-1) + (x_n - overline(x)_(n - 1))(x_n - overline(x)_n) #reft(2) \
+    M_(2, n) = M_(2, n-1) + (x_n - overline(x)_(n - 1))(x_n - overline(x)_n) #raw-ref(2) \
     sigma^2_n = M_(2, n) / n \
-    // s^2_n = M_(2, n) / (n - 1)
 $
 
-Given $M_2$, if $n > 0$, the standard deviation is $sqrt(M_(2, n) / n)$ #reft(3)
-. The average can be calculated incrementally like in @incremental-average
-#reft(1) .
+Given $M_2$, if $n > 0$, the standard deviation is $sqrt(M_(2, n) / n)$
+#raw-ref(3) . The average can be calculated incrementally like in
+@incremental-average #raw-ref(1) .
 
-#figure(caption: `mocc/math.cpp`)[
-    ```cpp
-    void OnlineDataAnalysis::insertDataPoint(real_t x_i) {
-        real_t next_mean =
-            mean_ * ((real_t)n / (n + 1)) + x_i / (n + 1); t1
+#load-listing-from-file("mocc/math.cpp", start: 4, end: 24)
 
-        m_2__ += (x_i - mean_) * (x_i - next_mean); t2
-        mean_ = next_mean;
-        n++;
-    }
+#pagebreak()
 
-    real_t OnlineDataAnalysis::stddev() const {
-        return n > 0 ? sqrt(m_2__ / n) : 0; t3
-    }
-    ```
-]
-
-=== Euler method // for ordinary differential equations
+=== Euler method
 
 Many systems can be modeled via differential equations. When an ordinary
 differential equation can't be solved analitically, the solution must be
@@ -386,7 +379,7 @@ Let the function $y$ be the solution to the following problem
 
 $
     cases(
-        y(x_0) = y_0 \
+        y(x_0) = y_0,
         y'(x) = f(x, y(x))
     )
 $
@@ -406,88 +399,61 @@ $ (x_(n + 1) - x_n) dot.c f(x_n, y_n) = Delta dot.c f(x_n, y_n) $
 Where $y_n = y(x_n)$. Let's consider the example in @euler-method-example.
 
 $
-    cases(y(x_0) = 0 \ y'(x) = 2x), quad "with" Delta = 1, 0.5, 0.3, 0.25
+    cases(y(x_0) = 0, y'(x) = 2x), quad "with" Delta = 1, 0.5, 0.3, 0.25
 $ <euler-method-example>
 
 The following program approximates @euler-method-example with different $Delta$
 values.
 
-#figure(caption: `examples/euler.cpp`)[
-    ```cpp
-    #define SIZE 4
-    float derivative(float x) { return 2 * x; }
-
-    int main() {
-        size_t x[SIZE];
-        for (size_t i = 0; i < SIZE; i++) {
-            x[i] = 0;
-            float delta = 1. / (i + 1);
-            for (float t = 0; t <= 10; t += delta)
-                x[i] += delta * derivative(t);
-        }
-        return 0;
-    }
-    ```
-]
+#load-listing-from-file("listings/euler.cpp")
 
 The approximation is close, but not very precise. However, the error analysis is
 beyond this guide's scope.
 
-#figure(caption: "examples/euler.svg", image("examples/euler.svg", width: 77%))
+#figure(caption: ```typ public/euler.svg```, image(
+    "public/euler.svg",
+    width: 77%,
+))
+
+#pagebreak()
 
 === Monte Carlo method
 
-"Monte Carlo methods, or Monte Carlo experiments, are a broad class of
+Monte Carlo methods, or Monte Carlo experiments, are a broad class of
 computational algorithms that rely on repeated random sampling to obtain
-numerical results.
+numerical results. @monte-carlo-method
 
 The underlying concept is to use randomness to solve problems that might be
 deterministic in principle [...] Monte Carlo methods are mainly used in three
 distinct problem classes: optimization, numerical integration, and generating
-draws from a probability distribution" @monte-carlo-method
+draws from a probability distribution. @monte-carlo-method
 
-#note[
-    The cost to develop a feature for a certain software is described by an
-    uniform discrete distribution $cal(U){300, 1000}$. Determine the probability
-    that the cost is less than $550$.
+#listing-problem[No budget left][
+    The following problem involves $"MyCAD"^trademark$ the next generation
+    #strong[C]omputer #strong[A]ided #strong[D]rawing software.
+
+    After a year of development, the remaining budget for $"MyCAD"^trademark$ is
+    only $550 euro$; during the past year it has been observed that the cost to
+    develop a new feature for $"MyCAD"^trademark$ is described by the uniform
+    distribution $cal(U)(300 euro, 1000 euro)$. In order to choose how to spend
+    the reamining budget, find the probability that the cost for the next
+    feature of $"MyCAD"^trademark$ is less than $550 euro$.
 ]
 
-The problem above can be easily solved analitically, but let's use the Monte
-Carlo method to approximate its value.
 
-#figure(caption: `examples/montecarlo.cpp`)[
-    ```cpp
-    #include <iostream>
-    #include <random>
+- TODO: find the analytical result, then compare to Monte Carlo result
 
-    int main() {
-        std::random_device random_device;
-        std::default_random_engine rand_engine(random_device());
-        std::uniform_int_distribution<> rand_cost(300, 1000);
+#load-listing-from-file("listings/montecarlo.cpp")
 
-        const size_t ITERATIONS = 10000;
-        size_t below_550 = 0;
-
-        for (size_t i = 0; i < ITERATIONS; i++) t1
-            if (rand_cost(rand_engine) < 550) t2
-                below_550++; t3
-
-        std::cout << (double)below_550/ITERATIONS t4
-                  << std::endl;
-        return 0;
-    }
-    ```
-]
-
-The first step is to simulate for a certain number of iterations #reft(1) the
+The first step is to simulate for a certain number of iterations #raw-ref(1) the
 system (in this example, "simulating the system" means generating a random
-integer cost between 300 and 1000 #reft(2) ). If the the iteration respects the
-requested condition ($< 550$), then it's counted #reft(3).
+integer cost between 300 and 1000 #raw-ref(2) ). If the the iteration respects
+the requested condition ($< 550$), then it's counted #raw-ref(3).
 
 At the end of the simulations, the probability is calculated as #math.frac(
     [iterations below 550],
     [total iterations],
-) #reft(4) . The bigger is the number of iterations, the more precise is the
+) #raw-ref(4) . The bigger is the number of iterations, the more precise is the
 approximation. This type of calculation can be very easily distributed in a HPC
 (high performance computing) context.
 
@@ -495,37 +461,21 @@ approximation. This type of calculation can be very easily distributed in a HPC
 
 = How to `C++`
 
-This section covers the basics for the exam assuming the reader already knows
-`C`.
+This section covers the basics useful for the exam, assuming the reader already
+knows `C` and has some knowledge about `OOP`.
 
 == Prelude
 
-`C++` is a strange language, and some of its quircks need to be pointed out to
+`C++` is a strange language, and some of its quirks need to be pointed out to
 have a better understanding of what the code does in later sections.
 
 === Operator overloading <operator-overloading>
 
-#figure(caption: `examples/random.cpp`)[
-    ```cpp
-    #include <iostream>
-    #include <random>
-
-    int main() {
-        std::cout << random() t1 << std::endl;
-
-        std::random_device random_device;
-        std::cout << random_device() t2 << std::endl;
-
-        int seed = random_device();
-        std::default_random_engine random_engine(seed); t3
-        std::cout << random_engine() t4 << std::endl;
-    }
-    ```
-] <random-example-1>
+#load-listing-from-file("listings/random.cpp") <random-example-1>
 
 In @random-example-1, to generate a random number, ```cpp random_device()```
-#reft(2) and ```cpp random_engine()``` #reft(4) are used like functions, but
-they *aren't functions*, they're *instances* of a ```cpp class```. That's
+#raw-ref(2) and ```cpp random_engine()``` #raw-ref(4) are used like functions,
+but they *aren't functions*, they're *instances* of a ```cpp class```. That's
 because in `C++` the behaviour a certain operator (like `+`, `+=`, `<<`, `>>`,
 `[]`, `()` etc..) when used on a instance of the ```cpp class``` can be defined
 by the programmer. It's called *operator overloading*, and it's relatively
@@ -542,151 +492,88 @@ For example, ```cpp std::cout``` is an instance of the
 valid piece of code which *doesn't do a bitwise left shift* like it would in
 `C`, but prints on the standard output the string ```cpp "Hello"```. // The same applies to to file streams.
 
-```cpp random()``` #reft(1) _should_ be a regular function call, but, for
-example, ```cpp std::default_random_engine random_engine(seed);``` #reft(3) is
-something else alltogether: a constructor call, where ```cpp seed``` is the
+```cpp random()``` #raw-ref(1) _should_ be a regular function call, but, for
+example, ```cpp std::default_random_engine random_engine(seed);``` #raw-ref(3)
+is something else alltogether: a constructor call, where ```cpp seed``` is the
 parameter passed to the constructor to instantiate the ```cpp random_engine```
 object.
 
-#pagebreak()
 
 == The ```cpp random``` library <random-library>
 
-The `C++` standard library offers tools to easily implement MDPs.
+The `C++` standard library offers tools to easily implement the Markov processes
+discussed in @markov-chain and @mdp .
 
-=== Random engines
+=== Randomness (random engines)
 
 In `C++` there are many ways to *generate random numbers*
 @pseudo-random-number-generation. Generally it's not recommended to use
-```cpp random()``` #reft(1) /*(reasons...)*/. It's better to use a *random
-    generator* #reft(5), because it's fast, deterministic (given a seed, the
+```cpp random()``` #raw-ref(1) /*(reasons...)*/. It's better to use a *random
+generator* #raw-ref(5), because it's fast, deterministic (given a seed, the
 sequence of generated numbers is the same) and can be used with distributions. A
 `random_device` is a non deterministic generator: it uses a *hardware entropy
-    source* (if available) to generate the random numbers.
+source* (if available) to generate the random numbers.
 
-#figure(caption: `examples/random.cpp`)[
-    ```cpp
-    #include <iostream>
-    #include <random>
+#load-listing-from-file("listings/random.cpp")
 
-    int main() {
-        std::cout << random() t1 << std::endl;
-
-        std::random_device random_device; t2
-        std::cout << random_device() t3 << std::endl;
-
-        int seed = random_device(); t4
-        std::default_random_engine random_engine(seed); t5
-        std::cout << random_engine() t6 << std::endl;
-    }
-    ```
-] <random-example>
-
-The typical course of action is to instantiate a `random_device` #reft(2), and
-use it to generate a seed #reft(4) for a `random_engine`. Given that random
-engines can be used with distributions, they're really useful to implement MDPs.
-Also, #reft(3) and #reft(6) are examples of *operator overloading*
-(@operator-overloading).
+The typical course of action is to instantiate a `random_device` #raw-ref(2),
+and use it to generate a seed #raw-ref(4) for a `random_engine`. Given that
+random engines can be used with distributions, they're really useful to
+implement MDPs. Also, #raw-ref(3) and #raw-ref(6) are examples of *operator
+overloading* (@operator-overloading).
 
 From this point on, ```cpp std::default_random_engine``` will be reffered to as
 ```cpp urng_t``` (uniform random number generator type).
 
-#figure()[
+#figure[
     ```cpp
     #include <random>
-    // works like typedef in C
+
+    /* Works like typedef in C. */
     using urng_t = std::default_random_engine;
 
-    int main() {
-        urng_t urng(190201); // constructor call with parameter 190201
-    }
+    /* The constructor is called with parameter 190201. */
+    int main() { urng_t urng(190201); }
     ```
 ]
 
 === Distributions <distributions>
 
 Just the capability to generate random numbers isn't enough, these numbers need
-to be manipulated to fit certain needs. Luckly, `C++` covers *basically all of
-    them*. For example, the MDP in @development-process can be easily simulated
-with the following code code:
+to be manipulated to fit certain needs. Luckly, `C++` covers *most of them*. To
+give an idea, the MDP in @development-process can be easily simulated with the
+code in @markov-chain-transition-matrix.
 
-#figure(caption: `examples/transition_matrix.cpp`)[
-    ```cpp
-    #include <iostream>
-    #include <random>
-    using urng_t = std::default_random_engine;
+#load-listing-from-file(
+    "listings/markov_chain_transition_matrix.cpp",
+) <markov-chain-transition-matrix>
 
-    int main() {
-        std::random_device random_device;
-        urng_t urng(random_device());
+==== Uniform discrete distribution #cppreference("https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution") <uniform-int>
 
-        std::discrete_distribution<> transition_matrix[] = {
-            {0, 1},
-            {0, .3, .7},
-            {0, .1, .2, .7},
-            {0, .1, .1, .1, .7},
-            {0, 0, 0, 0, 1},
-        };
-
-        size_t state = 0;
-        for (size_t step = 0; step < 15; step++) {
-            state = transition_matrix[state](urng);
-            std::cout << state << std::endl;
-        }
-
-        return 0;
-    }
-    ```
-] <transition-matrix>
-
-==== Uniform discrete distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution") <uniform-int>
-
-#note[
-    To test a system $S$ it's requried to build a generator that sends value
-    $v_t$ to $S$ every $T_t$ seconds. For each send, the value of $T_t$ is an
-    *integer* chosen uniformly in the range $[20, 30]$.
+#listing-problem[Sleepy system][
+    To test the _sleepy system_ $S$ it's necessary to build a generator that
+    sends a value $v_i$ to $S$ every $delta_i$ seconds _(otherwise $S$ does
+    nothing)_. The value of $delta_i$ is an integer chosen with the uniform
+    distribution $cal(U)(20, 30)$.
 ]
+
 The `C` code to compute $T_t$ would be ```cpp T = 20 + rand() % 11;```, which is
 very *error prone*, hard to remember and has no semantic value. In `C++` the
-same can be done in a *simpler* and *cleaner* way:
+same can be done in a simpler and cleaner way:
 
 ```cpp
-std::uniform_int_distribution<> random_T(20, 30); t1
+std::uniform_int_distribution<> random_T(20, 30);
 size_t T = t2 random_T(urng);
 ```
 
-The interval $T_t$ can be easily generated #reft(2) without needing to remember
-any formula or trick. The behaviour of $T_t$ is defined only once #reft(1), so
-it can be easily changed without introducing bugs or inconsistencies. It's also
-worth to take a look at the implementation of the exercise above (with the
-addition that $v_t = T_t$), as it comes up very often in software models.
+The interval $T_t$ can be easily generated #raw-ref(2) without needing to
+remember any formula or trick. The behaviour of $T_t$ is defined only once
+#raw-ref(1), so it can be easily changed without introducing bugs or
+inconsistencies. It's also worth to take a look at the implementation of the
+exercise above (with the addition that $v_t = T_t$), as it comes up very often
+in software models.
 
-#figure(caption: `examples/interval_generator.cpp`)[
-    ```cpp
-    #include <iostream>
-    #include <random>
-
-    using urng_t = std::default_random_engine;
-
-    int main() {
-        std::random_device random_device;
-        urng_t urng(random_device());
-        std::uniform_int_distribution<> random_T(20, 30);
-
-        size_t T = random_T(urng), next_request_time = T;
-        for (size_t time = 0; time < 1000; time++) {
-            if (time < next_request_time)
-                continue;
-
-            std::cout << T << std::endl;
-            T = random_T(urng);
-            next_request_time = time + T;
-        }
-
-        return 0;
-    }
-    ```
-]
+#load-listing-from-file("listings/time_intervals_generator.cpp")
 
 The ```cpp uniform_int_distribution``` has many other uses, for example, it
 could uniformly generate a random state in a MDP. Let ```cpp STATES_SIZE``` be
@@ -697,21 +584,21 @@ uniform_int_distribution<> random_state(0, STATES_SIZE-1 t1);
 ```
 
 ```cpp random_state``` generates a random state when used. Be careful! Remember
-to use ```cpp STATES_SIZE-1``` #reft(1), because
+to use ```cpp STATES_SIZE-1``` #raw-ref(1), because
 ```cpp uniform_int_distribution``` is inclusive. Forgettig ```cpp -1``` can lead
 to very sneaky bugs, like random segfaults at different instructions. It's very
 hard to debug unless using `gdb`. The ```cpp uniform_int_distribution``` can
 also generate negative integers, for example
 $z in { x | x in ZZ and x in [-10, 15]}$.
 
-==== Uniform continuous distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution") <uniform-real>
+==== Uniform continuous distribution #cppreference("https://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution") <uniform-real>
 
 It's the same as above, with the difference that it generates *real* numbers in
 the range $[a, b) subset RR$.
 
-==== Bernoulli distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution") <bernoulli>
+==== Bernoulli distribution #cppreference("https://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution") <bernoulli>
 
-#note[
+#listing-problem[Network protocols][
     To model a network protocol $P$ it's necessary to model requests. When sent,
     a request can randomly fail with probability $p = 0.001$.
 ]
@@ -721,8 +608,10 @@ checking whether $r < p$.
 
 ```cpp
 std::uniform_real_distribution<> uniform(0, 1);
-if (uniform(urng) < 0.001)
+
+if (uniform(urng) < 0.001) {
     fail();
+}
 ```
 
 A `std::bernoulli_distribution` is a better fit for this specification, as it
@@ -731,42 +620,20 @@ happen with a certain probability $p$".
 
 ```cpp
 std::bernoulli_distribution random_fail(0.001);
-if (random_fail(urng))
+
+if (random_fail(urng)) {
     fail();
+}
 ```
 
-==== Normal distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/normal_distribution") <normal>
+#pagebreak()
 
-Typical Normal distribution, requires the mean #reft(1) and the stddev #reft(2)
-.
+==== Normal distribution #cppreference("https://en.cppreference.com/w/cpp/numeric/random/normal_distribution") <normal>
 
-#figure(caption: `examples/normal.cpp`)[
-    ```cpp
-    #include <iomanip>
-    #include <iostream>
-    #include <map>
-    #include <random>
+Typical Normal distribution, requires the mean #raw-ref(1) and the stddev
+#raw-ref(2) .
 
-    using urng_t = std::default_random_engine;
-
-    int main() {
-        std::random_device random_device;
-        urng_t urng(random_device());
-        std::normal_distribution<> normal(12 t1, 2 t2);
-
-        std::map<long, unsigned> histogram{};
-        for (size_t i = 0; i < 10000; i++)
-            ++histogram[(size_t)normal(urng)];
-
-        for (const auto [k, v] : histogram)
-            if (v / 200 > 0)
-                std::cout << std::setw(2) << k << ' '
-                          << std::string(v / 200, '*') << '\n';
-
-        return 0;
-    }
-    ```
-]
+#load-listing-from-file("listings/normal_distribution.cpp")
 
 ```bash
  8 **
@@ -779,9 +646,9 @@ Typical Normal distribution, requires the mean #reft(1) and the stddev #reft(2)
 15 **
 ```
 
-==== Exponential distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/exponential_distribution") <exponential>
+==== Exponential distribution #cppreference("https://en.cppreference.com/w/cpp/numeric/random/exponential_distribution") <exponential>
 
-#note[
+#listing-problem[Cheaper servers][
     A server receives requests at a rate of 5 requests per minute from each
     client. You want to rebuild the architecture of the server to make it
     cheaper. To test if the new architecture can handle the load, its required
@@ -793,72 +660,20 @@ It's easier to simulate the system in seconds (to have more precise
 measurements). If the client sends 5/min, the rate in seconds should be
 $lambda = 5 / 60 ~ 0.083$ requests per second.
 
-#figure(caption: `examples/exponential.cpp`)[
-    ```cpp
-    /* ... */
-    int main() {
-        std::random_device random_device;
-        urng_t urng(random_device());
-        std::exponential_distribution<> random_interval(5./60.);
-
-        real_t next_request_time = 0;
-        std::vector<real_t> req_per_min = {0};
-        for (real_t time_s = 0; time_s < HORIZON; time_s++) {
-            if (((size_t)time_s) % 60 == 0)
-                req_per_min.push_back(0); t1
-
-            if (time_s < next_request_time)
-                continue;
-
-            req_per_min.back()++; t2
-            next_request_time = time_s + random_interval(urng);
-        }
-
-        real_t mean = 0;
-        for (auto x : req_per_min) t3
-            mean += x;
-
-        std::cout << mean / req_per_min.size() << std::endl;
-    }
-    ```
-]
+#load-listing-from-file("listings/exponential_distribution.cpp")
 
 The code above has a counter to measure how many requests were sent each minute.
-A new counter is added every 60 seconds #reft(1) , and it's incremented by 1
-each time a request is sent #reft(2) . At the end, the average of the counts is
-calculated #reft(3) , and it comes out to be about 5 requests every 60 seconds
-(or 5 requests per minute).
+A new counter is added every 60 seconds #raw-ref(1) , and it's incremented by 1
+each time a request is sent #raw-ref(2) . At the end, the average of the counts
+is calculated #raw-ref(3) , and it comes out to be about 5 requests every 60
+seconds (or 5 requests per minute).
 
-==== Poisson distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/poisson_distribution") <poisson>
+==== Poisson distribution #cppreference("https://en.cppreference.com/w/cpp/numeric/random/poisson_distribution") <poisson>
 
 The Poisson distribution is closely related to the Exponential distribution, as
 it randomly generates a number of items in a time unit given the average rate.
 
-```cpp
-#include <iomanip>
-#include <iostream>
-#include <map>
-#include <random>
-
-using urng_t = std::default_random_engine;
-using real_t = float;
-const size_t HORIZON = 10000;
-
-int main() {
-    std::random_device random_device;
-    urng_t urng(random_device());
-    std::poisson_distribution<> poisson(4);
-
-    std::map<long, unsigned> histogram{};
-    for (size_t i = 0; i < 10000; i++)
-        ++histogram[(size_t)poisson(urng)];
-
-    for (const auto [k, v] : histogram)
-        if (v / 100 > 0)
-            std::cout << std::setw(2) << k << ' '
-                      << std::string(v / 100, '*') << '\n';
-}
-```
+#load-listing-from-file("listings/poisson_distribution.cpp")
 
 ```bash
  0 *
@@ -872,13 +687,14 @@ int main() {
  8 **
  9 *
 ```
-==== Geometric distribution #docs("https://en.cppreference.com/w/cpp/numeric/random/geometric_distribution") <geometric>
+
+==== Geometric distribution #cppreference("https://en.cppreference.com/w/cpp/numeric/random/geometric_distribution") <geometric>
 
 A typical geometric distribution, has the same API as the others.
 
-=== Discrete distribution & transition matrices #docs("https://en.cppreference.com/w/cpp/numeric/random/discrete_distribution") <discrete>
+=== Discrete distribution & transition matrices #cppreference("https://en.cppreference.com/w/cpp/numeric/random/discrete_distribution") <discrete>
 
-#note[
+#listing-problem[E-commerce][
     To choose the architecture for an e-commerce it's necessary to simulate
     realistic purchases. After interviewing 678 people it's determined that 232
     of them would buy a shirt from your e-commerce, 158 would buy a hoodie and
@@ -892,32 +708,10 @@ specification can be implemented very easily in `C++` by using a
 ```cpp std::discrete_distribution```, without having to do any calculation or
 write complex logic.
 
-// #align(center)[
-#figure(caption: `examples/TODO.cpp`)[
-    ```cpp
-    enum Item { Shirt = 0, Hoodie = 1, Pants = 2 };
-
-    int main() {
-        std::discrete_distribution<>
-            rand_item = {232, 158, 288}; t1
-
-        for (size_t request = 0; request < 1000; request++) {
-            switch (rand_item(urng)) {
-                case Shirt: t2 std::cout << "shirt"; break;
-                case Hoodie: t2 std::cout << "hoodie"; break;
-                case Pants: t2 std::cout << "pants"; break;
-            }
-
-            std::cout << std::endl;
-        }
-
-        return 0;
-    }
-    ```
-]
+#load-listing-from-file("listings/discrete_distribution.cpp")
 
 The `rand_item` instance generates a random integer $x in {0, 1, 2}$ (because 3
-items were sepcified in the array #reft(1) , if the items were 10, then $x$
+items were sepcified in the array #raw-ref(1) , if the items were 10, then $x$
 would have been s.t. $0 <= x <= 9$). The ```cpp = {a, b, c}``` syntax can be
 used to intialize the a discrete distribution because `C++` allows to pass a
 ```cpp std::array``` to a constructor @std-array.
@@ -929,11 +723,11 @@ would be $158 / (232 + 158 + 288)$ an the probability to generate `2` would be
 $288 / (232 + 158 + 288)$. This way, the sum of the probabilities is always 1,
 and the probability is proportional to the weight.
 
-To map the integers to the actual items #reft(2) an ```cpp enum``` is used: for
-simple enums each entry can be converted automatically to its integer value (and
-viceversa). In `C++` there is another construct, the ```cpp enum class``` which
-doesn't allow implicit conversion (the conversion must be done with a function
-or with ```cpp static_cast```), but it's more typesafe (see @enum).
+To map the integers to the actual items #raw-ref(2) an ```cpp enum``` is used:
+for simple enums each entry can be converted automatically to its integer value
+(and viceversa). In `C++` there is another construct, the ```cpp enum class```
+which doesn't allow implicit conversion (the conversion must be done with a
+function or with ```cpp static_cast```), but it's more typesafe (see @enum).
 
 The ```cpp discrete_distribution``` can also be used for transition matrices,
 like the one in @rainy-sunny-transition-matrix. It's enough to assign each state
@@ -941,7 +735,7 @@ a number (e.g. ```cpp sunny = 0, rainy = 1```), and model the transition
 probability of *each state* as a discrete distribution.
 
 ```cpp
-std::discrete_distribution[] transition_matrix = {
+std::discrete_distribution[] markov_chain_transition_matrix = {
     /* 0 */ { /* 0 */ 0.8, /* 1 */ 0.2},
     /* 1 */ { /* 0 */ 0.5, /* 1 */ 0.5}
 }
@@ -954,20 +748,21 @@ to ```cpp 1 (rainy)``` is 0.2 etc...
 The `discrete_distribution` can be initialized if the weights aren't already
 know and must be calculated.
 
-#figure(caption: `practice/2025-01-09/1/main.cpp`)[
+#figure(caption: ```typ practice/2025-01-09/1/main.cpp```)[
     ```cpp
-    for (auto &weights t1 : matrix)
-        transition_matrix.push_back(
+    for (auto &weights t1 : matrix) {
+        markov_chain_transition_matrix.push_back(
             std::discrete_distribution<>(
                 weights.begin(), t2  weights.end() t3 )
         );
+    }
     ```
 ]
 
-The weights are stored in a ```cpp vector``` #reft(1) , and the
+The weights are stored in a ```cpp vector``` #raw-ref(1) , and the
 ```cpp discrete_distribution``` for each state is initialized by indicating the
-pointer at the beginning #reft(2) and at the end #reft(3) of the vector. This
-works with dynamic arrays too.
+pointer at the beginning #raw-ref(2) and at the end #raw-ref(3) of the vector.
+This works with dynamic arrays too.
 
 #pagebreak()
 
@@ -1030,29 +825,6 @@ int main(){
     params.close();
 }
 ```
-//
-// #align(center)[
-// ```cpp
-// #include <ofstream>
-// #include <ifstream>
-//
-// int main(){
-//     ofstream output("output.txt");
-//     output << "some text" << std::endl;
-//     output.close();
-//
-//     ifstream params("params.txt");
-//     int number;
-//     while (params >> number) {
-//         // do stuff with number...
-//     }
-//     params.close();
-//
-//     return 0;
-// }
-// ```
-// ]
-
 
 == Structure
 
@@ -1123,147 +895,82 @@ add structure _(classes etc..)_ where it *seems fit*.
 This section puts together the *formal definitions* and the `C++` knowledge to
 implement some simple MDPs.
 
-=== A simple MDP `"./software/1100"` <a-simple-markov-chain>
+=== A simple MDP `"software/1100"` <a-simple-markov-chain>
 
-The first MDP $M = (I, O, S, p, g)$ is such that
-- $I = {epsilon}$ #footnote[See @mdp-example]
-- $O = [0,1] times [0,1]$ the output is the current state of the MDP
-- $S = [0,1] times [0,1]$, each state is a pair #reft(3) of *real* numbers
-    #reft(2)
-// - $p : X times X times U -> X = cal(U)(0, 1) times cal(U)(0, 1)$, the transition probability is a *uniform continuous* distribution #reft(1)
-- $p : S times S times I -> S$ is the *uniform* transition probability
-    #reft(1) //the transition probability is a *uniform continuous* distribution #reft(1)
-- $g : S -> O : s |-> s$ outputs the current state #reft(4)
-- $s_0 = (0, 0)$ is the initial state #reft(3)
+The first MDP example is $M = (U, Y, X, p, g)$ where - $U = {epsilon}$ // #footnote[See @mdp-example]
+- $Y = X$ the set of outputs matches the set of states
+- $X = [0,1] times [0,1] = [0, 1]^2$ each state is a vector of two real numbers
+- $p : X times X times U -> X$, the transition probability, is uniform over $X$
+    for each input
+- $g : X -> Y : x |-> x$ outputs the current state
+- $(0, 0)$ is the initial state
 
-#figure(caption: `software/1100/main.cpp`)[
-    ```cpp
-    #include <fstream>
-    #include <random>
-    #include "../../mocc/mocc.hpp"
-    const size_t HORIZON = 10;
+#load-listing-from-file("course/1100/main.cpp")
 
-    int main() {
-        std::random_device random_device;
-        urng_t urng(random_device());
-        std::uniform_real_distribution<real_t> uniform(0, 1); t1
-        std::vector<real_t t2 > state(2, 0); t3
-        std::ofstream file("logs");
+=== Network of MDPs pt.1 `"software/1200"` <simple-mdps-connection-1>
 
-        for (size_t time = 0; time <= HORIZON; time++) {
-            for (auto &r_i : state)
-                r_i = uniform(urng); t1
+This example has two discrete-time MDPs $M_1, M_2$ s.t.
+- $M_1 = (U_1, Y_1, X_1, p_1, g_1)$
+- $M_2 =(U_2, Y_2, X_2, p_2, g_2)$
 
-            file << time << ' ';
-            for (auto r_i : state)
-                file << r_i << ' '; t4
-            file << std::endl;
-        }
+$M_1$ and $M_2$ are similar to the MDP in @a-simple-markov-chain (i.e.
+$X = [0, 1]^2$), with the difference that $forall i in {1, 2} space U_i = X_i$,
+and $p$ is redefined in this example in the following way:
 
-        file.close(); return 0;
-    }
-    ```
-]
-
-=== Networks of MDPs pt.1 `"./software/1200"` <simple-mdps-connection-1>
-
-This example has 2 MDPs $M_0, M_1$ s.t.
-- $M_0 = (I^0, O^0, S^0, p^0, g^0)$
-- $M_1 =(I^1, O^1, S^1, p^1, g^1)$
-
-$M_0$ and $M_1$ are similar to the MDP in @a-simple-markov-chain, with the
-difference that $I^i = [0, 1] times [0, 1]$, having $I^i = S^i$, meaning $p$
-must be redefined:
-
-$ p^i (s'|s, i) = cases(1 & "if" s' = i \ 0 & "otherwise") $
-
-Then the 2 MDPs can be connected
+// $U_i = [0, 1] times [0, 1]$, having
 
 $
-    & I^0_(t + 1) = (r_0 dot.c cal(U)(0, 1), r_1 dot.c cal(U)(0, 1)) "where" g^1 (S^1_t) = (r_0, r_1) \
-    & I^1_(t + 1) = (r_0 + cal(U)(0, 1), r_1 + cal(U)(0, 1)) "where" g^0 (S^0_t) = (r_0, r_1)
+    forall i in {1, 2}, x', x in X, u in U quad p_i (x'|x, u) = cases(1 & "if" x' = u, 0 & "otherwise")
+$
+
+#listing-def("Discrete time steps")[
+    Given a time step $t in NN$, let $U(t), X(t)$ be respectively the input and
+    state at time $t$.
+]
+
+The value of $U(t+1)$ for each MDP in this example is defined as
+
+$
+    & U_1(t + 1) = vec(x_1 dot.c cal(U)(0, 1), x_2 dot.c cal(U)(0, 1)) "where" g_2 (X(t)) = vec(x_1, x_2) \
+    & U_2(t + 1) = vec(x_1 + cal(U)(0, 1), x_2 + cal(U)(0, 1)) "where" g_1 (X(t)) = vec(x_1, x_2)
 $ <mdps-connection-1>
 
-Given that $g^i (S^i_t) = S^i_t$ and $I^i_t = S^i_t$, the connection in
-@mdps-connection-1 can be simplified:
+Thus, given that $X_i (t) =^1 U_i (t)$ with probability 1,
+$g_i (X_i (t)) =^2 X_i (t)$, and the definition in @mdps-connection-1, the
+connection between $M_1$ and $M_2$ can be defined as
+
+// Given that $g_i (X_i (t)) = X_i (t)$ and $U_i (t) = X_i (t)$, the connection in
+// @mdps-connection-1 can be simplified:
 
 $
-    & S^0_(t + 1) = (r_0 dot.c cal(U)(0, 1), r_1 dot.c cal(U)(0, 1)) "where" S^1_t = (r_0, r_1) \
-    & S^1_(t + 1) = (r_0 + cal(U)(0, 1), r_1 + cal(U)(0, 1)) "where" S^0_t = (r_0, r_1)
+    & X_1 (t + 1) =^1 vec(x_1 dot.c cal(U)(0, 1), x_2 dot.c cal(U)(0, 1)) "where" X_2 (t) =^2 vec(x_1, x_2) \
+    & X_2 (t + 1) =^1 vec(x_1 + cal(U)(0, 1), x_2 + cal(U)(0, 1)) "where" X_1(t) =^2 vec(x_1, x_2)
 $ <mdps-connection-2>
 
-With @mdps-connection-2 the code is easier to write, but this approach works for
-small examples like this one. For more complex systems it's better to design a
-module for each component and handle the connections more explicitly.
+With @mdps-connection-2 the code is easier to write, but this approach works
+only for small examples. For more complex systems it's better to design a module
+for each component and handle the connections more explicitly.
 
-#figure(caption: `software/1200/main.cpp`)[
-    ```cpp
-    /* ... */
-    const size_t HORIZON = 100;
-    struct MDP { real_t state[2]; };
+#load-listing-from-file("course/1200/main.cpp")
 
-    int main() {
-        /* ... */
-        std::vector<MDP> mdps(2, {0, 0});
-
-        for (size_t time = 0; time <= HORIZON; time++)
-            for (size_t r = 0; r < 2; r++) {
-                mdps[0].state[r] =
-                    mdps[1].state[r] * uniform(urng);
-                mdps[1].state[r] =
-                    mdps[0].state[r] + uniform(urng);
-            }
-
-        /* ... */
-    }
-    ```
-]
-
-=== Networks of MDPs pt.2 `"./software/1300"`
+=== Networks of MDPs pt.2 `"software/1300"`
 
 This example is similar to the one in @simple-mdps-connection-1, with a few
 notable differences:
-- $I^i = O^i = S^i = RR times RR$
-- the initial states are $s^0_0 = (1, 1), s^1_0 = (2, 2)$
+- $U_i = Y_i = X_i = RR times RR$
+- the initial states are $x_1 = (1, 1) in X_1, x_2 = (2, 2) in X_2$
 - the connections are slightly more complex.
 - no probability is involved
 
 Having
 
 $
-    p((r_0 ', r_1 ')|(r_0, r_1), (i_0, i_1)) = cases(1 & "if" ... \ 0 & "otherwise")
+    p(vec(x_1 ', x_2 ')|vec(x_1, x_2), vec(u_1, u_2)) = cases(1 & "if" ..., 0 & "otherwise") " where ..."
 $
 
-The implementation would be
+#load-listing-from-file("course/1300/main.cpp") <mdps-connection-3>
 
-#figure(caption: `software/1300/main.cpp`)[
-    ```cpp
-    /* ... */
-
-    int main() {
-        /* ... */
-        std::vector<MDP> mdps({{1, 1}, {2, 2}});
-
-        for (size_t time = 0; time <= HORIZON; time++) {
-            mdps[0].state[0] =
-                .7 * mdps[0].state[0] + .7 * mdps[0].state[1];
-            mdps[0].state[1] =
-                -.7 * mdps[0].state[0] + .7 * mdps[0].state[1];
-
-            mdps[1].state[0] =
-                mdps[1].state[0] + mdps[1].state[1];
-            mdps[1].state[1] =
-                -mdps[1].state[0] + mdps[1].state[1];
-
-            /* ... */
-        }
-
-        /* ... */
-    }
-    ```
-] <mdps-connection-3>
-
-=== MDPs network pt.3 `./software/1400"`
+=== MDPs network pt.3 `"software/1400"`
 
 The original model behaves exactly lik @mdps-connection-3, with a different
 implementation. As an exercise, the reader is encouraged to come up with a
@@ -1271,280 +978,146 @@ different implementation for @mdps-connection-3.
 
 #pagebreak()
 
-== Traffic light `"./software/2000"`
+== Traffic light `"software/2000"`
 
-This example models a *traffic light*. The three original versions (`2100`,
-`2200` and `2300`) have the same behaviour, with a different implementation. The
-one reported here behaves like the original versions, with a simpler
-implementation. Let $T$ be the MDP that describes the traffic light, s.t.
-- $I = {epsilon, sigma}$ where
-    - $epsilon$ means "do nothing"
-    - $sigma$ means "switch light"
-- $O = S$
-- $S = {"green", "yellow", "red"}$
-- $g(s) = s$
-- $p(s'|s, epsilon) = cases(1 & "if " s' = s \ 0 & "otherwise")$
-- $p(s'|s, sigma) = cases(
-        1 & "if " (s = "green" and s' = "yellow") or (s = "yellow" and s' = "red") or (s ="red" and s' = "green") \
-        0 & "otherwise"
-    )$
+This example models a traffic light. The three original versions presented in
+the course (`2100`, `2200` and `2300`) all have the same behaviour, with
+different implementations. The code reported in this document behaves like the
+original versions, with a simpler implementation. Let $T$ be the MDP that
+describes the traffic light where
+- $U = {epsilon, sigma}$ where
+    - $epsilon$ means _"do nothing"_
+    - $sigma$ means _"switch light"_
+- $Y = X$
+- $X = {GG, RR, YY}$ where
+    - $GG = "green"$
+    - $RR = "red"$
+    - $YY = "yellow"$
+- $g(x) = x$
+
+#math.equation(numbering: none, block: true)[
+    $
+        p(x'|x, epsilon) = cases(1 & quad "if " x' = x, 0 & "otherwise")
+    $
+]
+
+#math.equation(numbering: none, block: true)[
+    $
+        p(x'|x, sigma) = cases(
+            1 & quad "if " (x = GG and x' = YY) or (x = YY and x' = RR) or (x =RR and x' = GG),
+            0 & quad "otherwise"
+        )
+    $
+]
 
 Meaning that, if the input is $epsilon$, $T$ maintains the same color with
 probability 1. Otherwise, if the input is $sigma$, $T$ changes color with
-probability 1, iif the transition is valid (green $->$ yellow, yellow $->$ red,
-red $->$ green).
+probability 1 if and only if the color switch is valid (one of
+$GG -> YY, YY -> RR, RR -> GG$).
 
-#figure(caption: `software/2000/main.cpp`)[
-    ```cpp
-    #include <fstream>
-    #include <random>
-    #include "../../mocc/mocc.hpp"
-    const size_t HORIZON = 1000;
-    enum Light { GREEN = 0, YELLOW = 1, RED = 2 }; t1
-
-    int main() {
-        std::random_device random_device;
-        urng_t urng(rand_device());
-        std::uniform_int_distribution<>rand_interval(60, 120); t2
-        Light traffic_light = Light::RED;
-        size_t next_switch = rand_interval(urng);
-        std::ofstream file("logs");
-
-        for (size_t time = 0; time <= HORIZON; time++) {
-            file << time << ' ' << next_switch - time << ' '
-                 << traffic_light t3 << std::endl;
-            if (time < next_switch) continue;
-            traffic_light = t4
-                (traffic_light == RED
-                     ? GREEN
-                     : (traffic_light == GREEN ? YELLOW : RED));
-
-            next_switch = time + rand_interval(urng);
-        }
-        file.close(); return 0;
-    }
-    ```
-]
+#load-listing-from-file("course/2000/main.cpp")
 
 To reperesent the colors the cleanest way is to use an ```cpp enum```. C++ has
 two types of enums: ```cpp enum``` and ```cpp enum class```. In this example a
-*simple* ```cpp enum``` is good enough #reft(1), because its constants are
-automatically casted to their value when mapped to string #reft(3); this doesn't
-happen with ```cpp enum class``` because it is a stricter type, and requires
-explicit casting.
+simple ```cpp enum``` is good enough #raw-ref(1), because its constants are
+automatically casted to their value when mapped to string #raw-ref(3); this
+doesn't happen with ```cpp enum class``` because it is a stricter type, and
+requires explicit casting.
 
-The behaviour of the formula described above is implemented with a couple
-ternary operators #reft(4).
-
-// TODO:
-//   - #reft(1) ```cpp enum``` vs ```cpp enum class```
-//   - #reft(2) reference the same trick used in the uniform int distribution example
-//   - #reft(3) enum is easier to use, because it just logs the integer value associated with the constant
-//   - #reft(4) is basically the behaviour of the formula described above
-//   - how is the time rapresented?
-//   - how can it be implemented with ```cpp mocc```?
-
+The behaviour of the formula described above is implemented with a couple of
+ternary operators #raw-ref(4).
 
 == Control center
 
-This example adds complexity to the traffic light by introducing a *remote
-    control center*, network faults and repairs. Having many communicating
+This example adds complexity to the traffic light by introducing a remote
+control center, network faults and repairs. Having many communicating
 components, this example requires more structure.
 
-=== No network `"./software/3100"`
+=== No network `"software/3100"`
 
 The first step into building a complex system is to model it's components as
 units that can communicate with eachother. The traffic light needs to be to
 re-implemented as a component (which can be easily done with the ```c mocc```
 library).
 
-#figure(caption: `software/3100/parameters.hpp`)[
-    ```cpp
-    #pragma once t1
-
-    #include "../../mocc/mocc.hpp"
-    #include <cstddef>
-    #include <random>
-
-    enum Light { GREEN = 0, YELLOW = 1, RED = 2 }; t2
-    const size_t HORIZON = 1000; t3
-    static std::random_device random_device; t4
-    static urng_t urng = urng_t(random_device()); t4
-    ```
-]
+#load-listing-from-file("course/3100/parameters.hpp")
 
 The simulation requires some global variables and types in order to work, the
 simplest solution is to make a header file with all these data:
-- ```cpp #pragma once``` #reft(1) is used instead of
+- ```cpp #pragma once``` #raw-ref(1) is used instead of
     ```cpp #ifndef xxxx #define xxxx```; it has the same behaviour (preventing
     multiple definitions when a file is imported multiple times)... technically
     ```cpp #pragma once``` isn't part of the standard, yet all modern compilers
     support it
-- ```cpp enum Light``` #reft(2) has a more important job in this example: it's
-    used to communicate values from the *controller* to the *traffic light* via
-    the *network*; technically it could be defined in its own file, but, for the
-    sake of the example, it's not worth to make code navigation more complex
-- there is no problem in defining global constants #reft(3), but global
-    variables are generally discouraged #reft(4) (the alternative would be a
+- ```cpp enum Light``` #raw-ref(2) has a more important job in this example:
+    it's used to communicate values from the *controller* to the *traffic light*
+    via the *network*; technically it could be defined in its own file, but, for
+    the sake of the example, it's not worth to make code navigation more complex
+- there is no problem in defining global constants #raw-ref(3), but global
+    variables are generally discouraged #raw-ref(4) (the alternative would be a
     singleton or passing the values as parameters to each component, but it
     would make the example more complex than necessary)
 
-#figure(caption: `software/3100/traffic_light.hpp`)[
-    ```cpp
-    #pragma once
-
-    #include "../../mocc/system.hpp"
-    #include "../../mocc/time.hpp"
-    #include "parameters.hpp"
-
-    class TrafficLight : public Timed t1 {
-        std::uniform_int_distribution<> random_interval; t2
-        Light l = Light::RED; t3
-
-      public:
-        TrafficLight(System *system)
-            : random_interval(60, 120),
-              Timed(system, 90, TimerMode::Once) {} t4
-
-        void update(U) override { t5
-            l = (l == RED ? GREEN : (l == GREEN ? YELLOW : RED));
-            timer.set_duration(random_interval(urng)); t7
-        }
-
-        Light light() { return l; } t8
-    };
-    ```
-]
+#load-listing-from-file("course/3100/traffic_light.hpp")
 
 By using the ```cpp mocc``` library, the re-implementation of the traffic light
-is quite simple. A ```cpp TrafficLight``` is a ```cpp Timed``` component #reft(
+is quite simple. A ```cpp TrafficLight``` is a ```cpp Timed``` component
+#raw-ref(
     1,
 ), which means that it has a `timer`, and whenever the `timer` reaches 0 it
-#reft(5) it receives a notification (the method ```cpp update(U)``` is called,
-and the traffic light switches color). The `timer` needs to be attached to a
-```cpp System``` for it to work #reft(4), and must be initialized. In the
-library there are two types of ```cpp Timer```
+#raw-ref(5) it receives a notification (the method ```cpp update(U)``` is
+called, and the traffic light switches color). The `timer` needs to be attached
+to a ```cpp System``` for it to work #raw-ref(4), and must be initialized. In
+the library there are two types of ```cpp Timer```
 - ```cpp TimerMode::Once```: when the timer ends, it doesn't automatically
     restart (it must be manually reset, this allows to set a different after
-    each time the timer reaches 0, e.g. with a random variable #reft(2) #reft(
+    each time the timer reaches 0, e.g. with a random variable #raw-ref(2)
+    #raw-ref(
         7,
     ))
 - ```cpp TimerMode::Repeating```: the ```cpp Timer``` automatically resets with
     the last value set
-Like before, the state of the MDP is just the ```cpp Light``` #reft(3), which
-can be read #reft(8) but not modified by external code.
+Like before, the state of the MDP is just the ```cpp Light``` #raw-ref(3), which
+can be read #raw-ref(8) but not modified by external code.
 
-#figure(caption: `software/3100/main.cpp`)[
-    ```cpp
-    #include <fstream>
-
-    #include "parameters.hpp"
-    #include "traffic_light.hpp"
-
-    int main() {
-        std::ofstream file("logs");
-
-        System system; t1
-        Stopwatch stopwatch; t2
-        TrafficLight traffic_light(&system); t3
-        system.addObserver(&stopwatch);
-
-        while (stopwatch.elapsed() <= HORIZON) {
-            file << stopwatch.elapsed() << ' '
-                 << traffic_light.light() << std::endl;
-            system.next(); t4
-        }
-
-        file.close();
-        return 0;
-    }
-    ```
-]
+#load-listing-from-file("course/3100/main.cpp")
 
 The last step is to put together the system and run it. A ```cpp System```
-#reft(1) is a simple MDP which sends an output $epsilon$ when the
+#raw-ref(1) is a simple MDP which sends an output $epsilon$ when the
 ```cpp next()``` method is called. By connecting all the components to the
 ```cpp System``` it's enough to repeatedly call the ```cpp next()``` method to
 simulate the whole system.
 
-A ```cpp Stopwatch``` #reft(2) is needed to measure how much time has passed
-since the simulation started, and the ```cpp TrafficLight``` #reft(3) is
+A ```cpp Stopwatch``` #raw-ref(2) is needed to measure how much time has passed
+since the simulation started, and the ```cpp TrafficLight``` #raw-ref(3) is
 connected to a ```cpp timer``` which itself is connected to the
 ```cpp System```.
 
-=== Network monitor
+== Network monitor
 
 The next objective is to introduce a control center which sends information to
 the traffic light via a network. The traffic light just takes the value it
 receives via network and displays it.
 
-==== No faults `"./software/3200"`
+=== No faults `"software/3200"`
 
-#figure(caption: `software/3200/control_center.hpp`)[
-    ```cpp
-    /* ... */
-
-    class ControlCenter
-        : public Timed, public Notifier<Payload> t1 {
-        std::uniform_int_distribution<> random_interval;
-        Light l = Light::RED;
-
-      public:
-        ControlCenter(System *system)
-            : random_interval(60, 120),
-              Timed(system, 90, TimerMode::Once) {}
-
-        void update(U) override {
-            l = (l == RED ? GREEN : (l == GREEN ? YELLOW : RED));
-            notify(l); t1
-            timer.set_duration(random_interval(urng));
-        }
-
-        Light light() { return l; }
-    };
-    ```
-]
+#load-listing-from-file("course/3200/control_center.hpp")
 
 The ```cpp ControlCenter``` has the same behaviour the traffic light had before,
-with a small difference: it notifies #reft(1) other components when the light
+with a small difference: it notifies #raw-ref(1) other components when the light
 switches. The type of the notification is ```cpp Payload``` (which is just a
 ```cpp STRONG_ALIAS``` for ```cpp Light```), this way only components that take
 a ```cpp Payload``` (i.e. the ```cpp Network``` component) can be connected to
 the ```cpp ControlCenter```.
 
-#figure(caption: `software/3200/traffic_light.hpp`)[
-    ```cpp
-    /* ... */
-
-    class TrafficLight : public Observer<Message>,
-                         public Notifier<Light> {
-        Light l = Light::RED;
-
-      public:
-        void update(Message message) override {
-            t2 notify(l = message t1);
-        }
-
-        Light light() { return l; }
-    };
-    ```
-]
+#load-listing-from-file("course/3200/traffic_light.hpp")
 
 At this point the traffic light is easier to implement, as it just takes in
 input a ```cpp Message``` from other components (i.e. the ```cpp Network```),
-changes its light #reft(1) and notifies other components #reft(2) of the change
-(```cpp Message``` is just a ```cpp STRONG_ALIAS``` for ```cpp Light```).
+changes its light #raw-ref(1) and notifies other components #raw-ref(2) of the
+change (```cpp Message``` is just a ```cpp STRONG_ALIAS``` for ```cpp Light```).
 
-#figure(caption: `software/3200/parameters.hpp`)[
-    ```cpp
-    /* ... */
-    #include "../../mocc/alias.hpp"
-
-    /* ... */
-    STRONG_ALIAS(Payload, Light);
-    STRONG_ALIAS(Message, Light);
-    ```
-]
+#load-listing-from-file("course/3200/parameters.hpp")
 
 The ```cpp STRONG_ALIAS```es are defined in the `parameters.hpp` file (it's
 enough to import the `mocc/alias.hpp` file from the library). Strong aliases are
@@ -1554,390 +1127,100 @@ different from the type it aliases (```cpp Payload``` is a different type from
 be assigned to a ```cpp Payload``` and viceversa). Aliases enable type-safe
 connections among components.
 
-#figure(caption: `software/3200/network.hpp`)[
-    ```cpp
-    /* ... */
+#load-listing-from-file("course/3200/network.hpp")
 
-    class Network : public Timed,
-                    public Buffer<Payload>, t1
-                    public Notifier<Message> {
-
-      public:
-        Network(System *system)
-            : Timed(system, 0, TimerMode::Once) {}
-
-        void update(Payload payload) override {
-            if (buffer.empty())
-                timer.set_duration(2);
-            Buffer<Payload>::update(payload);
-        }
-
-        void update(U) override {
-            if (!buffer.empty()) {
-                notify((Light)buffer.front());
-                buffer.pop_front();
-                if (!buffer.empty())
-                    timer.set_duration(2);
-            }
-        }
-    };
-    ```
-]
-
-The simplest form of network has an illimited ```cpp Buffer``` #reft(1) for the
-incoming messages, and every 2 seconds it sends the message to the destination
-(to simulate a delay). This model of the network has many problems: it doesn't
-account for faults (messages are corrupted / lost), buffer overflow, the fact
-that all messages take the same time to be sent etc...
+The simplest form of network has an illimited ```cpp Buffer``` #raw-ref(1) for
+the incoming messages, and every 2 seconds it sends the message to the
+destination (to simulate a delay). This model of the network has many problems:
+it doesn't account for faults (messages are corrupted / lost), buffer overflow,
+the fact that all messages take the same time to be sent etc...
 
 
-#figure(caption: `software/3200/traffic_light.hpp`)[
-    ```cpp
-    /* ... */
-
-    class Monitor : public Recorder<Payload>,
-                    public Recorder<Light>,
-                    public Observer<> {
-
-        int time = 0; bool messages_lost = false;
-
-      public:
-        Monitor() : Recorder<Payload>(RED), Recorder<Light>(RED) {}
-
-        void update() override {
-            if (Recorder<Payload>::record !=
-                Recorder<Light>::record)
-                time++;
-            else
-                time = 0;
-
-            if (time > 3)
-                messages_lost = true;
-        }
-
-        bool is_valid() { return !messages_lost; }
-    };
-    ```
-]
+#load-listing-from-file("course/3200/traffic_light.hpp")
 
 The ```cpp Monitor``` is a component that takes inputs from both the
 ```cpp ControlCenter``` and the ```cpp TrafficLight``` and checks if messages
 are lost (a message is lost if it takes more then 3 seconds for the traffic
 light to change).
 
-==== Faults & no repair `"./software/3300"`
+=== Faults & no repair `"software/3300"`
 
-#figure(caption: `software/3300/network.hpp`)[
-    ```cpp
-    /* ... */
+#load-listing-from-file("course/3300/network.hpp")
 
-    class Network : public Timed,
-                    public Buffer<Payload>,
-                    public Notifier<Message> {
-        std::bernoulli_distribution random_fault; t1
-
-      public:
-        /* ... */
-
-        void update(U) override {
-            if (!buffer.empty()) {
-                if (!random_fault(urng)) t2
-                    notify((Light)buffer.front());
-                buffer.pop_front();
-                if (!buffer.empty())
-                    timer.set_duration(2);
-            }
-        }
-    };
-    ```
-]
-
-The first change is to add faults to the network #reft(1), which can be done
+The first change is to add faults to the network #raw-ref(1), which can be done
 easily by using a ```cpp std::bernoulli_distribution``` with a certain fault
 probability (e.g. 0.01), and send the message only if there is no fault. Once
 the message is lost nothing can be done, the system doesn't recover.
 
 #pagebreak()
 
-=== Faults & repair `"./software/3400"`
+=== Faults & repair `"software/3400"`
 
-#figure(caption: `software/3400/network.hpp`)[
-    ```cpp
-    /* ... */
+#load-listing-from-file("course/3400/network.hpp")
 
-    class Network : public Timed,
-                    public Buffer<Payload>,
-                    public Notifier<Message> {
-        std::bernoulli_distribution random_fault;
-        std::bernoulli_distribution random_repair; t1
+The next idea is to add repairs #raw-ref(1) when the system fails. In this case
+the repairs are random for simplicity #raw-ref(2), but there are smarter ways to
+handle a network fault.
 
-      public:
-        /* ... */
+=== Faults & repair + protocol `"software/3500"`
 
-        void update(U) override {
-            if (!buffer.empty()) {
-                if (!random_fault(urng)||random_repair(urng)) t2
-                    notify((Light)buffer.front());
-                buffer.pop_front();
-                if (!buffer.empty())
-                    timer.set_duration(2);
-            }
-        }
-    };
-    ```
-]
+#load-listing-from-file("course/3500/network.hpp")
 
-The next idea is to add repairs #reft(1) when the system fails. In this case the
-repairs are random for simplicity #reft(2), but there are smarter ways to handle
-a network fault.
-
-=== Faults & repair + protocol `"./software/3500"`
-
-#figure(caption: `software/3500/network.hpp`)[
-    ```cpp
-    /* ... */
-
-    class Network : public Timed,
-                    public Buffer<Payload>,
-                    public Notifier<Message>,
-                    public Notifier<Fault> t1 {
-      public:
-        /* ... */
-
-        void update(U) override {
-            if (!buffer.empty()) {
-                if (random_fault(urng)) {
-                    if (random_repair(urng))
-                        Notifier<Message>::notify(
-                            (Light)buffer.front());
-                    else
-                        Notifier<Fault>::notify(true); t2
-                } else {
-                    Notifier<Message>::notify(
-                        (Light)buffer.front());
-                }
-
-                buffer.pop_front();
-                if (!buffer.empty())
-                    timer.set_duration(2);
-            }
-        }
-    };
-    ```
-]
-
-In the last version, the network sends a notification #reft(2) when there is a
-```cpp Fault``` #reft(1) (which is just a ```cpp STRONG_ALIAS``` for
+In the last version, the network sends a notification #raw-ref(2) when there is
+a ```cpp Fault``` #raw-ref(1) (which is just a ```cpp STRONG_ALIAS``` for
 ```cpp bool```), this way the ```cpp TrafficLight``` can recover in case of
 errors.
 
-#figure(caption: `software/3500/traffic_light.hpp`)[
-    ```cpp
-    /* ... */
-
-    class TrafficLight : public Observer<Fault>, t1
-                         public Observer<Message>,
-                         public Notifier<Light> {
-        /* ... */
-
-        void update(Fault) override {
-            l = Light::RED;
-            notify(l);
-        }
-    };
-    ```
-]
+#load-listing-from-file("course/3500/traffic_light.hpp")
 
 When the ```cpp TrafficLight``` detects a ```cpp Fault``` it turns to
 ```cpp Light::RED``` for safety reasons.
 
-#figure(caption: [connections in `software/3500/main.cpp`])[
-    ```cpp
-    System system;
-    Monitor monitor;
-    Network network(&system);
-    Stopwatch stopwatch;
-    TrafficLight traffic_light;
-    ControlCenter control_center(&system);
-
-    system.addObserver(&monitor);
-    system.addObserver(&stopwatch);
-    network.Notifier<Message>::addObserver(&traffic_light);
-    network.Notifier<Fault>::addObserver(&traffic_light);
-    traffic_light.addObserver(&monitor);
-    control_center.addObserver(&network);
-    control_center.addObserver(&monitor);
-    ```
-]
+#load-listing-from-file("course/3500/main.cpp")
 
 == Statistics
 
-=== Expected value `[4100]`
+=== Expected value `"/software/4100"`
 
 In this example the goal is to simulate a development process (phase 0, phase 1,
 and phase 2), and calculate the cost of each simulation.
 
 
-#figure(caption: `software/4100/main.cpp`)[
-    ```cpp
-    #include <cstddef>
-    #include <fstream>
-    #include <random>
+#load-listing-from-file("course/4100/main.cpp")
 
-    #include "../../mocc/mocc.hpp"
-
-    int main() {
-        std::random_device random_device;
-        urng_t urng(random_device());
-
-        std::vector<std::discrete_distribution<>>
-            transition_matrix = {
-                {0, 1},
-                {0, .3, .7},
-                {0, 0, .2, .8},
-                {0, .1, .1, .1, .7},
-                {0, 0, 0, 0, 1},
-            };
-
-        real_t time = 0;
-        size_t phase = 0, costs = 0;
-
-        std::ofstream file("logs");
-
-        while (phase != 4) {
-            time++;
-            if (phase == 1 || phase == 3)
-                costs += 20;
-            else if (phase == 2)
-                costs += 40;
-
-            phase = transition_matrix[phase](urng);
-            file << time << ' ' << phase << ' ' << costs
-                 << std::endl;
-        }
-
-        file.close();
-        return 0;
-    }
-    ```
-]
-
-=== Probability `[4200]`
+=== Probability `"/software/4200"`
 
 This example behaves like the previous one, but uses the Monte Carlo method
 @monte-carlo-method to calculate the probability the cost is less than a certain
 value
 
-// In this one we simulate a more complex software developmen process, and we calculate the average cost (Wait, what? Do we simulate it multiple times?)
-
-#figure(caption: `software/4200/main.cpp`)[
-    ```cpp
-    /* ... */
-
-    const size_t ITERATIONS = 10000;
-
-    int main() {
-        Stat cost_stat;
-        size_t less_than_100_count = 0;
-        real_t time = 0;
-
-        std::ofstream file("logs");
-
-        for (int iter = 0; iter < ITERATIONS; iter++) {
-            size_t phase = 0, costs = 0;
-
-            while (phase != 4) {
-                time++;
-                if (phase == 1 || phase == 3)
-                    costs += 20;
-                else if (phase == 2)
-                    costs += 40;
-
-                phase = transition_matrix[phase](urng);
-                file << time << ' ' << phase << ' ' << costs
-                     << std::endl;
-            }
-
-            cost_stat.save(costs);
-            if (costs < 100)
-                less_than_100_count++;
-        }
-
-        std::cout << cost_stat.mean() << ' ' << cost_stat.stddev()
-                  << ' '
-                  << (double)less_than_100_count / ITERATIONS
-                  << std::endl;
-
-        file.close();
-        return 0;
-    }
-    ```
-]
-
-#pagebreak()
+#load-listing-from-file("course/4200/main.cpp")
 
 == Development process simulation
 
-An MDP can be implemented by using a *transition matrix* (like in @mdp-example).
+An MDP can be implemented by using a *transition matrix* // (like in @mdp-example).
 The simplest implemenation can be done by using a
-```cpp std::discrete_distribution``` by using the trick in @transition-matrix.
+```cpp std::discrete_distribution``` by using the trick in
+@markov-chain-transition-matrix.
 
-=== Random transition matrix `[5100]`
+=== Random transition matrix `"software/5100"`
 
 This example builds a *random transition matrix*.
 
-#figure(caption: `software/5100/main.cpp`)[
-    ```cpp
-    const size_t HORIZON = 20, STATES_SIZE = 10;
+#load-listing-from-file("course/5100/main.cpp")
 
-    int main() {
-        std::random_device random_device;
-        urng_t urng(random_device());
-        auto random_state = t1
-            std::uniform_int_distribution<>(0, STATES_SIZE - 1);
-        std::uniform_real_distribution<> random_real_0_1(0, 1);
-
-        std::vector<std::discrete_distribution<>>
-            transition_matrix(STATES_SIZE); t2
-        std::ofstream log("log.csv");
-
-        for (size_t state = 0; state < STATES_SIZE; state++) {
-            std::vector<real_t> weights(STATES_SIZE); t3
-            for (auto &weight : weights)
-                weight = random_real_0_1(urng);
-
-            transition_matrix[state] = t4
-                std::discrete_distribution<>(weights.begin(),
-                                             weights.end());
-        }
-
-        size_t state = random_state(urng);
-        for (size_t time = 0; time <= HORIZON; time++) {
-            log << time << " " << state << std::endl;
-            state = transition_matrix[state t5 ](urng); t6
-        }
-
-        log.close();
-        return 0;
-    }
-    ```
-]
-
-A *transition matrix* is a ```cpp vector<discrete_distribution<>>``` #reft(2)
-just like in @transition-matrix. Why can we do this? First of all, the states
-are numbered from ```cpp 0``` to ```cpp STATES_SIZE - 1```, that's why we can
-generate a random state #reft(1) just by generating a number from ```cpp 0``` to
-```cpp STATES_SIZE - 1```.
+A *transition matrix* is a ```cpp vector<discrete_distribution<>>``` #raw-ref(2)
+just like in @markov-chain-transition-matrix. Why can we do this? First of all,
+the states are numbered from ```cpp 0``` to ```cpp STATES_SIZE - 1```, that's
+why we can generate a random state #raw-ref(1) just by generating a number from
+```cpp 0``` to ```cpp STATES_SIZE - 1```.
 
 The problem with using a simple ```cpp uniform_int_distribution``` is that we
 don't want to choose the next state uniformly, we want to do something like in
 @simple-markov-chain.
 
 #figure(
-    {
-        set text(font: "CaskaydiaCove NF", weight: "light", lang: "en")
-        image("public/markov-chain.svg")
-    },
+    image("public/markov-chain.svg"),
     caption: "A simple Markov Chain",
 ) <simple-markov-chain>
 
@@ -1947,14 +1230,16 @@ the probability $p(i) = (sum_(i = 0)^n w_i) / w_i$ (the probability is
 proportional to the weight, so we have that $sum_(i = 0)^n p(i) = 1$ like we
 would expect in a Markov Chain).
 
-To instantiate the ```cpp discrete_distribution``` #reft(4), unlike in
-@transition-matrix, we need to first calculate the weights #reft(3), as we don't
-know them in advance.
+To instantiate the ```cpp discrete_distribution``` #raw-ref(4), unlike in
+@markov-chain-transition-matrix, we need to first calculate the weights
+#raw-ref(
+    3,
+), as we don't know them in advance.
 
-To randomly generate the next state #reft(6) we just have to use the
-```cpp discrete_distribution``` assigned to the current state #reft(5).
+To randomly generate the next state #raw-ref(6) we just have to use the
+```cpp discrete_distribution``` assigned to the current state #raw-ref(5).
 
-=== `[5200]` Software development & error detection
+=== Software development & error detection `"software/5200"`
 
 Our next goal is to model the software development process of a team. Each phase
 takes the team 4 days to complete, and, at the end of each phase the testing
@@ -1968,103 +1253,27 @@ team tests the software, and there can be 3 outcomes:
     team was able to find it
 
 If we have *no error*, we proceed to the next phase... the same happens if *no
-    error was detected* (because the testing team sucks and didn't find any
-errors). If we *detect an error* we either reiterate the current phase (with a
-certain probability, let's suppose $0.8$), or we go back to one of the previous
-phases with equal probability (we do this because, if we find an error, there's
-a high chance it was introduced in the current phase, and we want to keep the
-model simple).
+error was detected* (because the testing team sucks and didn't find any errors).
+If we *detect an error* we either reiterate the current phase (with a certain
+probability, let's suppose $0.8$), or we go back to one of the previous phases
+with equal probability (we do this because, if we find an error, there's a high
+chance it was introduced in the current phase, and we want to keep the model
+simple).
 
 In this exercise we take the parameters for each phase (the probability to
 introduce an error and the probability to not detect an error) from a file.
 
-#figure(caption: `software/5300/main.cpp`)[
-    ```cpp
-    #include <...>
-
-    using real_t = double;
-    const size_t HORIZON = 800, PHASES_SIZE = 3;
-
-    enum Outcome t1 {
-        NO_ERROR = 0,
-        NO_ERROR_DETECTED = 1,
-        ERROR_DETECTED = 2
-    };
-
-    int main() {
-        std::random_device random_device;
-        std::default_random_engine urng(random_device());
-        std::uniform_real_distribution<> uniform_0_1(0, 1);
-        std::vector<std::discrete_distribution<>>
-            phases_error_distribution;
-
-        {
-            std::ifstream probabilities("probabilities.csv");
-            real_t probability_error_introduced,
-                probability_error_not_detected;
-
-            while (probabilities >> probability_error_introduced >>
-                   probability_error_not_detected)
-                phases_error_distribution.push_back(
-                    t2 std::discrete_distribution<>({
-                        1 - probability_error_introduced,
-                        probability_error_introduced *
-                            probability_error_not_detected,
-                        probability_error_introduced *
-                            (1 - probability_error_not_detected),
-                    }));
-
-            probabilities.close();
-            assert(phases_error_distribution.size() ==
-                   PHASES_SIZE);
-        }
-
-        real_t probability_repeat_phase = 0.8;
-
-        size_t phase = 0;
-        std::vector<size_t> progress(PHASES_SIZE, 0);
-        std::vector<Outcome> outcomes(PHASES_SIZE, NO_ERROR);
-
-        for (size_t time = 0; time < HORIZON; time++) {
-            progress[phase]++;
-
-            if (progress[phase] == 4) {
-                outcomes[phase] = static_cast<Outcome>(
-                    phases_error_distribution[phase](urng));
-                switch (outcomes[phase]) {
-                case NO_ERROR:
-                case NO_ERROR_DETECTED:
-                    phase++;
-                    break;
-                case ERROR_DETECTED:
-                    if (phase > 0 && uniform_0_1(urng) >
-                                         probability_repeat_phase)
-                        phase = std::uniform_int_distribution<>(
-                            0, phase - 1)(urng);
-                    break;
-                }
-
-                if (phase == PHASES_SIZE)
-                    break;
-
-                progress[phase] = 0;
-            }
-        }
-
-        return 0;
-    }
-    ```
-] <error-detection>
+#load-listing-from-file("course/5300/main.cpp") <error-detection>
 
 TODO: ```cpp class enum``` vs ```cpp enum```. We can model the outcomes as an
-```cpp enum``` #reft(1)... we can use the ```cpp discrete_distribution``` trick
-to choose randomly one of the outcomes #reft(2). The other thing we notice is
-that we take the probabilities to generate an error and to detect it from a
-file.
+```cpp enum``` #raw-ref(1)... we can use the ```cpp discrete_distribution```
+trick to choose randomly one of the outcomes #raw-ref(2). The other thing we
+notice is that we take the probabilities to generate an error and to detect it
+from a file.
 
 #pagebreak()
 
-=== Optimizing costs for the development team `[5300]`
+=== Optimizing costs for the development team `"software/5300"`
 
 If we want we can manipulate the "parameters" in real life: a better experienced
 team has a lower probability to introduce an error, but a higher cost. What we
@@ -2076,7 +1285,7 @@ By repeating this a bunch of times, we can find out which parameters have the
 best results, a.k.a generate the lowest development times (there are better
 techniques like simulated annealing, but this one is simple enough for us).
 
-=== Key performance index `[5400]`
+=== Key performance index `"software/5400"`
 
 We can repeat the process in exercise `[5300]`, but this time we can assign a
 parameter a certain cost, and see which parameters optimize cost and time (or
@@ -2085,17 +1294,19 @@ something like that? Idk, I should look up the code again).
 
 == Complex systems
 
-=== Insulin pump `[6100]`
+=== Insulin pump `"software/6100"`
 
-=== Buffer `[6200]`
+=== Buffer `"software/6200"`
 
-=== Server `[6300]`
+=== Server `"software/6300"`
 
 #pagebreak()
 
 = MOCC library
 
 
+- TODO: make and "examples" folder for the library
+- TODO: automatically generate documentation from comments
 Model CheCking library for the exam
 
 == Design
@@ -2104,6 +1315,7 @@ Basically: the "Observer Pattern" @observer-pattern can be used to implement
 MDPs, because a MDP is like an entity that "is notified" when something happens
 (receives an input, in fact, in the case of MDPs, another name for input is
 "action"), and notifies other entities (gives an output, or reward).
+
 
 #figure(caption: `https://refactoring.guru/design-patterns/observer`)[
     #block(
@@ -2187,6 +1399,7 @@ deviation of a set of values (as discussed in @incremental-average and @welford)
 #pagebreak()
 
 == ```cpp time```
+
 
 ```cpp
 STRONG_ALIAS(T, real_t)
@@ -2414,10 +1627,10 @@ In short, every system can be divided into 4 steps:
 ]
 
 Reading the input: `std::ifstream` can read (from a file) based on the type of
-the variable read. For exapmle, `c` is a ```cpp char```, so #reft(1) will read
-exactly 1 character. If `c` was a string, ```cpp params >> c``` would have read
-a whole word (up to the first whitespace). For example, `A` is a float and `N`
-is a int, so ```cpp params >> A``` will try to read a float and
+the variable read. For exapmle, `c` is a ```cpp char```, so #raw-ref(1) will
+read exactly 1 character. If `c` was a string, ```cpp params >> c``` would have
+read a whole word (up to the first whitespace). For example, `A` is a float and
+`N` is a int, so ```cpp params >> A``` will try to read a float and
 ```cpp params >> N``` will *try* to read an int. (TODO: float $->$ real_t, int
 $->$ size_t)
 
@@ -2445,8 +1658,8 @@ The parameters are declared in a `parameters.hpp` file, for a few reasons
     to classes constructors
 - any class can just import the file with the parameters to access the
     parameters
-- they are static #reft(4) (otherwise clang doesn't like global variables)
-- in `parameters.hpp` there are also auxiliary types #reft(3), used in the
+- they are static #raw-ref(4) (otherwise clang doesn't like global variables)
+- in `parameters.hpp` there are also auxiliary types #raw-ref(3), used in the
     connections between entities
 
 ```cpp
@@ -2460,14 +1673,14 @@ while (stopwatch.elapsed() <= HORIZON) t4
 ```
 
 Simulating the system is actually easy:
-- declare the system #reft(1)
-- add a stopwatch #reft(2) (which starts from time 0, and everytime the system
-    is updated, it adds up time)
+- declare the system #raw-ref(1)
+- add a stopwatch #raw-ref(2) (which starts from time 0, and everytime the
+    system is updated, it adds up time)
     - it is needed to stop the simulation after a certain amount of time, called
         `HORIZON`
-- connect the stopwatch to the system #reft(3)
-- run a loop (like how a game loop would work) #reft(4)
-- in the loop, transition the system to the next state #reft(5)
+- connect the stopwatch to the system #raw-ref(3)
+- run a loop (like how a game loop would work) #raw-ref(4)
+- in the loop, transition the system to the next state #raw-ref(5)
 
 == Development team (time & cost)
 
@@ -2572,6 +1785,73 @@ Simulating the system is actually easy:
 
 == Heater simulation
 
+#page(bibliography("public/bibliography.bib"))
+
+
+
+// for ordinary differential equations
+// a Markov chain $M = (S, p)$ is described by a set of *states* $S$ and the
+// *transition probability* $p : S times S -> [0, 1]$ such that $p(s'|s)$ is the
+// probability to transition to $s'$ from $s$. The transition probability $p$ is
+// constrained by @markov-chain-constrain.
+
+// - $x_0 in X$ is the initial state
+
+// is such that $p(s'|s, i)$ is the probability to *transition* to state $s'$ from state $s$ when the *input value* is $i$
+
+// Let $M_1, M_2$ be two MDPs s.t.
+// - $M_1 = (U_1, X_1, Y_1, p_1, g_1)$
+// - $M_2 = (U_2, X_2, Y_2, p_2, g_2)$
+//
+// Then $M = (U_1, X_1 times X_2, Y_2, p, g)$ s.t.
+// - $p((x_1', x_2') | (x_1, x_2), u_1) = (p(x_1'|x_1, u_1), p(x_2'|x_2, g_1(x_1)))$
+// - $g((x_1, x_2)) = g_2(x_2)$
+//
+// - TODO the connection can also be partial
+
+// In the ```typ listings/mean.cpp``` file the procedure `incremental_mean()`
+// successfuly computes the average, but the simple `traditional_mean()` returns
+// `Inf`.
+
+// s^2_n = M_(2, n) / (n - 1)
+
+// The problem above can be solved analitically, but can be also used example on
+// how to use the Monte Carlo method to approximate values.
+//
+// #align(center)[
+// ```cpp
+// #include <ofstream>
+// #include <ifstream>
+//
+// int main(){
+//     ofstream output("output.txt");
+//     output << "some text" << std::endl;
+//     output.close();
+//
+//     ifstream params("params.txt");
+//     int number;
+//     while (params >> number) {
+//         // do stuff with number...
+//     }
+//     params.close();
+//
+//     return 0;
+// }
+// ```
+// ]
+
+// The implementation would be
+// TODO:
+//   - #reft(1) ```cpp enum``` vs ```cpp enum class```
+//   - #reft(2) reference the same trick used in the uniform int distribution example
+//   - #reft(3) enum is easier to use, because it just logs the integer value associated with the constant
+//   - #reft(4) is basically the behaviour of the formula described above
+//   - how is the time rapresented?
+//   - how can it be implemented with ```cpp mocc```?
+
+
+// In this one we simulate a more complex software developmen process, and we calculate the average cost (Wait, what? Do we simulate it multiple times?)
+
 // #pagebreak()
 //
 // = Extras
@@ -2624,5 +1904,3 @@ Simulating the system is actually easy:
 // // === Playwright
 //
 // == Model checking with Bevy (`Rust`)
-
-#page(bibliography("bibliography.bib"))
