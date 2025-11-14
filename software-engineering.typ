@@ -10,15 +10,9 @@
 #show figure: set block(breakable: true)
 #show heading: set block(above: 1.4em, below: 1em)
 
-#show heading.where(level: 2).or(heading.where(level: 1)): it => {
-    show raw: set text(size: 1.45em)
-
-    it
-}
-
 #show raw: it => {
     set text(font: "CaskaydiaCove NFM", weight: "light", size: 8.5pt)
-    set block(width: 100%, inset: 1em, fill: luma(250), stroke: .75pt + silver)
+    set block(width: 100%, inset: 1em, fill: luma(252), stroke: .5pt + silver)
 
     it
 }
@@ -34,8 +28,10 @@
     assert(end == none or start != none)
     assert(start == none or end == none or start < end)
 
+    let repository = "https://github.com/CuriousCI/software-engineering/tree/main/"
+
     figure(
-        caption: raw(filename, lang: "typ"),
+        caption: link(repository + filename, raw(filename, lang: "typ")),
         raw(
             {
                 let file = read(filename)
@@ -151,15 +147,10 @@ major components:"_ @prime
 - the _defect detectors_ analyze frames and audio buffers in real-time
 - the _orchestrator_ controls the flow in the service
 
-#figure(caption: "audio/video monitoring system process")[#{
-    set text(font: "CaskaydiaCove NFM", weight: "light", lang: "en")
-    block(
-        inset: 1em,
-        stroke: 1pt + luma(245),
-        fill: luma(254),
-        image("public/audio-video-monitor.svg", width: 100%),
-    )
-}]
+#figure(
+    caption: "audio/video monitoring system process",
+    image("public/audio-video-monitor.svg", width: 100%),
+)
 
 To answer questions about the system, it can be simulated by modeling its
 components as *Markov decision processes*.
@@ -219,8 +210,8 @@ implementing transition matrices , thus Markov chains, is really simple with the
 A Markov decision process (MDP), despite sharing the name, is *different* from a
 Markov chain, because it interacts with an *external environment*.
 
-#listing-def("Markov decision process")[A Markov decision process $M$ is,
-    conventionally, a tuple $(U, Y, X, p, g)$ where
+#listing-def("Markov decision process")[A Markov decision process $M$ is
+    conventionally a tuple $(U, Y, X, p, g)$ where
     - $U$ is the set of input values
     - $Y$ is the set of output values
     - $X$ is the set of states
@@ -236,8 +227,11 @@ $
     forall x in X, u in U space.en sum_(x' in X) p(x'|x, u) = 1
 $
 
+Where $p(x'|x, u)$ is the probability to transition from state $x$ to state $x'$
+when the input is $u$.
+
 #listing-example[Software development process][
-    The development process of a company can be modeled as a MDP \
+    The software development process of a company can be modeled as a MDP
     $M = (U, Y, X, p, g)$ where
     - $U = {epsilon}$ #footnote[If $U$ is empty $M$ can't transition, at least 1
             input is required, i.e. $epsilon$]
@@ -300,9 +294,7 @@ syntax for me to be bothered to write it).
     - TODO
 ]
 
-#pagebreak()
-
-== Other tricks and tips
+== Other tips and tricks
 
 === Incremental mean <incremental-average>
 
@@ -327,9 +319,9 @@ $
     overline(x)_n dot n / (n + 1) + x_(n + 1) / (n + 1)
 $
 
-With this formula the numbers added up are smaller: $overline(x)_n$ is
-multiplied by $n / (n + 1) tilde 1$, and, if $x_(n + 1)$ fits in IEEE-754, then
-$x_(n + 1) / (n + 1)$ can also be encoded.
+With this formula the numbers added up are smaller: $overline(x)_n$, the mean,
+is multiplied by $n / (n + 1) tilde 1$, and added up to
+$x_(n + 1) / (n + 1) < x_(n + 1)$.
 
 #load-listing-from-file(
     "listings/mean.cpp",
@@ -337,13 +329,9 @@ $x_(n + 1) / (n + 1)$ can also be encoded.
     end: 17,
 )
 
-The example in ```typ listings/mean.cpp``` shows how the incremental computation
-of the mean gives a result, wherease the traditional procedure return `Inf`. The
-other advantage of the incremental procedure (or _online_ procedure) is that it
-does not require for the data to be stored in a vector, thus saving the memory
-needed to memorize the values.
-
-#pagebreak()
+The examples in ```typ listings/mean.cpp``` show how the incremental computation
+of the mean gives a valid result, whereas the traditional procedure returns
+`Inf`.
 
 === Welford's online algorithm <welford>
 
@@ -353,13 +341,12 @@ this purpose @welford-online.
 
 $
     M_(2, n) = sum_(i=1)^n (x_i - overline(x)_n)^2 \
-    M_(2, n) = M_(2, n-1) + (x_n - overline(x)_(n - 1))(x_n - overline(x)_n) #raw-ref(2) \
+    M_(2, n) = M_(2, n-1) + (x_n - overline(x)_(n - 1))(x_n - overline(x)_n) \
     sigma^2_n = M_(2, n) / n \
 $
 
-Given $M_2$, if $n > 0$, the standard deviation is $sqrt(M_(2, n) / n)$
-#raw-ref(3) . The average can be calculated incrementally like in
-@incremental-average #raw-ref(1) .
+Given $M_2$, if $n > 0$, the standard deviation is $sqrt(M_(2, n) / n)$. The
+average can be calculated incrementally like in @incremental-average.
 
 #load-listing-from-file("mocc/math.cpp", start: 4, end: 24)
 
@@ -389,33 +376,33 @@ be the known *derivative* of $y$ ($y'$ is a function of $x$ and $y(x)$). To
 approximate $y$, a $Delta$ is chosen (the smaller, the more precise the
 approximation) s.t. $x_(n + 1) = x_n + Delta$. Now, understanding @euler-method
 should be easier: the value of $y$ at the *next step* is the current value of
-$y$ plus the value of its derivative $y'$ (multiplied by $Delta$). In
-@euler-method $y'$ is multiplied by $Delta$ because when going to the next step,
-all the derivatives from $x_n$ to $x_(n + 1)$ must be added up, and it's done by
-adding up
+$y$ plus the value of its derivative $y'$ multiplied by $Delta$. In
+@euler-method, $y'$ is multiplied by $Delta$ because when going to the next
+step, all the derivatives from $x_n$ to $x_(n + 1)$ must be added up, and it's
+done by adding up
 
 $ (x_(n + 1) - x_n) dot.c f(x_n, y_n) = Delta dot.c f(x_n, y_n) $
 
 Where $y_n = y(x_n)$. Let's consider the example in @euler-method-example.
 
 $
-    cases(y(x_0) = 0, y'(x) = 2x), quad "with" Delta = 1, 0.5, 0.3, 0.25
+    cases(y(x_0) = 0, y'(x) = 2x), quad "with" Delta in { 1, 1/2, 1/3, 1/4 }
 $ <euler-method-example>
 
 The following program approximates @euler-method-example with different $Delta$
 values.
 
-#load-listing-from-file("listings/euler.cpp")
+#load-listing-from-file("listings/euler.cpp", start: 4, end: 6)
 
-The approximation is close, but not very precise. However, the error analysis is
-beyond this guide's scope.
+#load-listing-from-file("listings/euler.cpp", start: 17, end: 25)
 
-#figure(caption: ```typ public/euler.svg```, image(
-    "public/euler.svg",
-    width: 77%,
-))
+The approximation in @euler-method-figure is close to $x^2$, but not very
+precise, however, error analysis is beyond this guide's scope.
 
-#pagebreak()
+#figure(
+    caption: ```typ public/euler.svg```,
+    image("public/euler.svg"),
+) <euler-method-figure>
 
 === Monte Carlo method
 
@@ -430,36 +417,67 @@ draws from a probability distribution. @monte-carlo-method
 
 #listing-problem[No budget left][
     The following problem involves $"MyCAD"^trademark$ the next generation
-    #strong[C]omputer #strong[A]ided #strong[D]rawing software.
-
-    After a year of development, the remaining budget for $"MyCAD"^trademark$ is
-    only $550 euro$; during the past year it has been observed that the cost to
+    #strong[C]omputer #strong[A]ided #strong[D]rawing software. After a year of
+    development, the remaining budget for $"MyCAD"^trademark$ is only
+    $550 euro$; during the past year it has been observed that the cost to
     develop a new feature for $"MyCAD"^trademark$ is described by the uniform
-    distribution $cal(U)(300 euro, 1000 euro)$. In order to choose how to spend
-    the reamining budget, find the probability that the cost for the next
-    feature of $"MyCAD"^trademark$ is less than $550 euro$.
+    distribution $cal(U)(300 euro, 1000 euro)$. In order to choose whether to
+    spend the reamining budget, find the probability that the next feature of
+    $"MyCAD"^trademark$ costs less than $550 euro$.
 ]
 
+\
 
-- TODO: find the analytical result, then compare to Monte Carlo result
+- *TODO: find the analytical result, then compare to Monte Carlo result
+    $approx 0.3569$*
 
 #load-listing-from-file("listings/montecarlo.cpp")
 
-The first step is to simulate for a certain number of iterations #raw-ref(1) the
-system (in this example, "simulating the system" means generating a random
-integer cost between 300 and 1000 #raw-ref(2) ). If the the iteration respects
-the requested condition ($< 550$), then it's counted #raw-ref(3).
+The idea behind the Monte Carlo method is to execute a large number of
+*independent* experiments with the *same probability distribution* (i.i.d.
+experiments). Each experiment yields a value and, given the law of large
+numbers, the mean of the values yielded by the experiments tends to match to the
+mean value of the distribution as the number of experiments increases.
 
-At the end of the simulations, the probability is calculated as #math.frac(
-    [iterations below 550],
-    [total iterations],
-) #raw-ref(4) . The bigger is the number of iterations, the more precise is the
-approximation. This type of calculation can be very easily distributed in a HPC
-(high performance computing) context.
+In the _"No budget left"_ Problem the experiments can be modeled with a
+Bernoulli distribution, since either the next feature costs less than $550 euro$
+or not. The parameter $p$ of the Bernoulli distribution is the probability which
+needs to be estimated.
+
+Each experiment draws a uniform random number $c$ between 300 and 1000 (the cost
+of the feature), and yields either $0$ or $1$ as described in
+@montecarlo-bernoulli.
+
+$
+    cases(
+        0 & quad c >= 550 euro,
+        1 & quad c < 550 euro
+    )
+$ <montecarlo-bernoulli>
+
+This means that the parameter $p$ of the Bernoulli distribution, which is the
+probability that the feature costs less than $550 euro$, is calculated as
+
+$
+    #math.frac([number of experiments with value $0 +$ number of experiments
+        with value
+        $1$], [total number of experiments]) \ =^1 \
+    #math.frac([number of experiments with value $1$], [total number of
+        experiments]) \ =^2 \
+    #math.frac([number of experiments with value less than $550 euro$], [total
+        number of experiments])
+$
+
+1. $0$ is the neutral element of the sum
+2. by the definition in @montecarlo-bernoulli
+
+This type of calculation can be very easily distributed on a HPC cluster, and is
+generally an embarrassingly parallel problem @embarrassingly-parallel, since
+each experiment is independent from the others.
 
 #pagebreak()
 
-= How to `C++`
+= Useful C++ for modeling
 
 This section covers the basics useful for the exam, assuming the reader already
 knows `C` and has some knowledge about `OOP`.
@@ -499,7 +517,7 @@ parameter passed to the constructor to instantiate the ```cpp random_engine```
 object.
 
 
-== The ```cpp random``` library <random-library>
+== Randomness in the standard library <random-library>
 
 The `C++` standard library offers tools to easily implement the Markov processes
 discussed in @markov-chain and @mdp .
@@ -537,7 +555,7 @@ From this point on, ```cpp std::default_random_engine``` will be reffered to as
     ```
 ]
 
-=== Distributions <distributions>
+=== Probability distributions <distributions>
 
 Just the capability to generate random numbers isn't enough, these numbers need
 to be manipulated to fit certain needs. Luckly, `C++` covers *most of them*. To
@@ -692,7 +710,7 @@ it randomly generates a number of items in a time unit given the average rate.
 
 A typical geometric distribution, has the same API as the others.
 
-=== Discrete distribution & transition matrices #cppreference("https://en.cppreference.com/w/cpp/numeric/random/discrete_distribution") <discrete>
+=== Discrete distribution and transition matrices #cppreference("https://en.cppreference.com/w/cpp/numeric/random/discrete_distribution") <discrete>
 
 #listing-problem[E-commerce][
     To choose the architecture for an e-commerce it's necessary to simulate
@@ -802,31 +820,32 @@ an unordered set (uses hashes)
 
 Could be useful. Can be either a map (ordered) or an unordered map (uses hashes)
 
-== I/O
+== Simplest method to work with *files*
+// == Input/Output
+//
+// Input output is very simple in C++.
+//
+// === Standard I/O <iostream>
+//
+// === Files <files>
+//
+// Working with files is way easier in `C++`
+//
+// ```cpp
+// #include <fstream>
+//
+// int main(){
+//     std::ofstream output("output.txt");
+//     std::ifstream params("params.txt");
+//
+//     while (etc...) {}
+//
+//     output.close();
+//     params.close();
+// }
+// ```
 
-Input output is very simple in C++.
-
-=== Standard I/O <iostream>
-
-=== Files <files>
-
-Working with files is way easier in `C++`
-
-```cpp
-#include <fstream>
-
-int main(){
-    std::ofstream output("output.txt");
-    std::ifstream params("params.txt");
-
-    while (etc...) {}
-
-    output.close();
-    params.close();
-}
-```
-
-== Structure
+== Program structure
 
 === Classes
 
@@ -849,7 +868,7 @@ int main(){
 
 #pagebreak()
 
-= Debugging with `gdb`
+= Fixing segfaults with gdb
 
 It's super useful! Trust me, if you learn this everything is way easier (printf
 won't be useful anymore)
@@ -895,7 +914,7 @@ add structure _(classes etc..)_ where it *seems fit*.
 This section puts together the *formal definitions* and the `C++` knowledge to
 implement some simple MDPs.
 
-=== A simple MDP `"software/1100"` <a-simple-markov-chain>
+=== A simple MDP `"course/1100"` <a-simple-markov-chain>
 
 The first MDP example is $M = (U, Y, X, p, g)$ where - $U = {epsilon}$ // #footnote[See @mdp-example]
 - $Y = X$ the set of outputs matches the set of states
@@ -907,7 +926,7 @@ The first MDP example is $M = (U, Y, X, p, g)$ where - $U = {epsilon}$ // #footn
 
 #load-listing-from-file("course/1100/main.cpp")
 
-=== Network of MDPs pt.1 `"software/1200"` <simple-mdps-connection-1>
+=== Network of MDPs pt.1 `"course/1200"` <simple-mdps-connection-1>
 
 This example has two discrete-time MDPs $M_1, M_2$ s.t.
 - $M_1 = (U_1, Y_1, X_1, p_1, g_1)$
@@ -916,8 +935,6 @@ This example has two discrete-time MDPs $M_1, M_2$ s.t.
 $M_1$ and $M_2$ are similar to the MDP in @a-simple-markov-chain (i.e.
 $X = [0, 1]^2$), with the difference that $forall i in {1, 2} space U_i = X_i$,
 and $p$ is redefined in this example in the following way:
-
-// $U_i = [0, 1] times [0, 1]$, having
 
 $
     forall i in {1, 2}, x', x in X, u in U quad p_i (x'|x, u) = cases(1 & "if" x' = u, 0 & "otherwise")
@@ -939,6 +956,7 @@ Thus, given that $X_i (t) =^1 U_i (t)$ with probability 1,
 $g_i (X_i (t)) =^2 X_i (t)$, and the definition in @mdps-connection-1, the
 connection between $M_1$ and $M_2$ can be defined as
 
+// $U_i = [0, 1] times [0, 1]$, having
 // Given that $g_i (X_i (t)) = X_i (t)$ and $U_i (t) = X_i (t)$, the connection in
 // @mdps-connection-1 can be simplified:
 
@@ -953,7 +971,7 @@ for each component and handle the connections more explicitly.
 
 #load-listing-from-file("course/1200/main.cpp")
 
-=== Networks of MDPs pt.2 `"software/1300"`
+=== Network of MDPs pt.2 `"course/1300"`
 
 This example is similar to the one in @simple-mdps-connection-1, with a few
 notable differences:
@@ -970,7 +988,7 @@ $
 
 #load-listing-from-file("course/1300/main.cpp") <mdps-connection-3>
 
-=== MDPs network pt.3 `"software/1400"`
+=== Network of MDPs pt.3 `"course/1400"`
 
 The original model behaves exactly lik @mdps-connection-3, with a different
 implementation. As an exercise, the reader is encouraged to come up with a
@@ -978,7 +996,7 @@ different implementation for @mdps-connection-3.
 
 #pagebreak()
 
-== Traffic light `"software/2000"`
+== Traffic light `"course/2000"`
 
 This example models a traffic light. The three original versions presented in
 the course (`2100`, `2200` and `2300`) all have the same behaviour, with
@@ -1027,13 +1045,13 @@ requires explicit casting.
 The behaviour of the formula described above is implemented with a couple of
 ternary operators #raw-ref(4).
 
-== Control center
+== Control center `"course/3100"`
 
 This example adds complexity to the traffic light by introducing a remote
 control center, network faults and repairs. Having many communicating
 components, this example requires more structure.
 
-=== No network `"software/3100"`
+// === No network
 
 The first step into building a complex system is to model it's components as
 units that can communicate with eachother. The traffic light needs to be to
@@ -1099,7 +1117,7 @@ The next objective is to introduce a control center which sends information to
 the traffic light via a network. The traffic light just takes the value it
 receives via network and displays it.
 
-=== No faults `"software/3200"`
+=== No faults `"course/3200"`
 
 #load-listing-from-file("course/3200/control_center.hpp")
 
@@ -1143,7 +1161,7 @@ The ```cpp Monitor``` is a component that takes inputs from both the
 are lost (a message is lost if it takes more then 3 seconds for the traffic
 light to change).
 
-=== Faults & no repair `"software/3300"`
+=== Faults & no repair `"course/3300"`
 
 #load-listing-from-file("course/3300/network.hpp")
 
@@ -1154,7 +1172,7 @@ the message is lost nothing can be done, the system doesn't recover.
 
 #pagebreak()
 
-=== Faults & repair `"software/3400"`
+=== Faults & repair `"course/3400"`
 
 #load-listing-from-file("course/3400/network.hpp")
 
@@ -1162,7 +1180,7 @@ The next idea is to add repairs #raw-ref(1) when the system fails. In this case
 the repairs are random for simplicity #raw-ref(2), but there are smarter ways to
 handle a network fault.
 
-=== Faults & repair + protocol `"software/3500"`
+=== Faults & repair + protocol `"course/3500"`
 
 #load-listing-from-file("course/3500/network.hpp")
 
@@ -1180,7 +1198,7 @@ When the ```cpp TrafficLight``` detects a ```cpp Fault``` it turns to
 
 == Statistics
 
-=== Expected value `"/software/4100"`
+=== Expected value `"/course/4100"`
 
 In this example the goal is to simulate a development process (phase 0, phase 1,
 and phase 2), and calculate the cost of each simulation.
@@ -1188,7 +1206,7 @@ and phase 2), and calculate the cost of each simulation.
 
 #load-listing-from-file("course/4100/main.cpp")
 
-=== Probability `"/software/4200"`
+=== Probability `"/course/4200"`
 
 This example behaves like the previous one, but uses the Monte Carlo method
 @monte-carlo-method to calculate the probability the cost is less than a certain
@@ -1203,7 +1221,7 @@ The simplest implemenation can be done by using a
 ```cpp std::discrete_distribution``` by using the trick in
 @markov-chain-transition-matrix.
 
-=== Random transition matrix `"software/5100"`
+=== Random transition matrix `"course/5100"`
 
 This example builds a *random transition matrix*.
 
@@ -1239,7 +1257,7 @@ To instantiate the ```cpp discrete_distribution``` #raw-ref(4), unlike in
 To randomly generate the next state #raw-ref(6) we just have to use the
 ```cpp discrete_distribution``` assigned to the current state #raw-ref(5).
 
-=== Software development & error detection `"software/5200"`
+=== Software development & error detection `"course/5200"`
 
 Our next goal is to model the software development process of a team. Each phase
 takes the team 4 days to complete, and, at the end of each phase the testing
@@ -1273,7 +1291,7 @@ from a file.
 
 #pagebreak()
 
-=== Optimizing costs for the development team `"software/5300"`
+=== Optimizing development costs `"course/5300"`
 
 If we want we can manipulate the "parameters" in real life: a better experienced
 team has a lower probability to introduce an error, but a higher cost. What we
@@ -1285,7 +1303,7 @@ By repeating this a bunch of times, we can find out which parameters have the
 best results, a.k.a generate the lowest development times (there are better
 techniques like simulated annealing, but this one is simple enough for us).
 
-=== Key performance index `"software/5400"`
+=== Key performance index `"course/5400"`
 
 We can repeat the process in exercise `[5300]`, but this time we can assign a
 parameter a certain cost, and see which parameters optimize cost and time (or
@@ -1294,11 +1312,11 @@ something like that? Idk, I should look up the code again).
 
 == Complex systems
 
-=== Insulin pump `"software/6100"`
+=== Insulin pump `"course/6100"`
 
-=== Buffer `"software/6200"`
+=== Buffer `"course/6200"`
 
-=== Server `"software/6300"`
+=== Server `"course/6300"`
 
 #pagebreak()
 
@@ -1904,3 +1922,8 @@ Simulating the system is actually easy:
 // // === Playwright
 //
 // == Model checking with Bevy (`Rust`)
+// fits in IEEE-754, then $x_(n + 1) / (n + 1)$ can also be encoded.
+// The other advantage of the incremental (or _online_) procedure is that it
+// does not require the data to be stored in a vector, thus saving the memory
+// needed to memorize the values before computing the mean.
+

@@ -2,35 +2,30 @@
 #include <fstream>
 #include <sstream>
 
-/* f(x) = x^2; */
-/* f'(x) = 2x */
-float f_prime(float x) { return 2 * x; }
+/* y(x) = x^2 => y'(x) = 2x */
+float y_prime(float x) { return 2 * x; }
 
 int main() {
-    const size_t FILES_COUNT = 4;
-    std::ofstream approximation_files[FILES_COUNT];
+    const size_t DELTA_COUNT = 4;
+    std::ofstream results_files[DELTA_COUNT];
 
-    for (size_t file = 0; file < FILES_COUNT; file++) {
+    for (size_t index = 0; index < DELTA_COUNT; index++) {
         std::stringstream ss;
-        ss << file << ".csv";
-        approximation_files[file] = std::ofstream(ss.str());
+        ss << "appr-" << index << ".csv";
+        results_files[index] = std::ofstream(ss.str());
     }
 
-    float y[FILES_COUNT];
-
-    for (size_t file = 0; file < FILES_COUNT; file++) {
-        y[file] = 0;
-        /* The bigger the file index, the smaller the Delta. */
-        const float delta = 1.0 / (file + 1);
+    for (size_t index = 0; index < DELTA_COUNT; index++) {
+        float y = 0.0;
+        const float delta = 1.0 / (float)(index + 1);
         for (float x = 0; x <= 10; x += delta) {
-            approximation_files[file] << x << ' ' << y[file]
-                                      << std::endl;
-            y[file] += delta * f_prime(x);
+            results_files[index] << x << ' ' << y << std::endl;
+            y += delta * y_prime(x);
         }
     }
 
-    for (size_t file = 0; file < FILES_COUNT; file++) {
-        approximation_files[file].close();
+    for (size_t index = 0; index < DELTA_COUNT; index++) {
+        results_files[index].close();
     }
 
     return EXIT_SUCCESS;
