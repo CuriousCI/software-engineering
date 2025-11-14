@@ -1,2 +1,0 @@
-Avg 100
-StdDev 10

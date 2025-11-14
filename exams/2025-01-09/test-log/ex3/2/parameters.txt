@@ -1,2 +1,0 @@
-Avg 360
-StdDev 50
