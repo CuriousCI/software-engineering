@@ -4,7 +4,6 @@
 
 #include "../../../mocc/math.hpp"
 #include "../../../mocc/mocc.hpp"
-#include <random>
 
 int main() {
     size_t N;
@@ -57,10 +56,9 @@ int main() {
     OnlineDataAnalysis project_cost_analysis;
 
     urng_t urng = pseudo_random_engine_from_device();
-    const size_t ITERATIONS = 1000;
-    const size_t INITIAL_STATE = 0;
+    const size_t EXPERIMENTS = 1000, INITIAL_STATE = 0;
 
-    for (size_t _ = 0; _ < ITERATIONS; _++) {
+    for (size_t _ = 0; _ < EXPERIMENTS; _++) {
         size_t current_state = INITIAL_STATE;
         real_t project_cost = 0;
 

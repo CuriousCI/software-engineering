@@ -3,9 +3,11 @@
 #include "listings.hpp"
 
 int main() {
+    /* As described in Section 2.2.1. */
     std::default_random_engine pseudo_random_engine =
         pseudo_random_engine_from_device();
 
+    /* Transition matrix for MDP in Figure 3. */
     std::discrete_distribution<>
         markov_chain_transition_matrix[] = {
             {0, 1},
@@ -15,17 +17,15 @@ int main() {
             {1},
         };
 
-    const size_t HORIZON = 15, FIRST_STATE = 0;
+    const size_t HORIZON = 15, INITIAL_STATE = 0;
 
-    size_t current_state = FIRST_STATE;
+    size_t current_state = INITIAL_STATE;
     for (size_t _ = 0; _ < HORIZON; _++) {
         std::cout << current_state << std::endl;
-
         size_t next_state =
             markov_chain_transition_matrix[current_state](
                 pseudo_random_engine
             );
-
         current_state = next_state;
     }
 
